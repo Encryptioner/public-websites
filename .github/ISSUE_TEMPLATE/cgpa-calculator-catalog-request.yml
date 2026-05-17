@@ -1,0 +1,56 @@
+name: "CGPA Calculator — Catalog Request"
+description: Request a course catalog for an institution/program/session not yet seeded in CGPA Calculator BD.
+title: "Catalog request: <institution> / <program> / <session>"
+labels: ["cgpa-calculator", "seed-request"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **CGPA Calculator BD** — https://encryptioner.github.io/cgpa-calculator/
+
+        Use this form to request a course catalog (course codes, credits, terms) for a
+        university program that isn't available yet. The more detail you provide, the
+        faster the request can be fulfilled.
+
+  - type: input
+    id: institution
+    attributes:
+      label: Institution
+      description: Full name of the university (e.g. National University, RUET, NSU, BRACU)
+      placeholder: Institution name
+    validations:
+      required: true
+
+  - type: input
+    id: program
+    attributes:
+      label: Program
+      description: Program name and level (e.g. Honours Physics, B.Sc. CSE, BBA, Masters in English)
+      placeholder: Program name and level
+    validations:
+      required: true
+
+  - type: input
+    id: session
+    attributes:
+      label: Session year
+      description: The year your program started (2020 or later preferred for accuracy).
+      placeholder: "e.g. 2022"
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Official syllabus / source URL
+      description: Link to the official course list — department page, handbook PDF, gazette, or registrar notice.
+      placeholder: https://...
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Additional notes
+      description: Any program-specific details — grading deviations, optional courses, special lab structure, etc.
+      placeholder: Optional
