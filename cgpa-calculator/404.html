@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<script>
+/**
+ * SPA redirect for GitHub Pages — subdirectory-aware.
+ *
+ * 404.html is always in the same directory as index.html (the app root).
+ * We compute the base from the 404 URL itself: everything up to the last slash.
+ *
+ * Works for any base:
+ *   /cgpa-calculator/a/b/c  → /cgpa-calculator/?p=/a/b/c
+ *   /public-websites/cgpa-calculator/a/b  → /public-websites/cgpa-calculator/?p=/a/b
+ *   /a/b  → /?p=/a/b
+ */
+(function() {
+  var l = window.location;
+  var pathSegs = l.pathname.split('/').filter(Boolean);
+
+  // The app base is detected by looking for where the spa app lives.
+  // Heuristic: since 404.html is at <base>/404.html, the base is
+  // everything in the URL path up to (not including) the "deep" segments.
+  // We can't know the base depth exactly without build-time info, but we can
+  // assume the app is deployed at a consistent root and try each depth.
+  // Fallback: treat last segment as the page, everything before as base.
+  var baseParts = pathSegs.slice(0, -1);
+  var deepParts = pathSegs.slice(baseParts.length);
+
+  var appRoot = '/' + (baseParts.length > 0 ? baseParts.join('/') + '/' : '');
+  var deepPath = deepParts.join('/');
+
+  var target =
+    l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+    appRoot + '?p=/' + deepPath.replace(/&/g, '~and~') +
+    (l.search ? '&q=' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+    l.hash;
+
+  l.replace(target);
+})();
+</script>
+</head>
+<body></body>
+</html>

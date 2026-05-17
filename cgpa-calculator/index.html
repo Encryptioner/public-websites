@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b0d12" />
+    <meta name="description" content="CGPA Calculator Bangladesh — calculate GPA and CGPA for all universities, Honours, Masters, BSc, MBA programs. Browser-only, offline-first." />
+    <link rel="icon" type="image/svg+xml" href="/public-websites/cgpa-calculator/favicon.svg" />
+    <title>CGPA Calculator BD</title>
+    <script>
+      // SPA redirect: restore path from ?p= (set by 404.html)
+      (function() {
+        var redirect = sessionStorage.redirect;
+        delete sessionStorage.redirect;
+        if (redirect && redirect !== location.href) {
+          history.replaceState(null, null, redirect);
+        }
+        var l = window.location;
+        if (l.search.startsWith('?p=')) {
+          var path = l.search.slice(3).replace(/~and~/g, '&');
+          history.replaceState(null, null, path || '/');
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/public-websites/cgpa-calculator/assets/index-DTekokWa.js"></script>
+    <link rel="stylesheet" crossorigin href="/public-websites/cgpa-calculator/assets/index-DH2_Nw47.css">
+  <link rel="manifest" href="/public-websites/cgpa-calculator/manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
