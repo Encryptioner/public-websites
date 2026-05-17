@@ -1,0 +1,17 @@
+.DS_Store
+Thumbs.db
+
+# editor / OS
+*.swp
+*.swo
+.idea/
+.vscode/
+
+# local agent caches
+.code-review-graph/
+.playwright-mcp/
+node_modules/
+
+# logs / tmp
+*.log
+tmp/

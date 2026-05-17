@@ -1,0 +1,15 @@
+{
+  "updated": "2026-05-17",
+  "sites": [
+    {
+      "slug": "cgpa-calculator",
+      "name": "CGPA Calculator · Bangladesh",
+      "tagline": "Offline CGPA tool for Bangladesh honours students.",
+      "description": "Browser-only, offline-first PWA to calculate GPA and CGPA for Bangladesh honours-level programmes. Works without internet, installable on mobile and desktop.",
+      "icon": "cgpa-calculator/icons/icon-192.png",
+      "tags": ["pwa", "education", "offline"],
+      "source": "https://github.com/Encryptioner/cgpa-calculator",
+      "added": "2026-05-17"
+    }
+  ]
+}
