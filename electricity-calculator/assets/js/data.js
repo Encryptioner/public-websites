@@ -122,17 +122,21 @@
   // A ready-made example home so users can "Load sample data" and learn by editing.
   // segments: list of { hours, days } usage spans for that device.
   // Demonstrates the variable-usage case (AC: 6h for 6 days, then 3h for 24 days).
+  // Flat-living example: fridge runs constantly (all 30 days); the AC has a
+  // variable pattern (guests for 6 days); everything else only runs the 20 days
+  // someone is actually home — set once via "days present" and reused per device.
   const SAMPLE = {
     title: "Sample Home — Monthly Usage",
     periodDays: 30,
+    occupiedDays: 20,
     items: [
-      { name: "Double-door Fridge / Freezer", watts: 200, segments: [{ hours: 24, days: 30 }] },
-      { name: "Air Conditioner (1.5 ton)", watts: 1500, segments: [{ hours: 6, days: 6 }, { hours: 3, days: 24 }] },
-      { name: "Ceiling Fan", watts: 75, segments: [{ hours: 14, days: 30 }] },
-      { name: "LED Tube Light", watts: 18, segments: [{ hours: 6, days: 30 }] },
-      { name: "LED TV (43\")", watts: 80, segments: [{ hours: 4, days: 30 }] },
-      { name: "Rice Cooker", watts: 700, segments: [{ hours: 1, days: 30 }] },
-      { name: "Mobile Charger", watts: 10, segments: [{ hours: 3, days: 30 }] },
+      { name: "Double-door Fridge / Freezer", watts: 200, hours: 24, daysMode: "all" },
+      { name: "Air Conditioner (1.5 ton)", watts: 1500, split: true, segments: [{ hours: 6, days: 6 }, { hours: 3, days: 14 }] },
+      { name: "Ceiling Fan", watts: 75, hours: 14, daysMode: "present" },
+      { name: "LED Tube Light", watts: 18, hours: 6, daysMode: "present" },
+      { name: "LED TV (43\")", watts: 80, hours: 4, daysMode: "present" },
+      { name: "Rice Cooker", watts: 700, hours: 1, daysMode: "present" },
+      { name: "Mobile Charger", watts: 10, hours: 3, daysMode: "present" },
     ],
   };
 

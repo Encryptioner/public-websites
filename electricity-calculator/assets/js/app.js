@@ -29,20 +29,24 @@
       periodDays: 30,
       startDate: "",
       endDate: "",
+      occupiedDays: "", // optional global "days someone was present"
       items: [],
     };
   }
 
   let nextId = 1;
   let lastSavedSig = null; // signature of the last state pushed to history
+  // daysMode: 'all' = whole billing period (constant, e.g. fridge),
+  //           'present' = the global "days present" value (flexible),
+  //           'custom' = this device's own days field.
   function makeItem(name, watts, hours) {
     return {
       id: nextId++,
       name: name,
       watts: calc.num(watts),
       hours: calc.num(hours),
-      days: effectivePeriodDays(), // per-device days (defaults to the period)
-      linkPeriod: true, // "constant" — track the billing period automatically
+      days: effectivePeriodDays(),
+      daysMode: "all",
       split: false,
       segments: [],
     };
@@ -134,6 +138,17 @@
     if (state.mode === "range") return calc.daysBetween(state.startDate, state.endDate);
     return calc.num(state.periodDays);
   }
+  // "Days present" — falls back to the full period when not set.
+  function effectiveOccupiedDays() {
+    const o = calc.num(state.occupiedDays);
+    return o > 0 ? o : effectivePeriodDays();
+  }
+  // Resolve a non-split device's days from its daysMode.
+  function itemDays(it) {
+    if (it.daysMode === "all") return effectivePeriodDays();
+    if (it.daysMode === "present") return effectiveOccupiedDays();
+    return calc.num(it.days);
+  }
 
   // Build a calc-ready item (fills .segments from the model).
   function effItem(it) {
@@ -147,9 +162,7 @@
     return {
       name: it.name,
       watts: it.watts,
-      segments: [
-        { hours: it.hours, days: it.linkPeriod ? effectivePeriodDays() : it.days },
-      ],
+      segments: [{ hours: it.hours, days: itemDays(it) }],
     };
   }
   function effItems() {
@@ -171,6 +184,7 @@
     $("daysInput").value = state.periodDays;
     $("startInput").value = state.startDate;
     $("endInput").value = state.endDate;
+    $("occupiedInput").value = state.occupiedDays === "" ? "" : state.occupiedDays;
     const days = state.mode === "days";
     $("modeDaysBtn").classList.toggle("is-on", days);
     $("modeRangeBtn").classList.toggle("is-on", !days);
@@ -240,16 +254,28 @@
     if (it.split) {
       bodyHtml = '<div class="item-fields one">' + wattField + "</div>" + segHtml;
     } else {
-      const shownDays = it.linkPeriod ? effectivePeriodDays() : it.days;
+      const custom = it.daysMode === "custom";
+      const shownDays = itemDays(it);
+      const opt = (val, label) =>
+        '<option value="' + val + '"' + (it.daysMode === val ? " selected" : "") + ">" + esc(label) + "</option>";
+      const daysSelect =
+        '<select class="text-input it-daysmode">' +
+        opt("all", t("srcAll") + " (" + effectivePeriodDays() + ")") +
+        opt("present", t("srcPresent") + " (" + effectiveOccupiedDays() + ")") +
+        opt("custom", t("srcCustom")) +
+        "</select>";
       bodyHtml =
         '<div class="item-fields three">' +
         wattField +
         '<label class="field"><span class="field-label">' + esc(t("hoursLabel")) + "</span>" +
         '<input type="number" class="text-input it-hours" min="0" max="24" step="0.5" value="' + esc(it.hours) + '" inputmode="decimal"></label>' +
         '<label class="field"><span class="field-label">' + esc(t("daysUsedLabel")) + "</span>" +
-        '<input type="number" class="text-input it-days" min="0" step="1" value="' + esc(shownDays) + '"' + (it.linkPeriod ? " disabled" : "") + ' inputmode="numeric"></label>' +
+        daysSelect + "</label>" +
         "</div>" +
-        '<label class="chk-row"><input type="checkbox" class="it-everyday"' + (it.linkPeriod ? " checked" : "") + "> <span>" + esc(t("everyDayLabel")) + "</span></label>";
+        (custom
+          ? '<label class="field it-customdays"><span class="field-label">' + esc(t("srcCustom")) + " — " + esc(t("segDays")) +
+            '</span><input type="number" class="text-input it-days" min="0" step="1" value="' + esc(it.days) + '" inputmode="numeric"></label>'
+          : '<div class="days-resolved">' + esc(t("daysUsedLabel")) + ": <b>" + shownDays + " " + esc(t("days")) + "</b></div>");
     }
 
     return (
@@ -411,12 +437,13 @@
       periodDays: calc.num($("daysInput").value),
       startDate: $("startInput").value,
       endDate: $("endInput").value,
+      occupiedDays: $("occupiedInput").value === "" ? "" : calc.num($("occupiedInput").value),
       items: state.items.map((it) => ({
         name: it.name,
         watts: it.watts,
         hours: it.hours,
         days: it.days,
-        linkPeriod: it.linkPeriod,
+        daysMode: it.daysMode,
         split: it.split,
         segments: it.segments,
       })),
@@ -432,6 +459,7 @@
     s.periodDays = calc.num(raw.periodDays) || (raw.periodDays === 0 ? 0 : 30);
     s.startDate = raw.startDate || "";
     s.endDate = raw.endDate || "";
+    s.occupiedDays = raw.occupiedDays == null || raw.occupiedDays === "" ? "" : calc.num(raw.occupiedDays);
     const periodDays = s.mode === "range" ? calc.daysBetween(s.startDate, s.endDate) : s.periodDays;
     s.items = (raw.items || []).map((it) => {
       const segs = Array.isArray(it.segments) ? it.segments : [];
@@ -441,16 +469,20 @@
       // days: explicit field wins; else a single span's days; else the period
       const days =
         it.days != null ? it.days : segs.length === 1 ? segs[0].days : periodDays;
-      // linkPeriod: explicit wins; else true when the device's days match the period
-      const linkPeriod =
-        it.linkPeriod != null ? !!it.linkPeriod : !split && calc.num(days) === calc.num(periodDays);
+      // daysMode: explicit wins; else infer from legacy linkPeriod / days match
+      let daysMode = it.daysMode;
+      if (!daysMode) {
+        if (it.linkPeriod === true) daysMode = "all";
+        else if (it.linkPeriod === false) daysMode = "custom";
+        else daysMode = !split && calc.num(days) === calc.num(periodDays) ? "all" : "custom";
+      }
       return {
         id: nextId++,
         name: it.name,
         watts: calc.num(it.watts),
         hours: calc.num(hours),
         days: calc.num(days),
-        linkPeriod: linkPeriod,
+        daysMode: daysMode,
         split: split,
         segments: split ? segs.map((x) => ({ hours: calc.num(x.hours), days: calc.num(x.days) })) : [],
       };
@@ -587,6 +619,12 @@
       renderItems();
       updateResults();
     });
+    // "days present" affects every device set to follow it
+    $("occupiedInput").addEventListener("input", () => {
+      state.occupiedDays = $("occupiedInput").value === "" ? "" : calc.num($("occupiedInput").value);
+      renderItems();
+      updateResults();
+    });
 
     // add
     $("addBtn").addEventListener("click", addDevice);
@@ -685,17 +723,17 @@
     if (e.target.classList.contains("it-split")) {
       it.split = e.target.checked;
       if (it.split && !it.segments.length) {
-        // seed first span from the simple hours + its current days
-        it.segments = [
-          { hours: it.hours, days: it.linkPeriod ? effectivePeriodDays() : it.days },
-        ];
+        // seed first span from the simple hours + its current resolved days
+        it.segments = [{ hours: it.hours, days: itemDays(it) }];
       }
       renderItems();
       updateResults();
-    } else if (e.target.classList.contains("it-everyday")) {
-      it.linkPeriod = e.target.checked;
-      if (it.linkPeriod) it.days = effectivePeriodDays();
-      renderItems(); // enable/disable + refresh the Days field
+    } else if (e.target.classList.contains("it-daysmode")) {
+      it.daysMode = e.target.value;
+      if (it.daysMode === "custom" && !calc.num(it.days)) {
+        it.days = itemDays(it) || effectivePeriodDays();
+      }
+      renderItems(); // show/hide the custom days field + resolved value
       updateResults();
     }
   }

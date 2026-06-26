@@ -26,6 +26,8 @@
       startLabel: "Start date",
       endLabel: "End date",
       daysComputed: "= {n} days",
+      occupiedLabel: "Days present (optional)",
+      occupiedHint: "If some devices run only while someone is home, enter those days here. Leave blank if all devices run the whole period.",
 
       // Add device
       addHeading: "Add a device",
@@ -52,6 +54,9 @@
       duplicate: "Duplicate",
       daysUsedLabel: "Days used",
       everyDayLabel: "Runs every billing day",
+      srcAll: "All days",
+      srcPresent: "Present days",
+      srcCustom: "Custom",
       segmentsToggle: "Split usage (different hours on different days)",
       segHours: "Hours/day",
       segDays: "Days",
@@ -150,6 +155,8 @@
       startLabel: "শুরুর তারিখ",
       endLabel: "শেষ তারিখ",
       daysComputed: "= {n} দিন",
+      occupiedLabel: "উপস্থিত দিন (ঐচ্ছিক)",
+      occupiedHint: "কিছু ডিভাইস শুধু কেউ বাসায় থাকলে চলে — সেই দিনগুলো এখানে দিন। সব ডিভাইস পুরো সময় চললে খালি রাখুন।",
 
       addHeading: "ডিভাইস যোগ করুন",
       addHint: "ডিভাইস খুঁজুন বা বেছে নিন, ওয়াট ঠিক করুন, তারপর যোগ করুন।",
@@ -174,6 +181,9 @@
       duplicate: "অনুলিপি",
       daysUsedLabel: "যত দিন ব্যবহার",
       everyDayLabel: "প্রতিদিন চলে",
+      srcAll: "সব দিন",
+      srcPresent: "উপস্থিত দিন",
+      srcCustom: "কাস্টম",
       segmentsToggle: "ব্যবহার ভাগ করুন (ভিন্ন দিনে ভিন্ন ঘণ্টা)",
       segHours: "ঘণ্টা/দিন",
       segDays: "দিন",
