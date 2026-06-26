@@ -70,9 +70,19 @@
     }
 
     _bind() {
-      this.input.addEventListener("focus", () => this._openPanel());
+      this.input.addEventListener("focus", () => {
+        // select existing text so the user can pick from the full list or
+        // type over a previous selection cleanly
+        this.input.select();
+        this._openPanel();
+      });
       this.input.addEventListener("input", () => {
+        if (this.opts.numericOnly) {
+          const clean = this.input.value.replace(/[^\d.]/g, "");
+          if (clean !== this.input.value) this.input.value = clean;
+        }
         this.value = null; // typing invalidates a prior selection
+        this.selectedLabel = null;
         this._render();
         this._openPanel();
       });
@@ -114,9 +124,20 @@
       return this.input.value.trim();
     }
 
+    // The query used for filtering. When the field still shows a committed
+    // selection (user just opened it without typing), show the FULL list
+    // instead of filtering down to that one label.
+    _filterQuery() {
+      const q = this._query();
+      if (this.value != null && this.selectedLabel && q === this.selectedLabel) {
+        return "";
+      }
+      return q;
+    }
+
     // Build the flat list of visible rows from current query.
     _compute() {
-      const q = this._query().toLowerCase();
+      const q = this._filterQuery().toLowerCase();
       const all = this.opts.getOptions() || [];
       const filtered = q
         ? all.filter(
@@ -251,6 +272,7 @@
       const isNew = r.type === "add";
       this.value = r.value;
       this.input.value = isNew ? r.value : r.label;
+      this.selectedLabel = this.input.value;
       this._closePanel();
       if (this.opts.onSelect) this.opts.onSelect(r.value, this.input.value, isNew);
     }
@@ -259,6 +281,7 @@
     setValue(value, label) {
       this.value = value;
       this.input.value = label != null ? label : value == null ? "" : String(value);
+      this.selectedLabel = this.input.value;
     }
     getValue() {
       return this.value;
@@ -268,6 +291,7 @@
     }
     clear() {
       this.value = null;
+      this.selectedLabel = null;
       this.input.value = "";
     }
     focus() {

@@ -50,12 +50,16 @@
       perDay: "/day",
       remove: "Remove",
       duplicate: "Duplicate",
+      daysUsedLabel: "Days used",
+      everyDayLabel: "Runs every billing day",
       segmentsToggle: "Split usage (different hours on different days)",
       segHours: "Hours/day",
       segDays: "Days",
       addSegment: "+ Add usage span",
       removeSegment: "Remove span",
       segSumNote: "Spans total {d} days · {h} device-hours",
+      summaryHeading: "Summary",
+      summaryHint: "Preview of your PDF report.",
 
       // Results
       resultsHeading: "Result",
@@ -96,8 +100,12 @@
           a: "Check the rating label or sticker on the device (often near the power cord or on the back/bottom), the user manual, or the box. It is shown as \"W\" or \"Watt\". For motors it may say HP (1 HP ≈ 746 W). If unsure, pick the closest match from our list — the typical value auto-fills and you can adjust it.",
         },
         {
+          q: "How do I handle constant vs occasional devices (real-life scenarios)?",
+          a: "Every device has <b>Hours/day</b> and <b>Days used</b>, so you can match any situation:<br>• <b>Constant</b> (fridge, Wi-Fi router): keep <b>“Runs every billing day”</b> on — it always uses the full period.<br>• <b>Occasional</b> (a light or fan used only the 20 days someone stays in a 30-day flat): turn that off and set <b>Days used = 20</b>.<br>• <b>Variable</b> (AC run 6 h/day for 6 days, then 3 h/day for 24 days): turn on <b>Split usage</b> and add one span per pattern.",
+        },
+        {
           q: "My device runs different hours on different days — what do I do?",
-          a: "Open a device and turn on <b>Split usage</b>. Add one span per pattern. Example: an AC used 6 hours/day for the first 6 days, then 3 hours/day for the next 24 days — add two spans. The total is the sum of all spans.",
+          a: "Open a device and turn on <b>Split usage</b>. Add one span per pattern. Example: an AC used 6 hours/day for the first 6 days, then 3 hours/day for the next 24 days — add two spans. The device total is the sum of all spans.",
         },
         {
           q: "Why don't the kWh match my bill exactly?",
@@ -164,12 +172,16 @@
       perDay: "/দিন",
       remove: "মুছুন",
       duplicate: "অনুলিপি",
+      daysUsedLabel: "যত দিন ব্যবহার",
+      everyDayLabel: "প্রতিদিন চলে",
       segmentsToggle: "ব্যবহার ভাগ করুন (ভিন্ন দিনে ভিন্ন ঘণ্টা)",
       segHours: "ঘণ্টা/দিন",
       segDays: "দিন",
       addSegment: "+ ব্যবহারের ধাপ যোগ করুন",
       removeSegment: "ধাপ মুছুন",
       segSumNote: "মোট {d} দিন · {h} ডিভাইস-ঘণ্টা",
+      summaryHeading: "সারসংক্ষেপ",
+      summaryHint: "আপনার পিডিএফ রিপোর্টের প্রিভিউ।",
 
       resultsHeading: "ফলাফল",
       totalLabel: "মোট খরচ",
@@ -205,6 +217,10 @@
         {
           q: "ডিভাইসের ওয়াট কোথায় পাবো?",
           a: "ডিভাইসের গায়ের রেটিং লেবেল বা স্টিকার (সাধারণত তারের কাছে বা পেছনে/নিচে), ম্যানুয়াল বা বাক্সে দেখুন — \"W\" বা \"ওয়াট\" লেখা থাকে। মোটরের ক্ষেত্রে HP থাকতে পারে (১ HP ≈ ৭৪৬ ওয়াট)। নিশ্চিত না হলে তালিকা থেকে কাছাকাছি বেছে নিন — সাধারণ মান বসে যাবে, পরে বদলাতে পারবেন।",
+        },
+        {
+          q: "সবসময় চলা ও মাঝে মাঝে চলা ডিভাইস কীভাবে হিসাব করবো (বাস্তব পরিস্থিতি)?",
+          a: "প্রতিটি ডিভাইসে <b>ঘণ্টা/দিন</b> ও <b>যত দিন ব্যবহার</b> আছে, তাই যেকোনো পরিস্থিতি মেলানো যায়:<br>• <b>সবসময়</b> (ফ্রিজ, রাউটার): <b>“প্রতিদিন চলে”</b> চালু রাখুন — পুরো সময়জুড়ে চলবে।<br>• <b>মাঝে মাঝে</b> (৩০ দিনের ফ্ল্যাটে কেউ ২০ দিন থাকলে লাইট/ফ্যান): এটি বন্ধ করে <b>যত দিন ব্যবহার = ২০</b> দিন।<br>• <b>পরিবর্তনশীল</b> (এসি ৬ দিন ৬ ঘণ্টা, পরের ২৪ দিন ৩ ঘণ্টা): <b>ব্যবহার ভাগ করুন</b> চালু করে প্রতিটির জন্য ধাপ যোগ করুন।",
         },
         {
           q: "আমার ডিভাইস ভিন্ন দিনে ভিন্ন ঘণ্টা চলে — কী করবো?",

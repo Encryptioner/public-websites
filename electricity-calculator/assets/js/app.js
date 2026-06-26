@@ -34,12 +34,15 @@
   }
 
   let nextId = 1;
+  let lastSavedSig = null; // signature of the last state pushed to history
   function makeItem(name, watts, hours) {
     return {
       id: nextId++,
       name: name,
       watts: calc.num(watts),
       hours: calc.num(hours),
+      days: effectivePeriodDays(), // per-device days (defaults to the period)
+      linkPeriod: true, // "constant" — track the billing period automatically
       split: false,
       segments: [],
     };
@@ -109,15 +112,19 @@
     wattCb = new ECCombobox($("wattCb"), {
       placeholder: t("wattPlaceholder"),
       allowAdd: true,
+      numericOnly: true, // only digits typeable; the unit "W" only shows in labels
       getOptions: wattOptions,
       validateAdd: (q) => {
         const n = Number(q);
         return Number.isFinite(n) && n > 0;
       },
       formatAdd: (q) => i18n.fmt(t("addCustomWatt"), { q }),
-      onSelect: (value) => {
-        // normalize an added value to a number
-        if (typeof value !== "number") wattCb.value = Number(value);
+      onSelect: (value, label, isNew) => {
+        // normalize an added value to a number and show it as "<n> W"
+        if (isNew) {
+          const n = Number(value);
+          wattCb.setValue(n, n + " " + t("wattShort"));
+        }
       },
     });
   }
@@ -140,7 +147,9 @@
     return {
       name: it.name,
       watts: it.watts,
-      segments: [{ hours: it.hours, days: effectivePeriodDays() }],
+      segments: [
+        { hours: it.hours, days: it.linkPeriod ? effectivePeriodDays() : it.days },
+      ],
     };
   }
   function effItems() {
@@ -199,7 +208,9 @@
     const w = t("wattShort");
     let segHtml = "";
     if (it.split) {
-      const rows = (it.segments.length ? it.segments : [{ hours: 0, days: 0 }])
+      const segArr = it.segments.length ? it.segments : [{ hours: 0, days: 0 }];
+      const onlyOne = segArr.length <= 1; // can't remove the last remaining span
+      const rows = segArr
         .map(
           (s, i) =>
             '<div class="seg-row" data-sid="' + i + '">' +
@@ -207,7 +218,7 @@
             '<input type="number" class="text-input seg-hours" min="0" max="24" step="0.5" value="' + esc(s.hours) + '" inputmode="decimal"></label>' +
             '<label class="seg-field"><span>' + esc(t("segDays")) + "</span>" +
             '<input type="number" class="text-input seg-days" min="0" step="1" value="' + esc(s.days) + '" inputmode="numeric"></label>' +
-            '<button type="button" class="icon-btn seg-remove" title="' + esc(t("removeSegment")) + '" aria-label="' + esc(t("removeSegment")) + '">✕</button>' +
+            '<button type="button" class="icon-btn seg-remove" ' + (onlyOne ? "disabled " : "") + 'title="' + esc(t("removeSegment")) + '" aria-label="' + esc(t("removeSegment")) + '">✕</button>' +
             "</div>"
         )
         .join("");
@@ -219,10 +230,26 @@
         '<button type="button" class="btn btn-ghost btn-sm seg-add">' + esc(t("addSegment")) + "</button>" +
         '<div class="seg-note">' + esc(i18n.fmt(t("segSumNote"), { d: totDays, h: calc.round(totHours, 1) })) + "</div>" +
         "</div>";
+    }
+
+    const wattField =
+      '<label class="field it-watt-field"><span class="field-label">' + esc(t("wattLabel")) + "</span>" +
+      '<div class="watt-edit"><input type="number" class="text-input it-watt" min="0" step="1" value="' + esc(it.watts) + '" inputmode="numeric"><span class="watt-suffix">' + esc(w) + "</span></div></label>";
+
+    let bodyHtml;
+    if (it.split) {
+      bodyHtml = '<div class="item-fields one">' + wattField + "</div>" + segHtml;
     } else {
-      segHtml =
-        '<label class="field it-hours-field"><span class="field-label">' + esc(t("hoursLabel")) + "</span>" +
-        '<input type="number" class="text-input it-hours" min="0" max="24" step="0.5" value="' + esc(it.hours) + '" inputmode="decimal"></label>';
+      const shownDays = it.linkPeriod ? effectivePeriodDays() : it.days;
+      bodyHtml =
+        '<div class="item-fields three">' +
+        wattField +
+        '<label class="field"><span class="field-label">' + esc(t("hoursLabel")) + "</span>" +
+        '<input type="number" class="text-input it-hours" min="0" max="24" step="0.5" value="' + esc(it.hours) + '" inputmode="decimal"></label>' +
+        '<label class="field"><span class="field-label">' + esc(t("daysUsedLabel")) + "</span>" +
+        '<input type="number" class="text-input it-days" min="0" step="1" value="' + esc(shownDays) + '"' + (it.linkPeriod ? " disabled" : "") + ' inputmode="numeric"></label>' +
+        "</div>" +
+        '<label class="chk-row"><input type="checkbox" class="it-everyday"' + (it.linkPeriod ? " checked" : "") + "> <span>" + esc(t("everyDayLabel")) + "</span></label>";
     }
 
     return (
@@ -233,12 +260,8 @@
       '<button type="button" class="icon-btn it-dup" title="' + esc(t("duplicate")) + '" aria-label="' + esc(t("duplicate")) + '">⧉</button>' +
       '<button type="button" class="icon-btn it-remove" title="' + esc(t("remove")) + '" aria-label="' + esc(t("remove")) + '">🗑</button>' +
       "</div></div>" +
-      '<div class="item-body">' +
-      '<label class="field it-watt-field"><span class="field-label">' + esc(t("wattLabel")) + "</span>" +
-      '<div class="watt-edit"><input type="number" class="text-input it-watt" min="0" step="1" value="' + esc(it.watts) + '" inputmode="numeric"><span class="watt-suffix">' + esc(w) + "</span></div></label>" +
-      segHtml +
-      "</div>" +
-      '<label class="split-toggle"><input type="checkbox" class="it-split"' + (it.split ? " checked" : "") + "> <span>" + esc(t("segmentsToggle")) + "</span></label>" +
+      bodyHtml +
+      '<label class="chk-row split-toggle"><input type="checkbox" class="it-split"' + (it.split ? " checked" : "") + "> <span>" + esc(t("segmentsToggle")) + "</span></label>" +
       "</article>"
     );
   }
@@ -278,8 +301,48 @@
         .join("");
     }
     renderFormula(rows, total);
+    renderSummary(rows, total);
     $("mobileTotal").classList.toggle("show", total > 0);
+    updateSaveButton();
     scheduleSave();
+  }
+
+  // A clean table that doubles as the PDF preview.
+  function renderSummary(rows, total) {
+    const wrap = $("summaryWrap");
+    if (!rows.length || total <= 0) {
+      wrap.hidden = true;
+      wrap.innerHTML = "";
+      return;
+    }
+    wrap.hidden = false;
+    const head =
+      "<thead><tr><th>" + esc(t("pdfDevice")) + "</th><th>" + esc(t("pdfWatts")) +
+      "</th><th>" + esc(t("pdfUsage")) + "</th><th>" + esc(t("pdfKwh")) + "</th></tr></thead>";
+    const body = rows
+      .map(
+        (r) =>
+          "<tr><td>" + esc(displayName(r.name)) + "</td><td>" + r.watts +
+          "</td><td>" + calc.round(r.hours, 1) + " h</td><td><b>" + calc.round(r.kwh, 2) + "</b></td></tr>"
+      )
+      .join("");
+    const foot =
+      '<tfoot><tr><td colspan="3">' + esc(t("pdfTotal")) + "</td><td><b>" +
+      calc.round(total, 2) + "</b></td></tr></tfoot>";
+    wrap.innerHTML =
+      '<div class="summary-head"><h3 class="sub-title">' + esc(t("summaryHeading")) +
+      '</h3><span class="muted summary-hint">' + esc(t("summaryHint")) + "</span></div>" +
+      '<div class="table-scroll"><table class="summary-table">' + head + "<tbody>" + body + "</tbody>" + foot + "</table></div>";
+  }
+
+  // Show "Save" only when the current calculation differs from the last saved
+  // snapshot (and has devices) — so the button never invites a no-op click.
+  function stateSignature() {
+    return JSON.stringify(currentState());
+  }
+  function updateSaveButton() {
+    const dirty = state.items.length > 0 && stateSignature() !== lastSavedSig;
+    $("saveBtn").hidden = !dirty;
   }
 
   function renderFormula(rows, total) {
@@ -352,6 +415,8 @@
         name: it.name,
         watts: it.watts,
         hours: it.hours,
+        days: it.days,
+        linkPeriod: it.linkPeriod,
         split: it.split,
         segments: it.segments,
       })),
@@ -367,16 +432,25 @@
     s.periodDays = calc.num(raw.periodDays) || (raw.periodDays === 0 ? 0 : 30);
     s.startDate = raw.startDate || "";
     s.endDate = raw.endDate || "";
+    const periodDays = s.mode === "range" ? calc.daysBetween(s.startDate, s.endDate) : s.periodDays;
     s.items = (raw.items || []).map((it) => {
       const segs = Array.isArray(it.segments) ? it.segments : [];
       const split = it.split != null ? !!it.split : segs.length > 1;
       const hours =
         it.hours != null ? it.hours : segs.length === 1 ? segs[0].hours : 0;
+      // days: explicit field wins; else a single span's days; else the period
+      const days =
+        it.days != null ? it.days : segs.length === 1 ? segs[0].days : periodDays;
+      // linkPeriod: explicit wins; else true when the device's days match the period
+      const linkPeriod =
+        it.linkPeriod != null ? !!it.linkPeriod : !split && calc.num(days) === calc.num(periodDays);
       return {
         id: nextId++,
         name: it.name,
         watts: calc.num(it.watts),
         hours: calc.num(hours),
+        days: calc.num(days),
+        linkPeriod: linkPeriod,
         split: split,
         segments: split ? segs.map((x) => ({ hours: calc.num(x.hours), days: calc.num(x.days) })) : [],
       };
@@ -489,24 +563,28 @@
     // title
     $("titleInput").addEventListener("input", () => {
       state.title = $("titleInput").value;
+      updateSaveButton();
       scheduleSave();
     });
 
-    // period mode
+    // period mode — re-render items so "every billing day" devices show the new days
     $("modeDaysBtn").addEventListener("click", () => setMode("days"));
     $("modeRangeBtn").addEventListener("click", () => setMode("range"));
     $("daysInput").addEventListener("input", () => {
       state.periodDays = calc.num($("daysInput").value);
+      renderItems();
       updateResults();
     });
     $("startInput").addEventListener("input", () => {
       state.startDate = $("startInput").value;
       syncPeriodInputs();
+      renderItems();
       updateResults();
     });
     $("endInput").addEventListener("input", () => {
       state.endDate = $("endInput").value;
       syncPeriodInputs();
+      renderItems();
       updateResults();
     });
 
@@ -535,7 +613,9 @@
       const s = currentState();
       if (!s.title) s.title = t("appName");
       store.addToHistory(s);
+      lastSavedSig = stateSignature(); // mark current state as saved (button hides)
       renderHistory();
+      updateSaveButton();
       flashSaved();
     });
     $("pdfBtn").addEventListener("click", downloadPdf);
@@ -549,6 +629,8 @@
       if (e.target.closest(".hist-load") && entry) {
         state = adoptState(entry.state);
         render();
+        lastSavedSig = stateSignature(); // a freshly loaded saved entry isn't dirty
+        updateSaveButton();
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (e.target.closest(".hist-del")) {
         if (confirm(t("confirmDelete"))) {
@@ -562,6 +644,7 @@
   function setMode(mode) {
     state.mode = mode;
     syncPeriodInputs();
+    renderItems();
     updateResults();
   }
 
@@ -574,6 +657,8 @@
       it.watts = calc.num(e.target.value);
     } else if (e.target.classList.contains("it-hours")) {
       it.hours = calc.num(e.target.value);
+    } else if (e.target.classList.contains("it-days")) {
+      it.days = calc.num(e.target.value);
     } else if (e.target.classList.contains("seg-hours") || e.target.classList.contains("seg-days")) {
       const segRow = e.target.closest(".seg-row");
       const seg = it.segments[Number(segRow.dataset.sid)];
@@ -593,17 +678,26 @@
   }
 
   function onItemChange(e) {
-    if (!e.target.classList.contains("it-split")) return;
     const card = e.target.closest(".item");
+    if (!card) return;
     const it = findItem(card.dataset.id);
     if (!it) return;
-    it.split = e.target.checked;
-    if (it.split && !it.segments.length) {
-      // seed first span from the simple hours + current period
-      it.segments = [{ hours: it.hours, days: effectivePeriodDays() }];
+    if (e.target.classList.contains("it-split")) {
+      it.split = e.target.checked;
+      if (it.split && !it.segments.length) {
+        // seed first span from the simple hours + its current days
+        it.segments = [
+          { hours: it.hours, days: it.linkPeriod ? effectivePeriodDays() : it.days },
+        ];
+      }
+      renderItems();
+      updateResults();
+    } else if (e.target.classList.contains("it-everyday")) {
+      it.linkPeriod = e.target.checked;
+      if (it.linkPeriod) it.days = effectivePeriodDays();
+      renderItems(); // enable/disable + refresh the Days field
+      updateResults();
     }
-    renderItems();
-    updateResults();
   }
 
   function onItemClick(e) {

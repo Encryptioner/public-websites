@@ -32,6 +32,11 @@
 * {
   box-sizing: border-box;
 }
+/* `hidden` must win over layout rules like `display:grid` (class specificity
+   would otherwise override the UA [hidden] rule and keep the panel visible). */
+[hidden] {
+  display: none !important;
+}
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -207,6 +212,7 @@ body {
 /* ---------- fields ---------- */
 .field {
   display: block;
+  min-width: 0;
 }
 .field-label {
   display: block;
@@ -233,6 +239,11 @@ body {
 }
 input[type="number"] {
   -moz-appearance: textfield;
+}
+/* date inputs are intrinsically wide on iOS/desktop — keep them in their box */
+input[type="date"] {
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* segmented control */
@@ -495,16 +506,55 @@ input[type="number"] {
   gap: 2px;
   flex: none;
 }
-.item-body {
+.item-fields {
   display: grid;
-  grid-template-columns: 130px 1fr;
   gap: 12px;
   align-items: end;
 }
-@media (max-width: 420px) {
-  .item-body {
-    grid-template-columns: 1fr;
+.item-fields.three {
+  grid-template-columns: repeat(3, 1fr);
+}
+.item-fields.one {
+  grid-template-columns: 130px;
+}
+@media (max-width: 460px) {
+  .item-fields.three {
+    grid-template-columns: 1fr 1fr;
   }
+  .item-fields.three .it-watt-field {
+    grid-column: 1 / -1;
+  }
+}
+.chk-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+.chk-row input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+  flex: none;
+}
+/* disabled controls read as non-interactive */
+.text-input:disabled {
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+.icon-btn:disabled,
+.btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.icon-btn:disabled:hover {
+  background: transparent;
+  color: var(--muted);
 }
 .watt-edit {
   position: relative;
@@ -625,10 +675,12 @@ input[type="number"] {
   font-weight: 600;
 }
 .result-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 10px;
   margin-bottom: 18px;
+}
+.result-actions .btn {
+  flex: 1; /* PDF expands to full width when Save is hidden */
 }
 .sub-title {
   margin: 0 0 10px;
@@ -715,6 +767,70 @@ input[type="number"] {
 }
 .ftotal {
   background: var(--accent-soft);
+}
+
+/* ---------- summary table (PDF preview) ---------- */
+.summary {
+  margin-top: 18px;
+  border-top: 1px dashed var(--line-strong);
+  padding-top: 14px;
+}
+.summary-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.summary-head .sub-title {
+  margin: 0;
+}
+.summary-hint {
+  font-size: 12.5px;
+}
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  min-width: 340px;
+}
+.summary-table th,
+.summary-table td {
+  padding: 9px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+.summary-table th:first-child,
+.summary-table td:first-child {
+  text-align: left;
+  white-space: normal;
+}
+.summary-table thead th {
+  background: var(--primary-50);
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid #99f6e4;
+}
+.summary-table tbody td {
+  border-bottom: 1px solid var(--line);
+}
+.summary-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.summary-table tfoot td {
+  background: var(--surface-2);
+  font-weight: 700;
+  border-top: 2px solid var(--line-strong);
 }
 
 /* ---------- history ---------- */
