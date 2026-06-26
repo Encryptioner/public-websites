@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Usage Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #e2e8f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 20px 0;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #60a5fa, #34d399);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            font-size: 1em;
+            color: #94a3b8;
+            margin-bottom: 30px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 12px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+        }
+
+        .panel-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .appliance-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .appliance-item {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            padding: 14px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .appliance-item:hover {
+            background: rgba(15, 23, 42, 0.8);
+            border-color: rgba(148, 163, 184, 0.3);
+        }
+
+        .appliance-info {
+            flex: 1;
+        }
+
+        .appliance-name {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #f1f5f9;
+        }
+
+        .appliance-watts {
+            font-size: 0.85em;
+            color: #94a3b8;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        input[type="number"] {
+            width: 70px;
+            padding: 8px 10px;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.9em;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(51, 65, 85, 0.8);
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #60a5fa;
+        }
+
+        .unit-label {
+            font-size: 0.85em;
+            color: #94a3b8;
+            min-width: 30px;
+        }
+
+        .results-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .result-item {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .result-label {
+            font-size: 0.9em;
+            color: #94a3b8;
+            margin-bottom: 8px;
+        }
+
+        .result-value {
+            font-size: 2em;
+            font-weight: 700;
+            color: #60a5fa;
+        }
+
+        .result-secondary {
+            font-size: 1em;
+            color: #34d399;
+            margin-top: 8px;
+        }
+
+        .days-input {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .days-input label {
+            font-size: 0.95em;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .days-input input {
+            width: 100%;
+            padding: 10px;
+            background: rgba(51, 65, 85, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 1em;
+        }
+
+        .days-input input:focus {
+            outline: none;
+            border-color: #60a5fa;
+            background: rgba(51, 65, 85, 0.8);
+        }
+
+        .divider {
+            height: 1px;
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .formula-section {
+            background: rgba(15, 23, 42, 0.5);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .formula-title {
+            font-size: 0.95em;
+            color: #94a3b8;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .formula-text {
+            background: rgba(51, 65, 85, 0.3);
+            padding: 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            color: #a1f3a2;
+            word-break: break-all;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-calculate {
+            background: linear-gradient(135deg, #60a5fa, #3b82f6);
+            color: white;
+        }
+
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(96, 165, 250, 0.3);
+        }
+
+        .btn-reset {
+            background: rgba(148, 163, 184, 0.2);
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+        }
+
+        .btn-reset:hover {
+            background: rgba(148, 163, 184, 0.3);
+        }
+
+        .breakdown {
+            margin-top: 20px;
+        }
+
+        .breakdown-title {
+            font-size: 0.95em;
+            color: #cbd5e1;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 0.9em;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-name {
+            color: #cbd5e1;
+        }
+
+        .breakdown-value {
+            color: #60a5fa;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .appliance-list {
+                max-height: 400px;
+            }
+        }
+
+        .scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .scrollbar::-webkit-scrollbar-track {
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 3px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(96, 165, 250, 0.3);
+            border-radius: 3px;
+        }
+
+        .scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(96, 165, 250, 0.5);
+        }
+
+        .appliance-list {
+            scrollbar-color: rgba(96, 165, 250, 0.3) rgba(148, 163, 184, 0.1);
+        }
+
+        .info-text {
+            font-size: 0.85em;
+            color: #64748b;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ Electricity Usage Calculator</h1>
+            <p class="subtitle">Calculate your monthly electricity consumption with ease</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Panel: Appliances -->
+            <div class="panel">
+                <div class="panel-title">Select Your Appliances</div>
+                <div class="appliance-list scrollbar" id="applianceList">
+                    <!-- Appliances will be populated here -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Results -->
+            <div class="panel">
+                <div class="panel-title">Your Consumption</div>
+                
+                <div class="days-input">
+                    <label for="daysInput">Days Living in Month</label>
+                    <input type="number" id="daysInput" value="30" min="1" max="31">
+                    <p class="info-text">Enter how many days you stay and use these appliances</p>
+                </div>
+
+                <div class="divider"></div>
+
+                <div class="results-panel">
+                    <div class="result-item">
+                        <div class="result-label">Total Monthly Usage</div>
+                        <div class="result-value" id="totalUnits">0</div>
+                        <div class="result-secondary">kWh (Units)</div>
+                    </div>
+
+                    <div class="result-item">
+                        <div class="result-label">Estimated Monthly Bill</div>
+                        <div class="result-value" id="estimatedBill">0</div>
+                        <div class="result-secondary">BDT (at 15 TK/unit)</div>
+                    </div>
+
+                    <div class="breakdown" id="breakdownSection" style="display: none;">
+                        <div class="breakdown-title">Consumption Breakdown</div>
+                        <div id="breakdownList"></div>
+                    </div>
+
+                    <div class="formula-section">
+                        <div class="formula-title">Your Formula</div>
+                        <div class="formula-text" id="formulaText">Select appliances to see your formula</div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-calculate" onclick="calculate()">Calculate</button>
+                    <button class="btn-reset" onclick="resetCalculator()">Reset</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const appliances = [
+            // Kitchen Appliances
+            { name: 'Refrigerator (Single Door)', watts: 100, category: 'Kitchen', defaultHours: 24 },
+            { name: 'Freezer (Double Door)', watts: 120, category: 'Kitchen', defaultHours: 24 },
+            { name: 'Rice Cooker', watts: 800, category: 'Kitchen', defaultHours: 1 },
+            { name: 'Microwave', watts: 1000, category: 'Kitchen', defaultHours: 0.5 },
+            { name: 'Electric Kettle', watts: 1500, category: 'Kitchen', defaultHours: 0.25 },
+            { name: 'Toaster', watts: 800, category: 'Kitchen', defaultHours: 0.25 },
+            { name: 'Blender', watts: 500, category: 'Kitchen', defaultHours: 0.25 },
+            { name: 'Oven (Electric)', watts: 2000, category: 'Kitchen', defaultHours: 1 },
+            { name: 'Coffee Maker', watts: 900, category: 'Kitchen', defaultHours: 0.5 },
+            
+            // Cooling & Heating
+            { name: 'Air Conditioner (1.5 Ton)', watts: 1500, category: 'Cooling', defaultHours: 8 },
+            { name: 'Air Conditioner (2 Ton)', watts: 2000, category: 'Cooling', defaultHours: 8 },
+            { name: 'Electric Heater', watts: 1500, category: 'Heating', defaultHours: 4 },
+            { name: 'Water Heater', watts: 2000, category: 'Heating', defaultHours: 2 },
+            
+            // Lighting
+            { name: 'LED Bulb (9W)', watts: 9, category: 'Lighting', defaultHours: 6 },
+            { name: 'LED Bulb (12W)', watts: 12, category: 'Lighting', defaultHours: 6 },
+            { name: 'LED Tube (18W)', watts: 18, category: 'Lighting', defaultHours: 8 },
+            { name: 'CFL Bulb (15W)', watts: 15, category: 'Lighting', defaultHours: 6 },
+            { name: 'Incandescent Bulb (60W)', watts: 60, category: 'Lighting', defaultHours: 6 },
+            
+            // Fans
+            { name: 'Ceiling Fan', watts: 60, category: 'Fans', defaultHours: 10 },
+            { name: 'Table Fan', watts: 40, category: 'Fans', defaultHours: 6 },
+            { name: 'Exhaust Fan', watts: 50, category: 'Fans', defaultHours: 2 },
+            
+            // Entertainment
+            { name: 'Television (LED 32")', watts: 60, category: 'Entertainment', defaultHours: 4 },
+            { name: 'Television (LED 43")', watts: 100, category: 'Entertainment', defaultHours: 4 },
+            { name: 'Desktop Computer', watts: 400, category: 'Entertainment', defaultHours: 6 },
+            { name: 'Laptop', watts: 55, category: 'Entertainment', defaultHours: 2 },
+            { name: 'Gaming Console', watts: 150, category: 'Entertainment', defaultHours: 3 },
+            
+            // Laundry
+            { name: 'Washing Machine', watts: 500, category: 'Laundry', defaultHours: 1 },
+            { name: 'Clothes Dryer', watts: 3000, category: 'Laundry', defaultHours: 0.5 },
+            { name: 'Electric Iron', watts: 1200, category: 'Laundry', defaultHours: 1 },
+            
+            // Personal Care
+            { name: 'Geyser (Water Heater)', watts: 2000, category: 'Personal Care', defaultHours: 1.5 },
+            { name: 'Hair Dryer', watts: 1500, category: 'Personal Care', defaultHours: 0.25 },
+            { name: 'Vacuum Cleaner', watts: 800, category: 'Personal Care', defaultHours: 0.5 },
+            
+            // Charging
+            { name: 'Mobile Phone Charger', watts: 8, category: 'Charging', defaultHours: 1 },
+            { name: 'Laptop Charger', watts: 65, category: 'Charging', defaultHours: 1.5 },
+            { name: 'Power Bank Charger', watts: 5, category: 'Charging', defaultHours: 1 },
+        ];
+
+        function initializeAppliances() {
+            const applianceList = document.getElementById('applianceList');
+            applianceList.innerHTML = '';
+
+            appliances.forEach((appliance, index) => {
+                const item = document.createElement('div');
+                item.className = 'appliance-item';
+                item.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 12px; flex: 1;">
+                        <input type="checkbox" id="check-${index}" onchange="calculate()">
+                        <div class="appliance-info">
+                            <div class="appliance-name">${appliance.name}</div>
+                            <div class="appliance-watts">${appliance.watts}W • ${appliance.defaultHours}h/day</div>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <input type="number" id="hours-${index}" value="${appliance.defaultHours}" min="0" step="0.5" onchange="calculate()">
+                        <span class="unit-label">hrs</span>
+                    </div>
+                `;
+                applianceList.appendChild(item);
+            });
+        }
+
+        function calculate() {
+            const daysInput = parseFloat(document.getElementById('daysInput').value) || 30;
+            let totalUnits = 0;
+            let formula = [];
+            let breakdown = [];
+
+            appliances.forEach((appliance, index) => {
+                const checkbox = document.getElementById(`check-${index}`);
+                const hoursInput = document.getElementById(`hours-${index}`);
+
+                if (checkbox.checked) {
+                    const hours = parseFloat(hoursInput.value) || 0;
+                    const dailyUnits = (appliance.watts * hours) / 1000;
+                    const monthlyUnits = dailyUnits * daysInput;
+                    totalUnits += monthlyUnits;
+
+                    const dailyKwh = dailyUnits.toFixed(3);
+                    const monthlyKwh = monthlyUnits.toFixed(2);
+                    
+                    formula.push(`${dailyKwh} × ${daysInput}`);
+                    breakdown.push({
+                        name: appliance.name,
+                        units: monthlyKwh
+                    });
+                }
+            });
+
+            // Update results
+            document.getElementById('totalUnits').textContent = totalUnits.toFixed(2);
+            const estimatedBill = (totalUnits * 15).toFixed(0);
+            document.getElementById('estimatedBill').textContent = estimatedBill.toLocaleString();
+
+            // Update formula
+            if (formula.length > 0) {
+                document.getElementById('formulaText').textContent = `(${formula.join(' + ')}) = ${totalUnits.toFixed(2)} kWh`;
+            } else {
+                document.getElementById('formulaText').textContent = 'Select appliances to see your formula';
+            }
+
+            // Update breakdown
+            const breakdownSection = document.getElementById('breakdownSection');
+            if (breakdown.length > 0) {
+                breakdownSection.style.display = 'block';
+                const breakdownList = document.getElementById('breakdownList');
+                breakdownList.innerHTML = breakdown
+                    .sort((a, b) => parseFloat(b.units) - parseFloat(a.units))
+                    .map(item => `
+                        <div class="breakdown-item">
+                            <span class="breakdown-name">${item.name}</span>
+                            <span class="breakdown-value">${item.units} kWh</span>
+                        </div>
+                    `)
+                    .join('');
+            } else {
+                breakdownSection.style.display = 'none';
+            }
+        }
+
+        function resetCalculator() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+            document.getElementById('daysInput').value = 30;
+            calculate();
+        }
+
+        // Initialize on load
+        initializeAppliances();
+        calculate();
+    </script>
+</body>
+</html>
