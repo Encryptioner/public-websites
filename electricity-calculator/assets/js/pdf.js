@@ -59,15 +59,17 @@
   function buildReportHtml(r) {
     const rows = r.rows
       .map((row) => {
+        const bb = row.note ? "none" : "1px solid #e5e7eb";
         const noteRow = row.note
-          ? '<tr><td colspan="4" style="padding:2px 10px 8px;color:#64748b;font-size:11px;font-style:italic;border-bottom:1px solid #e5e7eb">' + esc(row.note) + "</td></tr>"
+          ? '<tr><td colspan="5" style="padding:2px 10px 8px;color:#64748b;font-size:11px;font-style:italic;border-bottom:1px solid #e5e7eb">' + esc(row.note) + "</td></tr>"
           : "";
         return (
           "<tr>" +
-          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + '">' + esc(row.name) + "</td>" +
-          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + ';text-align:right">' + esc(row.watts) + "</td>" +
-          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + ';text-align:right">' + esc(row.usage) + "</td>" +
-          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + ';text-align:right;font-weight:600">' + esc(row.kwh) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + bb + '">' + esc(row.name) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right">' + esc(row.watts) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right">' + esc(row.usage) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right;font-weight:600">' + esc(row.kwh) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right;color:#64748b">' + esc(String(row.percent)) + "%</td>" +
           "</tr>" + noteRow
         );
       })
@@ -100,6 +102,7 @@
       '<th style="padding:8px 10px;text-align:right;border-bottom:2px solid #99f6e4">' + esc(r.cols.watts) + "</th>" +
       '<th style="padding:8px 10px;text-align:right;border-bottom:2px solid #99f6e4">' + esc(r.cols.usage) + "</th>" +
       '<th style="padding:8px 10px;text-align:right;border-bottom:2px solid #99f6e4">' + esc(r.cols.kwh) + "</th>" +
+      '<th style="padding:8px 10px;text-align:right;border-bottom:2px solid #99f6e4">' + esc(r.cols.percent) + "</th>" +
       "</tr></thead><tbody>" + rows + "</tbody></table>" +
       // Total
       '<div style="margin-top:18px;display:flex;justify-content:flex-end">' +

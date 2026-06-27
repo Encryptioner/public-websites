@@ -1,439 +1,243 @@
-# ElectroCalc - Electricity Usage Calculator
-## Project Documentation & Handover Brief
+# electricity-calculator — Agent Guide
 
 **Last Updated:** June 2026  
-**Status:** Production Ready  
-**File:** `electrocalc_production.html`
+**Status:** Production  
+**Live:** `https://encryptioner.github.io/public-websites/electricity-calculator/`
 
 ---
 
-## Executive Summary
+## Architecture
 
-ElectroCalc is a premium, production-ready web application that helps users accurately calculate their monthly electricity consumption. It addresses the need for flexible, accurate electricity tracking when usage patterns vary (guests, seasonal changes, different appliances with different usage days). The tool is designed for all user types - from non-technical homeowners to power users who need detailed calculations.
+No build step. Static files served as-is. No package.json, no bundler.
 
----
-
-## Project Context & Origin
-
-**User Profile:**
-- Name: Ankur
-- Role: Software developer, open-source maintainer
-- Context: Developer with focus on practical tooling, visual quality, and usability
-- Preference: Direct communication, minimal confirmation questions, production-quality output
-
-**Initial Problem Statement:**
-User had a Hitachi inverter double-door freezer (400-480L) using 1.0-1.5 kWh/day, LED light for 6 hrs, ceiling fan for 20 hrs, rice cooker for 1 hr, and mobile charging for 1 hr. Wanted to:
-1. Calculate electricity usage for variable days (e.g., 20 days in a flat instead of full 30 days)
-2. Create a general formula for any number of days
-3. Account for multiple same items with different usage hours
-4. Include custom wattage for unlisted items
-5. Support day overrides for specific appliances
-6. Export reports as PDF or images
-7. Production-grade UX/UI
-
-**Evolution:**
-- Initial simple calculator evolved into comprehensive tool
-- Requirements expanded to include 150+ appliances, search functionality, date range selection, and professional export options
-- Design principle: "Top-notch UX/UI, mobile-friendly, responsive, production-ready, easily understandable for all user types"
-
----
-
-## Core Requirements Met
-
-### Functional Requirements
-
-1. **Appliance Management**
-   - Pre-loaded database of 150+ common home appliances across 12 categories
-   - Real-time search with instant filtering (case-insensitive)
-   - Custom appliance creation with user-defined wattage
-   - Support for adding same appliance multiple times with unique IDs (Item 1, Item 2, etc.)
-
-2. **Flexible Day/Period Selection**
-   - **Days Mode:** Enter 1-31 days for calculation
-   - **Date Range Mode:** Select start and end dates (auto-calculates duration)
-   - Both modes support calculation updates in real-time
-
-3. **Day Overrides for Individual Appliances**
-   - Checkbox to enable "Different days" mode per appliance
-   - Allow specific appliances to use different day counts than global period
-   - Use Case: AC used 25 days, guests AC used 5 days separately, etc.
-
-4. **Real-Time Calculation**
-   - Instant updates as hours or days change
-   - Formula generation showing exact calculation
-   - Breakdown by appliance sorted by consumption (highest first)
-   - Total monthly usage in kWh
-
-5. **Export Functionality**
-   - PDF download with professional formatting
-   - Full report including: billing period, all appliances, consumption breakdown, total usage, and calculation formula
-   - White background PDF for printing
-   - Timestamped filename
-
-### Design & UX Requirements
-
-1. **Visual Design**
-   - Premium, professional aesthetic
-   - Teal (#0f766e primary) + Gold (#f59e0b accent) color scheme
-   - Dark theme background (gradient from #0f172a to #020617)
-   - Not templated - distinctive design choices
-   - Proper use of whitespace and hierarchy
-
-2. **Mobile Responsiveness**
-   - Fully responsive from 320px to 1400px+
-   - Single column layout on mobile, two columns on desktop
-   - Touch-friendly inputs and buttons
-   - Readable text at all sizes
-   - Smooth scaling of all elements
-
-3. **User Experience**
-   - Minimal learning curve for all user types
-   - Clear labels and instructions
-   - Immediate visual feedback on interactions
-   - Smooth animations (with respects-reduced-motion)
-   - Empty states that guide users
-
-4. **Accessibility**
-   - Proper semantic HTML
-   - Form labels connected to inputs
-   - Visible focus states
-   - Color contrast compliance
-   - Keyboard navigation support
-
-### Content & Education
-
-1. **Onboarding & Marketing**
-   - "Why Track Your Electricity?" section with 3 benefits cards
-   - 6-step "How to Use ElectroCalc" guide with numbered steps
-   - "Pro Tips for Accuracy" section with 4 practical tips
-   - Info modal accessible from header
-
-2. **Context-Specific Help**
-   - Panel subtitles explaining each section
-   - Input field labels and placeholders
-   - Result card labels with emoji icons
-   - Breakdown labels and formula display
-
----
-
-## Technical Specifications
-
-### Technology Stack
-- **HTML5:** Semantic markup
-- **CSS3:** Custom properties (CSS variables), Grid, Flexbox, animations
-- **JavaScript (Vanilla):** No frameworks, pure ES6+
-- **External Libraries:**
-  - `html2pdf.js` (v0.10.1) - PDF generation
-  - `html2canvas.js` (v1.4.1) - Image capture (prepared for future use)
-
-### File Structure
 ```
-electrocalc_production.html (Single file, self-contained)
-├── HTML
-├── CSS (inline <style>)
-└── JavaScript (inline <script>)
+electricity-calculator/
+├── index.html                   — single HTML shell; all IDs are here
+├── favicon.svg
+└── assets/
+    ├── css/styles.css           — all styling; CSS variables in :root
+    └── js/
+        ├── data.js              — CATEGORIES, DEVICES, WATT_PRESETS, SCENARIOS → window.ECData
+        ├── i18n.js              — STR.en / STR.bn, t(), applyStaticI18n() → window.ECi18n
+        ├── calc.js              — pure math, no DOM; breakdown(), round() → window.ECCalc
+        ├── combobox.js          — accessible combobox widget → window.ECCombobox
+        ├── storage.js           — localStorage save/load for history → window.ECStorage
+        ├── pdf.js               — html2canvas + jsPDF report builder → window.ECPdf
+        └── app.js               — all state, rendering, event wiring
 ```
 
-### Data Structure
+Load order matters: scripts at bottom of `<body>` in the order above.
 
-**Appliances Database:**
+---
+
+## State Model
+
 ```javascript
+// Global `state` object in app.js
 {
-  'Kitchen': [
-    { name: 'Appliance Name', watts: 800 },
-    ...
-  ],
-  'Cooling & Heating': [...],
-  'Lighting': [...],
-  'Fans': [...],
-  'Entertainment': [...],
-  'Laundry': [...],
-  'Personal Care': [...],
-  'Charging': [...],
-  'Other': [...]
+  title: "",
+  mode: "days",         // "days" | "range"
+  days: 30,
+  startDate: "",
+  endDate: "",
+  occupied: "",         // days-present (optional)
+  items: [ Item, ... ]
 }
-```
 
-**Selected Item Structure:**
-```javascript
+// Item shape
 {
-  id: 1,                    // Unique identifier
-  name: 'Air Conditioner',
-  watts: 1500,
-  hours: 8,                 // Daily usage hours
-  overrideDays: false,      // Boolean for day override
-  specificDays: 30          // Days for this appliance if overridden
+  id: number,
+  name: string,
+  watts: number,
+  hours: number,        // raw user value — NOT normalized; unit stored in hoursUnit
+  hoursUnit: "h/day" | "min/day" | "h/week" | "min/week",
+  daysMode: "all" | "present" | "custom",
+  days: number,         // only used when daysMode === "custom"
+  split: boolean,       // true → custom segment array
+  segments: [...],      // only when split === true
+  note: string,
+  noteOpen: boolean,
 }
 ```
 
-### Key Functions
-
-**Appliance Management:**
-- `initializeSearch()` - Setup search functionality
-- `getAllAppliances()` - Flatten all appliance categories
-- `addFromSearch()` - Add appliance from search results
-- `addCustomAppliance()` - Add user-defined appliance
-- `addItem(name, watts)` - Core add item logic
-- `removeItem(id)` - Remove appliance by ID
-- `renderItems()` - Render all items to DOM
-
-**Calculations:**
-- `updateItemHours(id, value)` - Update daily hours
-- `updateItemOverride(id, checked)` - Toggle day override
-- `updateItemSpecificDays(id, value)` - Set override days
-- `calculateDaysFromRange()` - Calculate days from date range
-- `updateResults()` - Main calculation engine
-
-**User Interface:**
-- `setDateMode(mode)` - Switch between days/range mode
-- `exportToPDF()` - Generate and download PDF
-- `resetCalculator()` - Clear all data
-- `toggleInfoModal()` - Show/hide help modal
+**Critical:** `hours` is always the value in `hoursUnit`, never pre-converted. Conversion to h/day happens only in `hoursPerDay(it)` inside `effItem()` before calc. Never store converted values.
 
 ---
 
-## Design Decisions & Rationale
+## Key Functions in app.js
 
-### Color Palette
-- **Primary Teal (#0f766e):** Professional, trustworthy, associated with energy/sustainability
-- **Accent Gold (#f59e0b):** Warmth, energy, highlights important information
-- **Dark Background:** Reduces eye strain, modern aesthetic, highlights content
-- **Reasoning:** Teal-gold combination is distinctive (avoids templates), aligns with energy/sustainability theme
-
-### Layout Structure
-- **Two-column desktop, single-column mobile:** Efficient use of space on desktop, simplified flow on mobile
-- **Left panel for input, right panel for results:** Clear input-output separation
-- **Marketing & education below:** Content discovery without initial cognitive load
-
-### Typography
-- **System font stack:** Fast loading, native look on each platform
-- **Clear hierarchy:** h1 > panel titles > labels > body text
-- **Monospace for formulas:** Distinct visual treatment for technical content
-
-### Interactions
-- **Real-time calculation:** No submit button needed, immediate feedback
-- **Expandable override section:** Progressive disclosure, only shows when needed
-- **Smooth animations:** Transitions on hover, slide-in on new items (respects prefers-reduced-motion)
-- **Modal for help:** Non-intrusive, optional access
-
-### Appliance Database
-- **150+ appliances:** Covers >95% of common home appliances
-- **12 categories:** Logical grouping for discoverability
-- **Realistic wattages:** Based on standard product specifications in Bangladesh/South Asia
-- **Custom option always visible:** Empowers users to add unlisted items
+| Function | Purpose |
+|---|---|
+| `makeItem()` | Creates a new item with defaults |
+| `hoursPerDay(it)` | Converts hours+unit → h/day for calc |
+| `hoursUnitAttrs(unit)` | Returns `{max, step}` for the hours input |
+| `effItem(it)` | Converts item to calc-ready format (calls hoursPerDay) |
+| `itemDays(it)` | Resolves effective days for an item |
+| `effectivePeriodDays()` | Total period days (from days or date range) |
+| `effectiveOccupiedDays()` | Present days (occupied field, capped to period) |
+| `renderItems()` | Full re-render of #itemsList; updates device count badge |
+| `itemCardHtml(it, idx)` | Builds HTML string for one device card |
+| `renderSummary()` | 5-column summary table (name, watt, usage h, kWh, % total) |
+| `updateResults()` | Runs calc, updates breakdown + summary + formula |
+| `render()` | Full page re-render (called on load + lang switch) |
+| `populateScenarioSelect()` | Fills #scenarioSelect from SCENARIOS; called in render() |
+| `loadScenario(key)` | Loads a scenario into state, calls render() |
+| `adoptState(obj)` | Merges a plain object (scenario/history entry) into state |
+| `currentState()` | Snapshots state for history save |
+| `downloadPdf()` | Builds pdfRows with percent, calls window.ECPdf.exportPdf() |
 
 ---
 
-## User Flow
+## i18n Rules
 
-1. **User arrives at page**
-   - Sees clean header with ElectroCalc branding
-   - Left panel for appliance selection (search + custom)
-   - Right panel for results (initially empty state)
-   - Below: marketing content and help section
+- All user-visible strings live in `i18n.js` under `STR.en` and `STR.bn`.
+- `t("key")` returns the string in current language.
+- `applyStaticI18n()` sets `el.textContent = t(el.dataset.i18n)` — **never put child nodes inside `[data-i18n]` elements** (they get wiped).
+- `[data-i18n-ph]` sets `placeholder`.
+- Always add new strings to **both** language blocks. Bengali uses full words (not abbreviations) for labels.
+- `render()` is called on language switch, which calls `populateScenarioSelect()` — so scenario placeholder text auto-updates.
 
-2. **Search for appliances**
-   - Types in search box (e.g., "AC", "fan", "freezer")
-   - Results filter in real-time
-   - Selects from dropdown and clicks "Add Selected"
-   - Item appears in left panel
-
-3. **Adjust usage**
-   - Enters daily hours for each appliance
-   - Can see daily kWh calculation in read-only field
-   - Optionally checks "Different days" for specific appliances
-   - Sees results update in real-time on right panel
-
-4. **Set billing period**
-   - Chooses between "Days" mode (enter 1-31) or "Date Range" mode
-   - Results recalculate automatically
-
-5. **Review results**
-   - Sees total monthly usage in large, gradient text
-   - Breakdown table shows consumption by appliance
-   - Formula box shows exact calculation
-   - Can download PDF for records
-
-6. **Export or reset**
-   - Downloads PDF report
-   - Or resets calculator to start fresh
+### Hours field label keys (unit-aware)
+| Unit | i18n key |
+|---|---|
+| h/day | `hoursLabel` |
+| min/day | `hoursLabelMinDay` |
+| h/week | `hoursLabelHWeek` |
+| min/week | `hoursLabelMinWeek` |
 
 ---
 
-## File Specifications
+## Rendering Pattern
 
-**File Name:** `electrocalc_production.html`  
-**File Type:** HTML5  
-**File Size:** ~70KB (minified would be ~35KB)  
-**Dependencies:** CDN-hosted (html2pdf.js, html2canvas.js)  
-**Browser Support:** Modern browsers (Chrome 90+, Firefox 88+, Safari 14+, Edge 90+)  
-**Offline Support:** Yes (works offline except PDF export)
+`renderItems()` does a full `innerHTML` replace of `#itemsList` — no virtual DOM, no diffing. This means:
+- Every state change triggers `renderItems()` + `updateResults()`.
+- The hours field label updates automatically when unit changes because the card is re-rendered.
+- Event delegation on `#itemsList` for all item interactions.
+- Do not attach per-element event listeners inside `itemCardHtml` — they would be lost on next render.
 
 ---
 
-## Customization Guide for Future Enhancements
+## calc.js (pure, never modify)
 
-### Adding New Appliances
 ```javascript
-'Category Name': [
-  { name: 'Appliance Name', watts: 800 },
-  // Add to this array
-]
+// window.ECCalc
+calc.breakdown(items)  // → [{name, watts, hours, kwh, percent}, ...]
+calc.total(items)      // → number (kWh)
+calc.round(n, dp)      // → number
 ```
 
-### Changing Color Scheme
-Edit CSS variables in `:root`:
-```css
-:root {
-  --primary: #yourcolor;
-  --accent: #yourcolor;
-  /* etc */
-}
+`items` passed to calc must be already-normalized (h/day), which `effItem()` handles.  
+`breakdown()` already returns `percent` — use it, don't recalculate.
+
+---
+
+## data.js
+
+```javascript
+// window.ECData
+{ CATEGORIES, DEVICES, WATT_PRESETS, SCENARIOS }
+
+// SCENARIOS shape
+[{
+  key: string,         // e.g. "flat2"
+  title: string,       // display name (already localized per scenario)
+  periodDays: number,
+  occupiedDays: number | "",
+  items: [{
+    name, watts, hours, hoursUnit, daysMode,
+    days?,             // only for daysMode "custom"
+    note?
+  }]
+}]
 ```
 
-### Adjusting Wattage Database
-All wattages are in the `appliances` object. Update per appliance as needed based on local models/specs.
-
-### PDF Customization
-Modify `exportToPDF()` function - change header, add company logo, adjust formatting.
-
-### Adding New Languages
-- Add language selector in header
-- Create translation object
-- Update all display text to use translations
-- Keep variable names and IDs unchanged
+Currently 5 scenarios: `flat2`, `flat4`, `flatGuest`, `building`, `office`.  
+`building` and `office` use `occupiedDays: ""`.  
+Scenario items use real-world units (min/day for kettle, h/week for washer, etc.).
 
 ---
 
-## Testing Checklist
+## pdf.js
 
-- [ ] Search finds all appliances correctly
-- [ ] Custom appliance creation works with various wattages
-- [ ] Days mode calculates correctly (1-31 days)
-- [ ] Date range mode auto-calculates days accurately
-- [ ] Day override toggle shows/hides input
-- [ ] Calculations update in real-time
-- [ ] Breakdown sorted correctly (highest first)
-- [ ] Formula displays correctly
-- [ ] PDF exports with proper formatting
-- [ ] Mobile layout responsive at all breakpoints
-- [ ] Keyboard navigation works
-- [ ] Focus states visible
-- [ ] Animations respect prefers-reduced-motion
-- [ ] Empty state displays when no items
-- [ ] Reset confirmation dialog works
-- [ ] Date inputs set today's date in range mode
+`window.ECPdf.exportPdf(report)` — takes a fully-assembled `report` object from app.js.  
+Uses html2canvas + jsPDF (loaded from CDN on demand). The report HTML is built by `buildReportHtml(r)` inside pdf.js.  
+Table has 5 columns: Device | Watt | Usage | kWh | % of total.  
+Note rows use `colspan="5"`.
 
 ---
 
-## Known Limitations & Future Enhancements
+## CSS Layout
 
-### Current Limitations
-1. **Image capture removed** - html2canvas not working reliably; kept for future implementation
-2. **No local storage** - Data doesn't persist between sessions (can be added)
-3. **No user accounts** - Single session only
-4. **No sharing** - Cannot generate shareable links
-5. **Static appliance list** - Cannot add to database (only custom items)
-6. **Single language** - English only
-
-### Potential Enhancements
-1. **Local storage:** Save calculations, allow "save as" scenarios
-2. **Image export:** Fix html2canvas integration for screenshot
-3. **Comparison mode:** Compare different scenarios side-by-side
-4. **History:** Track previous calculations
-5. **Tariff integration:** Add region-specific electricity rates
-6. **Advanced analytics:** Chart consumption over time
-7. **Sharing:** Generate shareable links with preset configurations
-8. **API:** Allow integration with other tools
-9. **Mobile app:** React Native/Flutter version
-10. **Offline support:** Service worker for true offline capability
+- `.wrap` — max-width 1400px, centered, padding
+- `.layout` — CSS grid, two columns on desktop (`col-input` + `col-result`)
+- `.panel` — card with white background, rounded corners
+- `.panel-head` — flex row: `.panel-head-left` (title + badge) + `.panel-actions` (buttons)
+- `.device-count-badge` — teal pill next to "Your devices"
+- `.item-card` — each device row; `.item-num` is serial number on left
+- `.hours-wrap` — flex container: hours input + unit `<select>`
+- `.it-hoursunit` — the unit selector inside hours-wrap
+- `.scenario-select` — ghost-button styled `<select>` (max-width 170px)
 
 ---
 
-## Performance Notes
+## Event Wiring (bind() in app.js)
 
-- **Single file design:** Minimal HTTP requests
-- **CSS variables:** Efficient styling
-- **Vanilla JS:** No framework overhead (~8KB vs 100KB+ for framework)
-- **Debounced search:** Real-time filtering without lag
-- **Lazy rendering:** Only renders visible items
+All item interactions use event delegation on `#itemsList`:
+- `.it-hours` → update hours, re-render + recalc
+- `.it-hoursunit` → update hoursUnit, `renderItems()` + `updateResults()` (label re-renders automatically)
+- `.it-watt` → update watts
+- `.it-daysmode` → update daysMode
+- `.it-days` → update custom days
+- `.it-note` → update note text
+- `.it-del` → remove item
+- `.it-split-toggle` → toggle split mode
 
-**Optimization opportunities:**
-- Minify CSS and JS for production (save ~35KB)
-- Compress appliance database (JSON endpoint instead of inline)
-- Service worker for offline support
-- Image optimization for marketing cards
-
----
-
-## Deployment Instructions
-
-1. **Save file** as `electrocalc_production.html`
-2. **Upload to web server** or host on static hosting (GitHub Pages, Netlify, Vercel)
-3. **No build step required** - works as-is
-4. **No database required** - fully client-side
-5. **No environment variables** - fully self-contained
-6. **CDN dependencies** - ensure CDN access (html2pdf.js, html2canvas.js)
-
-**Recommended Hosting:**
-- GitHub Pages (free, reliable)
-- Netlify (free tier, good performance)
-- Vercel (free tier, fast)
-- Traditional web hosting (any provider)
+`#scenarioSelect` change → load scenario (with confirm if items exist, reset select on cancel).  
+`#clearAllBtn` click → clear items only (title + billing period kept).  
+`#resetBtn` click → full state reset.
 
 ---
 
-## Support & Maintenance
+## Adding / Changing Features
 
-**No dependencies to maintain** - Uses CDN-hosted libraries.  
-**Annual review recommended** for:
-- Updated appliance wattage data
-- New appliances added to market
-- Browser compatibility checks
-- Security patch assessment
+### Add a new string
+1. Add to `STR.en` in i18n.js
+2. Add to `STR.bn` in i18n.js  
+3. Use `t("yourKey")` in app.js or `data-i18n="yourKey"` in index.html
 
----
+### Add a new scenario
+1. Push to `SCENARIOS` array in data.js
+2. Each item must include `hoursUnit` (default `"h/day"`)
+3. No other changes needed — `populateScenarioSelect()` picks it up automatically
 
-## Changelog
+### Add a new hours unit
+1. Add unit string to `STR.en` and `STR.bn` (e.g. `unitHBiweek`)
+2. Add label key for the field (e.g. `hoursLabelHBiweek`) to both languages
+3. Add conversion case to `hoursPerDay(it)` in app.js
+4. Add `{max, step}` case to `hoursUnitAttrs(unit)` in app.js
+5. Add `[val, t("...")]` entry to the unitOpts array in `itemCardHtml`
+6. Add to `hoursFieldLabel` ternary in `itemCardHtml`
 
-### v1.0.0 (Production Release)
-- Initial production-ready release
-- 150+ appliances database
-- Search functionality
-- Custom appliance support
-- Days and date range modes
-- Day overrides per appliance
-- Real-time calculations
-- PDF export
-- Responsive design
-- Marketing content
-- Help documentation
-- Professional UI/UX
+### Modify PDF layout
+Edit `buildReportHtml(r)` in pdf.js. The `r` object is assembled in `downloadPdf()` in app.js — add new fields there first.
 
 ---
 
-## Contact & Questions
+## What NOT To Do
 
-**Original Creator:** Ankur (Software Developer, Open-Source Maintainer)  
-**Handover Date:** June 2026  
-**Documentation Version:** 1.0
-
-For questions about implementation, refer to inline code comments and this documentation.
+- **No build system** — no npm, no bundler, no package.json
+- **No frameworks** — vanilla HTML/CSS/JS only
+- **Don't convert `hours` at rest** — always store raw user value; convert only in `hoursPerDay()`
+- **Don't modify calc.js** — it's pure math, treat as read-only
+- **Don't attach event listeners inside `itemCardHtml`** — use delegation on `#itemsList`
+- **Don't put child nodes inside `[data-i18n]` elements** — `applyStaticI18n()` overwrites innerHTML
+- **Don't skip Bengali strings** — every new string needs both `en` and `bn` entries
 
 ---
 
-## Quick Start for Claude Code
+## Local Preview
 
-1. **Load the file:** `electrocalc_production.html`
-2. **No build step needed** - fully functional as-is
-3. **Test the flow:**
-   - Search for "AC"
-   - Add custom item
-   - Toggle date range mode
-   - Check day override
-   - Verify calculations
-   - Download PDF
-4. **Deploy:** Upload HTML file to any web server
-5. **For enhancements:** Follow customization guide above
-
-The application is production-ready and requires no additional setup or configuration.
+```bash
+python3 -m http.server 8080
+# open http://localhost:8080/electricity-calculator/
+```

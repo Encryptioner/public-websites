@@ -160,26 +160,100 @@
     2500, 3000, 3730, 5000, 7500, 10000,
   ];
 
-  // A ready-made example home so users can "Load sample data" and learn by editing.
-  // segments: list of { hours, days } usage spans for that device.
-  // Demonstrates the variable-usage case (AC: 6h for 6 days, then 3h for 24 days).
-  // Flat-living example: fridge runs constantly (all 30 days); the AC has a
-  // variable pattern (guests for 6 days); everything else only runs the 20 days
-  // someone is actually home — set once via "days present" and reused per device.
-  const SAMPLE = {
-    title: "Sample Home — Monthly Usage",
-    periodDays: 30,
-    occupiedDays: 20,
-    items: [
-      { name: "Double-door Fridge / Freezer", watts: 200, hours: 24, daysMode: "all" },
-      { name: "Air Conditioner (1.5 ton)", watts: 1500, split: true, segments: [{ hours: 6, days: 6 }, { hours: 3, days: 14 }] },
-      { name: "Ceiling Fan", watts: 75, hours: 14, daysMode: "present" },
-      { name: "LED Tube Light", watts: 18, hours: 6, daysMode: "present" },
-      { name: "LED TV (43\")", watts: 80, hours: 4, daysMode: "present" },
-      { name: "Rice Cooker", watts: 700, hours: 1, daysMode: "present" },
-      { name: "Mobile Charger", watts: 10, hours: 3, daysMode: "present" },
-    ],
-  };
+  // Ready-made scenario presets. hoursUnit: "h/day" | "min/day" | "h/week" | "min/week".
+  const SCENARIOS = [
+    {
+      key: "flat2",
+      title: "Flat — 2 people",
+      periodDays: 30,
+      occupiedDays: 25,
+      items: [
+        { name: "Double-door Fridge / Freezer", watts: 200, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Air Conditioner (1.5 ton)", watts: 1500, hours: 8, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Ceiling Fan", watts: 75, hours: 12, hoursUnit: "h/day", daysMode: "present" },
+        { name: "LED Tube Light", watts: 18, hours: 5, hoursUnit: "h/day", daysMode: "present" },
+        { name: "LED TV (43\")", watts: 80, hours: 4, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Rice Cooker", watts: 700, hours: 30, hoursUnit: "min/day", daysMode: "present" },
+        { name: "Electric Kettle", watts: 1500, hours: 10, hoursUnit: "min/day", daysMode: "present", note: "~2 min/use × 5 uses/day" },
+        { name: "Mobile Charger", watts: 10, hours: 3, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Wi-Fi Router", watts: 10, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+      ],
+    },
+    {
+      key: "flat4",
+      title: "Flat — 4 people",
+      periodDays: 30,
+      occupiedDays: 28,
+      items: [
+        { name: "Double-door Fridge / Freezer", watts: 200, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Air Conditioner (1.5 ton)", watts: 1500, hours: 8, hoursUnit: "h/day", daysMode: "present", note: "Living room" },
+        { name: "Air Conditioner (1 ton)", watts: 1000, hours: 7, hoursUnit: "h/day", daysMode: "present", note: "Bedroom 2" },
+        { name: "Ceiling Fan", watts: 75, hours: 14, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Ceiling Fan (2)", watts: 75, hours: 10, hoursUnit: "h/day", daysMode: "present", note: "Bedroom" },
+        { name: "LED Tube Light", watts: 18, hours: 6, hoursUnit: "h/day", daysMode: "present" },
+        { name: "LED Tube Light (2)", watts: 18, hours: 3, hoursUnit: "h/day", daysMode: "present", note: "Kitchen & bathroom" },
+        { name: "LED TV (43\")", watts: 80, hours: 5, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Rice Cooker", watts: 700, hours: 45, hoursUnit: "min/day", daysMode: "present" },
+        { name: "Washing Machine", watts: 500, hours: 3, hoursUnit: "h/week", daysMode: "all" },
+        { name: "Mobile Charger", watts: 10, hours: 4, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Mobile Charger (2)", watts: 10, hours: 3, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Wi-Fi Router", watts: 10, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+      ],
+    },
+    {
+      key: "flatGuest",
+      title: "Flat — with guest (mid-period)",
+      periodDays: 30,
+      occupiedDays: 22,
+      items: [
+        { name: "Double-door Fridge / Freezer", watts: 200, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Air Conditioner (1.5 ton)", watts: 1500, hours: 8, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Air Conditioner (1 ton)", watts: 1000, hours: 7, hoursUnit: "h/day", daysMode: "custom", days: 7, note: "Guest room — 7-day visit" },
+        { name: "Ceiling Fan", watts: 75, hours: 12, hoursUnit: "h/day", daysMode: "present" },
+        { name: "LED Tube Light", watts: 18, hours: 5, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Rice Cooker", watts: 700, hours: 30, hoursUnit: "min/day", daysMode: "present" },
+        { name: "Electric Kettle", watts: 1500, hours: 15, hoursUnit: "min/day", daysMode: "custom", days: 7, note: "Guest use only" },
+        { name: "Mobile Charger", watts: 10, hours: 3, hoursUnit: "h/day", daysMode: "present" },
+        { name: "Wi-Fi Router", watts: 10, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+      ],
+    },
+    {
+      key: "building",
+      title: "Whole building (common areas)",
+      periodDays: 30,
+      occupiedDays: "",
+      items: [
+        { name: "Lift / Elevator (6-person)", watts: 5000, hours: 4, hoursUnit: "h/day", daysMode: "all", note: "Estimated avg daily run time" },
+        { name: "Corridor / Stairwell LED Light", watts: 18, hours: 12, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Corridor / Stairwell LED Light (2)", watts: 18, hours: 12, hoursUnit: "h/day", daysMode: "all", note: "Floor 3–6" },
+        { name: "Lobby / Reception Light", watts: 50, hours: 14, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Water Motor (3 HP)", watts: 2238, hours: 90, hoursUnit: "min/day", daysMode: "all", note: "3× 30 min rooftop fill/day" },
+        { name: "CCTV / NVR System (8 cameras)", watts: 120, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Electric Gate Motor", watts: 200, hours: 1, hoursUnit: "h/day", daysMode: "all", note: "Opening/closing cycles" },
+        { name: "Building WiFi Access Point", watts: 15, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Building Intercom System", watts: 30, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Fire Alarm System Panel", watts: 50, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+      ],
+    },
+    {
+      key: "office",
+      title: "Office / workspace (26 working days)",
+      periodDays: 26,
+      occupiedDays: "",
+      items: [
+        { name: "Air Conditioner (1.5 ton)", watts: 1500, hours: 8, hoursUnit: "h/day", daysMode: "all", note: "Main hall" },
+        { name: "Air Conditioner (1 ton)", watts: 1000, hours: 6, hoursUnit: "h/day", daysMode: "all", note: "Manager cabin" },
+        { name: "LED Tube Light", watts: 18, hours: 9, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Desktop Computer", watts: 200, hours: 8, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Desktop Computer (2)", watts: 200, hours: 8, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Monitor", watts: 30, hours: 8, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Laptop", watts: 65, hours: 8, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Wi-Fi Router", watts: 10, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "Printer", watts: 50, hours: 30, hoursUnit: "min/day", daysMode: "all" },
+        { name: "Electric Kettle", watts: 1500, hours: 10, hoursUnit: "min/day", daysMode: "all", note: "~2 uses/day staff tea" },
+      ],
+    },
+  ];
 
-  window.ECData = { CATEGORIES, DEVICES, WATT_PRESETS, SAMPLE };
+  window.ECData = { CATEGORIES, DEVICES, WATT_PRESETS, SCENARIOS };
 })();

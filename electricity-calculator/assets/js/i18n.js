@@ -77,6 +77,8 @@
 
       // Actions
       loadSample: "Load sample",
+      loadScenario: "Load scenario…",
+      clearAll: "Clear devices",
       reset: "Reset",
       save: "Save",
       downloadPdf: "Download PDF",
@@ -86,6 +88,7 @@
       load: "Load",
       delete: "Delete",
       confirmReset: "Clear all devices and start over?",
+      confirmClearDevices: "Remove all devices? Billing period and title are kept.",
       confirmDelete: "Delete this saved calculation?",
       savedAt: "Saved {when}",
 
@@ -126,6 +129,15 @@
         },
       ],
 
+      // Hours unit selector
+      unitHDay: "h/day",
+      unitMinDay: "min/day",
+      unitHWeek: "h/week",
+      unitMinWeek: "min/week",
+      hoursLabelMinDay: "Minutes per day",
+      hoursLabelHWeek: "Hours per week",
+      hoursLabelMinWeek: "Minutes per week",
+
       // Note per device
       addNote: "+ Add note",
       hideNote: "Hide note",
@@ -143,6 +155,7 @@
       pdfWatts: "Watt",
       pdfUsage: "Usage",
       pdfKwh: "Units (kWh)",
+      pdfPercent: "% of total",
       pdfTotal: "Total",
       pdfGenerated: "Generated",
       pdfFooter: "Made with Electricity Calculator",
@@ -212,6 +225,8 @@
       ofTotal: "মোটের",
 
       loadSample: "নমুনা দেখুন",
+      loadScenario: "পরিস্থিতি লোড করুন…",
+      clearAll: "ডিভাইস মুছুন",
       reset: "রিসেট",
       save: "সংরক্ষণ",
       downloadPdf: "পিডিএফ ডাউনলোড",
@@ -221,6 +236,7 @@
       load: "লোড করুন",
       delete: "মুছুন",
       confirmReset: "সব ডিভাইস মুছে নতুন করে শুরু করবেন?",
+      confirmClearDevices: "সব ডিভাইস মুছবেন? বিলিং সময়কাল ও শিরোনাম থাকবে।",
       confirmDelete: "এই সংরক্ষিত হিসাবটি মুছবেন?",
       savedAt: "{when} সংরক্ষিত",
 
@@ -260,6 +276,15 @@
         },
       ],
 
+      // Hours unit selector
+      unitHDay: "ঘ/দিন",
+      unitMinDay: "মিনিট/দিন",
+      unitHWeek: "ঘ/সপ্তাহ",
+      unitMinWeek: "মিনিট/সপ্তাহ",
+      hoursLabelMinDay: "দৈনিক ব্যবহার (মিনিট)",
+      hoursLabelHWeek: "সাপ্তাহিক ব্যবহার (ঘণ্টা)",
+      hoursLabelMinWeek: "সাপ্তাহিক ব্যবহার (মিনিট)",
+
       // Note per device
       addNote: "+ নোট যোগ করুন",
       hideNote: "নোট লুকান",
@@ -277,6 +302,7 @@
       pdfWatts: "ওয়াট",
       pdfUsage: "ব্যবহার",
       pdfKwh: "ইউনিট (kWh)",
+      pdfPercent: "% মোটের",
       pdfTotal: "মোট",
       pdfGenerated: "তৈরি",
       pdfFooter: "Electricity Calculator দিয়ে তৈরি",

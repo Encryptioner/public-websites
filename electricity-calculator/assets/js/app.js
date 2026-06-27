@@ -12,7 +12,7 @@
 (function () {
   "use strict";
 
-  const { CATEGORIES, DEVICES, WATT_PRESETS, SAMPLE } = window.ECData;
+  const { CATEGORIES, DEVICES, WATT_PRESETS, SCENARIOS } = window.ECData;
   const i18n = window.ECi18n;
   const calc = window.ECCalc;
   const store = window.ECStore;
@@ -45,6 +45,7 @@
       name: name,
       watts: calc.num(watts),
       hours: calc.num(hours),
+      hoursUnit: "h/day",
       days: effectivePeriodDays(),
       daysMode: "all",
       split: false,
@@ -52,6 +53,24 @@
       note: "",
       noteOpen: false,
     };
+  }
+
+  // Normalize any hoursUnit to hours-per-day for calc.
+  function hoursPerDay(it) {
+    const h = it.hours;
+    const u = it.hoursUnit || "h/day";
+    if (u === "min/day") return h / 60;
+    if (u === "h/week") return h / 7;
+    if (u === "min/week") return h / (60 * 7);
+    return h;
+  }
+
+  // Returns max and step attrs for the hours input based on unit.
+  function hoursUnitAttrs(unit) {
+    if (unit === "min/day") return { max: 1440, step: 1 };
+    if (unit === "h/week") return { max: 168, step: 0.5 };
+    if (unit === "min/week") return { max: 10080, step: 1 };
+    return { max: 24, step: 0.5 };
   }
 
   // Returns "Name (2)", "Name (3)" etc. for duplicate device items.
@@ -167,6 +186,7 @@
   }
 
   // Build a calc-ready item (fills .segments from the model).
+  // hoursPerDay() converts any unit to h/day before the calc engine sees it.
   function effItem(it) {
     if (it.split) {
       return {
@@ -180,7 +200,7 @@
       name: it.name,
       watts: it.watts,
       note: it.note || "",
-      segments: [{ hours: it.hours, days: itemDays(it) }],
+      segments: [{ hours: hoursPerDay(it), days: itemDays(it) }],
     };
   }
   function effItems() {
@@ -190,6 +210,7 @@
   // ---------- rendering ----------
   function render() {
     applyStaticI18n();
+    populateScenarioSelect();
     renderItems();
     updateResults();
     renderHistory();
@@ -227,16 +248,20 @@
   function renderItems() {
     const list = $("itemsList");
     const empty = $("emptyState");
+    const badge = $("deviceCount");
     if (!state.items.length) {
       list.innerHTML = "";
       empty.hidden = false;
+      badge.hidden = true;
       return;
     }
     empty.hidden = true;
-    list.innerHTML = state.items.map(itemCardHtml).join("");
+    badge.textContent = state.items.length;
+    badge.hidden = false;
+    list.innerHTML = state.items.map((it, idx) => itemCardHtml(it, idx)).join("");
   }
 
-  function itemCardHtml(it) {
+  function itemCardHtml(it, index) {
     const w = t("wattShort");
     let segHtml = "";
     if (it.split) {
@@ -274,6 +299,20 @@
     } else {
       const custom = it.daysMode === "custom";
       const shownDays = itemDays(it);
+      const hoursUnit = it.hoursUnit || "h/day";
+      const unitA = hoursUnitAttrs(hoursUnit);
+      const hoursFieldLabel = hoursUnit === "min/day" ? t("hoursLabelMinDay")
+        : hoursUnit === "h/week" ? t("hoursLabelHWeek")
+        : hoursUnit === "min/week" ? t("hoursLabelMinWeek")
+        : t("hoursLabel");
+      const unitOpts = [
+        ["h/day", t("unitHDay")],
+        ["min/day", t("unitMinDay")],
+        ["h/week", t("unitHWeek")],
+        ["min/week", t("unitMinWeek")],
+      ].map(([val, label]) =>
+        '<option value="' + val + '"' + (hoursUnit === val ? " selected" : "") + ">" + esc(label) + "</option>"
+      ).join("");
       const opt = (val, label) =>
         '<option value="' + val + '"' + (it.daysMode === val ? " selected" : "") + ">" + esc(label) + "</option>";
       const daysSelect =
@@ -285,8 +324,11 @@
       bodyHtml =
         '<div class="item-fields three">' +
         wattField +
-        '<label class="field"><span class="field-label">' + esc(t("hoursLabel")) + "</span>" +
-        '<input type="number" class="text-input it-hours" min="0" max="24" step="0.5" value="' + esc(it.hours) + '" inputmode="decimal"></label>' +
+        '<label class="field"><span class="field-label">' + esc(hoursFieldLabel) + "</span>" +
+        '<div class="hours-wrap">' +
+        '<input type="number" class="text-input it-hours" min="0" max="' + unitA.max + '" step="' + unitA.step + '" value="' + esc(it.hours) + '" inputmode="decimal">' +
+        '<select class="text-input it-hoursunit">' + unitOpts + "</select>" +
+        "</div></label>" +
         '<label class="field"><span class="field-label">' + esc(t("daysUsedLabel")) + "</span>" +
         daysSelect + "</label>" +
         "</div>" +
@@ -306,6 +348,7 @@
     return (
       '<article class="item" data-id="' + it.id + '">' +
       '<div class="item-top">' +
+      '<span class="item-num">' + esc(String(index + 1) + ".") + "</span>" +
       '<div class="item-name" title="' + esc(displayName(it.name)) + '">' + esc(displayName(it.name)) + "</div>" +
       '<div class="item-tools">' +
       '<button type="button" class="icon-btn it-dup" title="' + esc(t("duplicate")) + '" aria-label="' + esc(t("duplicate")) + '">⧉</button>' +
@@ -384,21 +427,23 @@
 
     const head =
       "<thead><tr><th>" + esc(t("pdfDevice")) + "</th><th>" + esc(t("pdfWatts")) +
-      "</th><th>" + esc(t("pdfUsage")) + "</th><th>" + esc(t("pdfKwh")) + "</th></tr></thead>";
+      "</th><th>" + esc(t("pdfUsage")) + "</th><th>" + esc(t("pdfKwh")) + "</th><th>" + esc(t("pdfPercent")) + "</th></tr></thead>";
+    // Build noteMap once to avoid repeated linear search and handle duplicate names.
+    const noteMap = {};
+    state.items.forEach((it) => { if (it.note && !noteMap[it.name]) noteMap[it.name] = it.note; });
     const body = rows
       .map((r) => {
-        // find note from state items (match by name in order)
-        const stateItem = state.items.find((it) => it.name === r.name && it.note);
-        const noteRow = stateItem
-          ? '<tr class="summary-note-row"><td colspan="4">' + esc(stateItem.note) + "</td></tr>"
+        const note = noteMap[r.name];
+        const noteRow = note
+          ? '<tr class="summary-note-row"><td colspan="5">' + esc(note) + "</td></tr>"
           : "";
         return "<tr><td>" + esc(displayName(r.name)) + "</td><td>" + r.watts +
-          "</td><td>" + calc.round(r.hours, 1) + " h</td><td><b>" + calc.round(r.kwh, 2) + "</b></td></tr>" + noteRow;
+          "</td><td>" + calc.round(r.hours, 1) + " h</td><td><b>" + calc.round(r.kwh, 2) + "</b></td><td>" + calc.round(r.percent, 0) + "%</td></tr>" + noteRow;
       })
       .join("");
     const foot =
       '<tfoot><tr><td colspan="3">' + esc(t("pdfTotal")) + "</td><td><b>" +
-      calc.round(total, 2) + "</b></td></tr></tfoot>";
+      calc.round(total, 2) + "</b></td><td>100%</td></tr></tfoot>";
     wrap.innerHTML =
       '<div class="summary-head"><h3 class="sub-title">' + esc(t("summaryHeading")) +
       '</h3><div class="summary-head-right"><span class="muted summary-hint">' + esc(t("summaryHint")) + '</span>' +
@@ -488,6 +533,7 @@
         name: it.name,
         watts: it.watts,
         hours: it.hours,
+        hoursUnit: it.hoursUnit || "h/day",
         days: it.days,
         daysMode: it.daysMode,
         split: it.split,
@@ -528,6 +574,7 @@
         name: it.name,
         watts: calc.num(it.watts),
         hours: calc.num(hours),
+        hoursUnit: it.hoursUnit || "h/day",
         days: calc.num(days),
         daysMode: daysMode,
         split: split,
@@ -539,8 +586,21 @@
     return s;
   }
 
-  function loadSample() {
-    state = adoptState(SAMPLE);
+  function populateScenarioSelect() {
+    const sel = $("scenarioSelect");
+    sel.innerHTML = '<option value="">' + esc(t("loadScenario")) + "</option>";
+    SCENARIOS.forEach((s) => {
+      const opt = document.createElement("option");
+      opt.value = s.key;
+      opt.textContent = s.title;
+      sel.appendChild(opt);
+    });
+  }
+
+  function loadScenario(key) {
+    const scenario = SCENARIOS.find((s) => s.key === key);
+    if (!scenario) return;
+    state = adoptState(scenario);
     render();
   }
 
@@ -589,15 +649,18 @@
       pad(now.getMinutes());
 
     const occupiedDays = calc.num(state.occupiedDays);
-    const pdfRows = items
-      .map((it) => ({
-        name: displayName(it.name),
-        note: it.note || "",
-        watts: it.watts + " " + t("wattShort"),
-        usage: calc.round(calc.deviceHours(it), 1) + " h",
-        kwh: calc.round(calc.deviceKwh(it), 2),
-      }))
-      .sort((a, b) => parseFloat(b.kwh) - parseFloat(a.kwh));
+    // Use breakdown() so percent is available; already sorted by consumption desc.
+    const bdRows = calc.breakdown(items);
+    const noteMap = {};
+    items.forEach((it) => { if (it.note && !noteMap[it.name]) noteMap[it.name] = it.note; });
+    const pdfRows = bdRows.map((r) => ({
+      name: displayName(r.name),
+      note: noteMap[r.name] || "",
+      watts: r.watts + " " + t("wattShort"),
+      usage: calc.round(r.hours, 1) + " h",
+      kwh: calc.round(r.kwh, 2),
+      percent: calc.round(r.percent, 0),
+    }));
 
     const report = {
       appName: t("appName"),
@@ -618,6 +681,7 @@
         watts: t("pdfWatts"),
         usage: t("pdfUsage"),
         kwh: t("pdfKwh"),
+        percent: t("pdfPercent"),
       },
       rows: pdfRows,
       totalLabel: t("pdfTotal"),
@@ -710,7 +774,22 @@
     $("itemsList").addEventListener("click", onItemClick);
 
     // toolbar
-    $("sampleBtn").addEventListener("click", loadSample);
+    $("scenarioSelect").addEventListener("change", (e) => {
+      const key = e.target.value;
+      if (!key) return;
+      if (state.items.length && !confirm(t("confirmReset"))) {
+        e.target.value = "";
+        return;
+      }
+      loadScenario(key);
+    });
+    $("clearAllBtn").addEventListener("click", () => {
+      if (!state.items.length) return;
+      if (!confirm(t("confirmClearDevices"))) return;
+      state.items = [];
+      renderItems();
+      updateResults();
+    });
     $("resetBtn").addEventListener("click", () => {
       if (state.items.length && !confirm(t("confirmReset"))) return;
       state = blankState();
@@ -815,6 +894,10 @@
         it.days = itemDays(it) || effectivePeriodDays();
       }
       renderItems(); // show/hide the custom days field + resolved value
+      updateResults();
+    } else if (e.target.classList.contains("it-hoursunit")) {
+      it.hoursUnit = e.target.value;
+      renderItems(); // update max/step attrs on the number input
       updateResults();
     }
   }

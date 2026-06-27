@@ -108,9 +108,13 @@
         <!-- Items -->
         <div class="panel">
           <div class="panel-head">
-            <h2 class="panel-title" data-i18n="itemsHeading"></h2>
+            <div class="panel-head-left">
+              <h2 class="panel-title" data-i18n="itemsHeading"></h2>
+              <span id="deviceCount" class="device-count-badge" hidden></span>
+            </div>
             <div class="panel-actions">
-              <button type="button" id="sampleBtn" class="btn btn-ghost btn-sm" data-i18n="loadSample"></button>
+              <select id="scenarioSelect" class="btn btn-ghost btn-sm scenario-select"></select>
+              <button type="button" id="clearAllBtn" class="btn btn-ghost btn-sm" data-i18n="clearAll"></button>
               <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" data-i18n="reset"></button>
             </div>
           </div>
