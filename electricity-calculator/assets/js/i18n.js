@@ -126,9 +126,19 @@
         },
       ],
 
+      // Note per device
+      addNote: "+ Add note",
+      hideNote: "Hide note",
+      notePlaceholder: "Optional note about this device…",
+      noteLabel: "Note",
+      occupiedExceedsError: "Cannot exceed total days ({n})",
+
       // PDF
       pdfTitle: "Electricity Usage Report",
       pdfPeriod: "Billing period",
+      pdfPeriodRange: "Billing period ({start} – {end})",
+      pdfPresentDays: "Days present",
+      pdfNote: "Note",
       pdfDevice: "Device",
       pdfWatts: "Watt",
       pdfUsage: "Usage",
@@ -250,8 +260,19 @@
         },
       ],
 
+      // Note per device
+      addNote: "+ নোট যোগ করুন",
+      hideNote: "নোট লুকান",
+      notePlaceholder: "এই ডিভাইস সম্পর্কে ঐচ্ছিক নোট…",
+      noteLabel: "নোট",
+      occupiedExceedsError: "মোট দিনের ({n}) বেশি হতে পারবে না",
+
+      // PDF
       pdfTitle: "বিদ্যুৎ খরচের রিপোর্ট",
       pdfPeriod: "বিলিং সময়কাল",
+      pdfPeriodRange: "বিলিং সময়কাল ({start} – {end})",
+      pdfPresentDays: "উপস্থিত দিন",
+      pdfNote: "নোট",
       pdfDevice: "ডিভাইস",
       pdfWatts: "ওয়াট",
       pdfUsage: "ব্যবহার",
@@ -274,6 +295,7 @@
     personalCare: "Personal Care",
     charging: "Charging & Computing",
     water: "Water & Pump",
+    building: "Building & Common Areas",
     other: "Other",
   };
   STR.bn.categories = {
@@ -286,6 +308,7 @@
     personalCare: "ব্যক্তিগত যত্ন",
     charging: "চার্জিং ও কম্পিউটিং",
     water: "পানি ও পাম্প",
+    building: "বিল্ডিং ও কমন এরিয়া",
     other: "অন্যান্য",
   };
 

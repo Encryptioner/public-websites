@@ -21,6 +21,7 @@
     "personalCare",
     "charging",
     "water",
+    "building",
     "other",
   ];
 
@@ -39,6 +40,11 @@
     { cat: "kitchen", name: "Coffee Maker", bn: "কফি মেকার", watts: 800 },
     { cat: "kitchen", name: "Dishwasher", bn: "ডিশওয়াশার", watts: 1500 },
     { cat: "kitchen", name: "Water Purifier", bn: "ওয়াটার পিউরিফায়ার", watts: 50 },
+    { cat: "kitchen", name: "RO Water Purifier / Filter", bn: "আরও ওয়াটার পিউরিফায়ার / ফিল্টার", watts: 75 },
+    { cat: "kitchen", name: "Electric Water Dispenser (Hot & Cold)", bn: "ইলেকট্রিক ওয়াটার ডিসপেন্সার (গরম ও ঠান্ডা)", watts: 500 },
+    { cat: "kitchen", name: "Electric Pressure Cooker", bn: "ইলেকট্রিক প্রেশার কুকার", watts: 1000 },
+    { cat: "kitchen", name: "Deep Fryer", bn: "ডিপ ফ্রায়ার", watts: 2000 },
+    { cat: "kitchen", name: "Sandwich Maker / Panini Press", bn: "স্যান্ডউইচ মেকার / প্যানিনি প্রেস", watts: 750 },
 
     // Cooling & Heating
     { cat: "cooling", name: "Air Conditioner (1 ton)", bn: "এয়ার কন্ডিশনার (১ টন)", watts: 1000 },
@@ -102,21 +108,56 @@
     { cat: "water", name: "Water Pump (0.5 HP)", bn: "ওয়াটার পাম্প (০.৫ এইচপি)", watts: 375 },
     { cat: "water", name: "Water Pump (1 HP)", bn: "ওয়াটার পাম্প (১ এইচপি)", watts: 750 },
     { cat: "water", name: "Submersible Pump", bn: "সাবমার্সিবল পাম্প", watts: 1100 },
+    { cat: "water", name: "Instant Water Heater (Shower)", bn: "ইনস্ট্যান্ট ওয়াটার হিটার (শাওয়ার)", watts: 3000 },
     { cat: "water", name: "Aquarium Pump", bn: "অ্যাকোয়ারিয়াম পাম্প", watts: 20 },
 
+    // Building & Common Areas
+    { cat: "building", name: "Lift / Elevator (6-person)", bn: "লিফট / এলিভেটর (৬ জন)", watts: 5000 },
+    { cat: "building", name: "Lift / Elevator (8-person)", bn: "লিফট / এলিভেটর (৮ জন)", watts: 7500 },
+    { cat: "building", name: "Lift / Elevator (10-person / commercial)", bn: "লিফট / এলিভেটর (১০ জন / বাণিজ্যিক)", watts: 10000 },
+    { cat: "building", name: "Corridor / Stairwell LED Light", bn: "করিডোর / সিঁড়ির এলইডি লাইট", watts: 18 },
+    { cat: "building", name: "Lobby / Reception Light", bn: "লবি / রিসেপশন লাইট", watts: 50 },
+    { cat: "building", name: "Common Area Ceiling Fan", bn: "কমন এরিয়া সিলিং ফ্যান", watts: 75 },
+    { cat: "building", name: "Common Area Exhaust Fan", bn: "কমন এরিয়া এক্সহস্ট ফ্যান", watts: 40 },
+    { cat: "building", name: "Water Motor (2 HP)", bn: "ওয়াটার মোটর (২ এইচপি)", watts: 1500 },
+    { cat: "building", name: "Water Motor (3 HP)", bn: "ওয়াটার মোটর (৩ এইচপি)", watts: 2238 },
+    { cat: "building", name: "Water Motor (5 HP)", bn: "ওয়াটার মোটর (৫ এইচপি)", watts: 3730 },
+    { cat: "building", name: "Rooftop / Overhead Tank Pump", bn: "ছাদের ট্যাংকের পাম্প", watts: 750 },
+    { cat: "building", name: "CCTV / NVR System (4 cameras)", bn: "সিসিটিভি / এনভিআর সিস্টেম (৪ ক্যামেরা)", watts: 80 },
+    { cat: "building", name: "CCTV / NVR System (8 cameras)", bn: "সিসিটিভি / এনভিআর সিস্টেম (৮ ক্যামেরা)", watts: 120 },
+    { cat: "building", name: "Electric Gate Motor", bn: "ইলেকট্রিক গেট মোটর", watts: 200 },
+    { cat: "building", name: "Building Intercom System", bn: "বিল্ডিং ইন্টারকম সিস্টেম", watts: 30 },
+    { cat: "building", name: "Generator / DG Set (standby panel)", bn: "জেনারেটর / ডিজি সেট (স্ট্যান্ডবাই প্যানেল)", watts: 500 },
+    { cat: "building", name: "Common Area AC (2 ton)", bn: "কমন এরিয়া এসি (২ টন)", watts: 2000 },
+    { cat: "building", name: "Fire Alarm System Panel", bn: "ফায়ার অ্যালার্ম সিস্টেম প্যানেল", watts: 50 },
+    { cat: "building", name: "Electric Door Lock / Access Control", bn: "ইলেকট্রিক ডোর লক / অ্যাক্সেস কন্ট্রোল", watts: 20 },
+    { cat: "building", name: "Building WiFi Access Point", bn: "বিল্ডিং ওয়াই-ফাই অ্যাক্সেস পয়েন্ট", watts: 15 },
+    { cat: "building", name: "Network Switch / LAN Hub", bn: "নেটওয়ার্ক সুইচ / ল্যান হাব", watts: 25 },
+    { cat: "building", name: "Building PA / Announcement System", bn: "বিল্ডিং পিএ / অ্যানাউন্সমেন্ট সিস্টেম", watts: 50 },
+    { cat: "building", name: "Automatic Voltage Regulator (AVR / Stabilizer)", bn: "অটোমেটিক ভোল্টেজ রেগুলেটর (এভিআর / স্ট্যাবিলাইজার)", watts: 30 },
+    { cat: "building", name: "IPS / Inverter System (standby draw)", bn: "আইপিএস / ইনভার্টার সিস্টেম (স্ট্যান্ডবাই)", watts: 100 },
+    { cat: "building", name: "Solar Charge Controller", bn: "সোলার চার্জ কন্ট্রোলার", watts: 10 },
+
     // Other
-    { cat: "other", name: "CCTV Camera", bn: "সিসিটিভি ক্যামেরা", watts: 15 },
+    { cat: "other", name: "CCTV Camera (single)", bn: "সিসিটিভি ক্যামেরা (একটি)", watts: 15 },
+    { cat: "other", name: "IP Camera / Smart Camera", bn: "আইপি ক্যামেরা / স্মার্ট ক্যামেরা", watts: 8 },
+    { cat: "other", name: "DVR / NVR Recorder (standalone)", bn: "ডিভিআর / এনভিআর রেকর্ডার (স্বতন্ত্র)", watts: 25 },
+    { cat: "other", name: "Video Doorbell", bn: "ভিডিও ডোরবেল", watts: 5 },
+    { cat: "other", name: "Home Security Alarm Panel", bn: "হোম সিকিউরিটি অ্যালার্ম প্যানেল", watts: 10 },
+    { cat: "other", name: "Smart Home Hub / Controller", bn: "স্মার্ট হোম হাব / কন্ট্রোলার", watts: 8 },
     { cat: "other", name: "Sewing Machine", bn: "সেলাই মেশিন", watts: 100 },
     { cat: "other", name: "Vacuum Cleaner", bn: "ভ্যাকুয়াম ক্লিনার", watts: 1400 },
     { cat: "other", name: "Air Purifier", bn: "এয়ার পিউরিফায়ার", watts: 50 },
-    { cat: "other", name: "Inverter / UPS", bn: "ইনভার্টার / ইউপিএস", watts: 50 },
+    { cat: "other", name: "Inverter / UPS (home)", bn: "ইনভার্টার / ইউপিএস (হোম)", watts: 50 },
     { cat: "other", name: "Mosquito Killer", bn: "মশা মারার যন্ত্র", watts: 10 },
+    { cat: "other", name: "Electric Mosquito Bat (charging)", bn: "ইলেকট্রিক মশার ব্যাট (চার্জিং)", watts: 5 },
   ];
 
   // Common wattage presets for the Watt combobox (ascending). Users can add any value.
   const WATT_PRESETS = [
-    5, 9, 10, 15, 18, 20, 25, 30, 40, 50, 60, 65, 75, 80, 100, 120, 150, 200,
-    250, 300, 375, 400, 500, 700, 750, 800, 1000, 1100, 1200, 1500, 2000, 2500,
+    5, 8, 9, 10, 15, 18, 20, 25, 30, 40, 50, 60, 65, 75, 80, 100, 120, 150, 200,
+    250, 300, 375, 400, 500, 700, 750, 800, 1000, 1100, 1200, 1500, 2000, 2238,
+    2500, 3000, 3730, 5000, 7500, 10000,
   ];
 
   // A ready-made example home so users can "Load sample data" and learn by editing.

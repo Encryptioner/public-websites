@@ -49,7 +49,23 @@
       daysMode: "all",
       split: false,
       segments: [],
+      note: "",
+      noteOpen: false,
     };
+  }
+
+  // Returns "Name (2)", "Name (3)" etc. for duplicate device items.
+  function nextCopyName(name) {
+    const base = name.replace(/ \(\d+\)$/, "");
+    let max = 0;
+    state.items.forEach((it) => {
+      const itBase = it.name.replace(/ \(\d+\)$/, "");
+      if (itBase === base) {
+        const m = it.name.match(/ \((\d+)\)$/);
+        max = Math.max(max, m ? parseInt(m[1], 10) : 1);
+      }
+    });
+    return base + " (" + (max + 1) + ")";
   }
 
   // ---------- i18n plumbing ----------
@@ -156,12 +172,14 @@
       return {
         name: it.name,
         watts: it.watts,
+        note: it.note || "",
         segments: it.segments.length ? it.segments : [{ hours: 0, days: 0 }],
       };
     }
     return {
       name: it.name,
       watts: it.watts,
+      note: it.note || "",
       segments: [{ hours: it.hours, days: itemDays(it) }],
     };
   }
@@ -278,6 +296,13 @@
           : '<div class="days-resolved">' + esc(t("daysUsedLabel")) + ": <b>" + shownDays + " " + esc(t("days")) + "</b></div>");
     }
 
+    const noteHtml = it.noteOpen
+      ? '<div class="it-note-wrap">' +
+        '<textarea class="it-note text-input" rows="2" placeholder="' + esc(t("notePlaceholder")) + '">' + esc(it.note) + "</textarea>" +
+        '<button type="button" class="it-note-hide btn-link">' + esc(t("hideNote")) + "</button>" +
+        "</div>"
+      : '<button type="button" class="it-note-add btn-link">' + esc(t("addNote")) + "</button>";
+
     return (
       '<article class="item" data-id="' + it.id + '">' +
       '<div class="item-top">' +
@@ -288,6 +313,7 @@
       "</div></div>" +
       bodyHtml +
       '<label class="chk-row split-toggle"><input type="checkbox" class="it-split"' + (it.split ? " checked" : "") + "> <span>" + esc(t("segmentsToggle")) + "</span></label>" +
+      '<div class="it-note-row">' + noteHtml + "</div>" +
       "</article>"
     );
   }
@@ -342,22 +368,42 @@
       return;
     }
     wrap.hidden = false;
+
+    // Period meta
+    const periodDays = effectivePeriodDays();
+    const occupiedDays = calc.num(state.occupiedDays);
+    let periodMeta = "";
+    if (state.mode === "range" && state.startDate && state.endDate) {
+      periodMeta += '<span class="summary-meta-item"><b>' + esc(t("startLabel")) + ":</b> " + esc(state.startDate) + "</span>" +
+        '<span class="summary-meta-item"><b>' + esc(t("endLabel")) + ":</b> " + esc(state.endDate) + "</span>";
+    }
+    periodMeta += '<span class="summary-meta-item"><b>' + esc(t("daysLabel")) + ":</b> " + periodDays + " " + esc(t("days")) + "</span>";
+    if (occupiedDays > 0 && occupiedDays < periodDays) {
+      periodMeta += '<span class="summary-meta-item"><b>' + esc(t("pdfPresentDays")) + ":</b> " + occupiedDays + " " + esc(t("days")) + "</span>";
+    }
+
     const head =
       "<thead><tr><th>" + esc(t("pdfDevice")) + "</th><th>" + esc(t("pdfWatts")) +
       "</th><th>" + esc(t("pdfUsage")) + "</th><th>" + esc(t("pdfKwh")) + "</th></tr></thead>";
     const body = rows
-      .map(
-        (r) =>
-          "<tr><td>" + esc(displayName(r.name)) + "</td><td>" + r.watts +
-          "</td><td>" + calc.round(r.hours, 1) + " h</td><td><b>" + calc.round(r.kwh, 2) + "</b></td></tr>"
-      )
+      .map((r) => {
+        // find note from state items (match by name in order)
+        const stateItem = state.items.find((it) => it.name === r.name && it.note);
+        const noteRow = stateItem
+          ? '<tr class="summary-note-row"><td colspan="4">' + esc(stateItem.note) + "</td></tr>"
+          : "";
+        return "<tr><td>" + esc(displayName(r.name)) + "</td><td>" + r.watts +
+          "</td><td>" + calc.round(r.hours, 1) + " h</td><td><b>" + calc.round(r.kwh, 2) + "</b></td></tr>" + noteRow;
+      })
       .join("");
     const foot =
       '<tfoot><tr><td colspan="3">' + esc(t("pdfTotal")) + "</td><td><b>" +
       calc.round(total, 2) + "</b></td></tr></tfoot>";
     wrap.innerHTML =
       '<div class="summary-head"><h3 class="sub-title">' + esc(t("summaryHeading")) +
-      '</h3><span class="muted summary-hint">' + esc(t("summaryHint")) + "</span></div>" +
+      '</h3><div class="summary-head-right"><span class="muted summary-hint">' + esc(t("summaryHint")) + '</span>' +
+      '<button type="button" class="btn btn-primary btn-sm summary-pdf-btn">' + esc(t("downloadPdf")) + "</button></div></div>" +
+      '<div class="summary-meta">' + periodMeta + "</div>" +
       '<div class="table-scroll"><table class="summary-table">' + head + "<tbody>" + body + "</tbody>" + foot + "</table></div>";
   }
 
@@ -446,6 +492,7 @@
         daysMode: it.daysMode,
         split: it.split,
         segments: it.segments,
+        note: it.note || "",
       })),
     };
   }
@@ -485,6 +532,8 @@
         daysMode: daysMode,
         split: split,
         segments: split ? segs.map((x) => ({ hours: calc.num(x.hours), days: calc.num(x.days) })) : [],
+        note: it.note || "",
+        noteOpen: !!(it.note),
       };
     });
     return s;
@@ -528,7 +577,6 @@
   // ---------- PDF ----------
   async function downloadPdf() {
     const items = effItems();
-    const rows = calc.breakdown(items);
     const total = calc.totalKwh(items);
     const periodDays = effectivePeriodDays();
     const now = new Date();
@@ -540,26 +588,38 @@
       pad(now.getHours()) +
       pad(now.getMinutes());
 
+    const occupiedDays = calc.num(state.occupiedDays);
+    const pdfRows = items
+      .map((it) => ({
+        name: displayName(it.name),
+        note: it.note || "",
+        watts: it.watts + " " + t("wattShort"),
+        usage: calc.round(calc.deviceHours(it), 1) + " h",
+        kwh: calc.round(calc.deviceKwh(it), 2),
+      }))
+      .sort((a, b) => parseFloat(b.kwh) - parseFloat(a.kwh));
+
     const report = {
       appName: t("appName"),
       subtitle: t("tagline"),
       title: ($("titleInput").value.trim() || t("appName")),
       generatedLabel: t("pdfGenerated"),
       generatedAt: now.toLocaleString(),
-      periodLabel: t("pdfPeriod"),
+      // Period — show date range when in range mode
+      periodLabel: state.mode === "range" && state.startDate && state.endDate
+        ? i18n.fmt(t("pdfPeriodRange"), { start: state.startDate, end: state.endDate })
+        : t("pdfPeriod"),
       periodText: periodDays + " " + t("days"),
+      presentDays: occupiedDays > 0 && occupiedDays < periodDays ? occupiedDays : 0,
+      presentDaysLabel: t("pdfPresentDays"),
+      daysUnit: t("days"),
       cols: {
         device: t("pdfDevice"),
         watts: t("pdfWatts"),
         usage: t("pdfUsage"),
         kwh: t("pdfKwh"),
       },
-      rows: rows.map((r) => ({
-        name: displayName(r.name),
-        watts: r.watts + " " + t("wattShort"),
-        usage: calc.round(r.hours, 1) + " h",
-        kwh: calc.round(r.kwh, 2),
-      })),
+      rows: pdfRows,
       totalLabel: t("pdfTotal"),
       totalKwh: calc.round(total, 2),
       unit: t("unit"),
@@ -621,7 +681,19 @@
     });
     // "days present" affects every device set to follow it
     $("occupiedInput").addEventListener("input", () => {
-      state.occupiedDays = $("occupiedInput").value === "" ? "" : calc.num($("occupiedInput").value);
+      const raw = $("occupiedInput").value;
+      const val = raw === "" ? "" : calc.num(raw);
+      const max = effectivePeriodDays();
+      const errEl = $("occupiedError");
+      if (val !== "" && val > max) {
+        errEl.textContent = i18n.fmt(t("occupiedExceedsError"), { n: max });
+        errEl.hidden = false;
+        $("occupiedInput").classList.add("input-error");
+        return; // don't apply invalid value
+      }
+      errEl.hidden = true;
+      $("occupiedInput").classList.remove("input-error");
+      state.occupiedDays = val;
       renderItems();
       updateResults();
     });
@@ -657,6 +729,11 @@
       flashSaved();
     });
     $("pdfBtn").addEventListener("click", downloadPdf);
+
+    // summary PDF button (delegation — button is recreated on each renderSummary)
+    $("summaryWrap").addEventListener("click", (e) => {
+      if (e.target.closest(".summary-pdf-btn")) downloadPdf();
+    });
 
     // history (delegation)
     $("historyList").addEventListener("click", (e) => {
@@ -697,6 +774,10 @@
       it.hours = calc.num(e.target.value);
     } else if (e.target.classList.contains("it-days")) {
       it.days = calc.num(e.target.value);
+    } else if (e.target.classList.contains("it-note")) {
+      it.note = e.target.value;
+      scheduleSave();
+      return; // no need to recalculate
     } else if (e.target.classList.contains("seg-hours") || e.target.classList.contains("seg-days")) {
       const segRow = e.target.closest(".seg-row");
       const seg = it.segments[Number(segRow.dataset.sid)];
@@ -750,10 +831,20 @@
     } else if (e.target.closest(".it-dup")) {
       const copy = JSON.parse(JSON.stringify(it));
       copy.id = nextId++;
+      copy.noteOpen = false;
+      copy.name = nextCopyName(it.name);
       const idx = state.items.indexOf(it);
       state.items.splice(idx + 1, 0, copy);
       renderItems();
       updateResults();
+    } else if (e.target.closest(".it-note-add")) {
+      it.noteOpen = true;
+      renderItems();
+    } else if (e.target.closest(".it-note-hide")) {
+      it.noteOpen = false;
+      it.note = "";
+      scheduleSave();
+      renderItems();
     } else if (e.target.closest(".seg-add")) {
       it.segments.push({ hours: 0, days: 0 });
       renderItems();

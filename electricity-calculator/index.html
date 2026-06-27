@@ -80,6 +80,7 @@
             <span class="field-label" data-i18n="occupiedLabel"></span>
             <input type="number" id="occupiedInput" class="text-input" min="0" step="1" inputmode="numeric" placeholder="" />
             <span class="field-hint" data-i18n="occupiedHint"></span>
+            <span class="occupied-error" id="occupiedError" hidden></span>
           </label>
         </div>
 
@@ -93,11 +94,11 @@
               <div id="deviceCb"></div>
             </label>
             <label class="field add-watt">
-              <span class="field-label" data-i18n="wattLabel"></span>
+              <span class="label-row"><span class="field-label" data-i18n="wattLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
               <div id="wattCb"></div>
             </label>
             <label class="field add-hours">
-              <span class="field-label" data-i18n="hoursLabel"></span>
+              <span class="label-row"><span class="field-label" data-i18n="hoursLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
               <input type="number" id="hoursInput" class="text-input" min="0" max="24" step="0.5" value="1" inputmode="decimal" />
             </label>
             <button type="button" id="addBtn" class="btn btn-primary add-btn" data-i18n="addBtn"></button>

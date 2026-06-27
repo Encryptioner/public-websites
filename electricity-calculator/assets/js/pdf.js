@@ -58,19 +58,29 @@
 
   function buildReportHtml(r) {
     const rows = r.rows
-      .map(
-        (row) =>
+      .map((row) => {
+        const noteRow = row.note
+          ? '<tr><td colspan="4" style="padding:2px 10px 8px;color:#64748b;font-size:11px;font-style:italic;border-bottom:1px solid #e5e7eb">' + esc(row.note) + "</td></tr>"
+          : "";
+        return (
           "<tr>" +
-          '<td style="padding:8px 10px;border-bottom:1px solid #e5e7eb">' + esc(row.name) + "</td>" +
-          '<td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:right">' + esc(row.watts) + "</td>" +
-          '<td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:right">' + esc(row.usage) + "</td>" +
-          '<td style="padding:8px 10px;border-bottom:1px solid #e5e7eb;text-align:right;font-weight:600">' + esc(row.kwh) + "</td>" +
-          "</tr>"
-      )
+          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + '">' + esc(row.name) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + ';text-align:right">' + esc(row.watts) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + ';text-align:right">' + esc(row.usage) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + (row.note ? "none" : "1px solid #e5e7eb") + ';text-align:right;font-weight:600">' + esc(row.kwh) + "</td>" +
+          "</tr>" + noteRow
+        );
+      })
       .join("");
+
+    // Period info block
+    const presentRow = r.presentDays > 0
+      ? '<span style="margin-left:16px;color:#64748b">' + esc(r.presentDaysLabel) + ": <b>" + r.presentDays + " " + esc(r.daysUnit) + "</b></span>"
+      : "";
 
     return (
       '<div style="font-family:Arial,Helvetica,sans-serif;color:#0f172a;background:#fff;padding:28px 30px;width:760px;box-sizing:border-box">' +
+      // Header
       '<div style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:3px solid #10b981;padding-bottom:14px;margin-bottom:18px">' +
       "<div>" +
       '<div style="font-size:22px;font-weight:800;color:#0f766e">⚡ ' + esc(r.appName) + "</div>" +
@@ -78,8 +88,12 @@
       "</div>" +
       '<div style="text-align:right;font-size:12px;color:#64748b">' + esc(r.generatedLabel) + "<br><b>" + esc(r.generatedAt) + "</b></div>" +
       "</div>" +
-      '<h1 style="font-size:18px;margin:0 0 4px">' + esc(r.title) + "</h1>" +
-      '<div style="font-size:13px;color:#475569;margin-bottom:16px">' + esc(r.periodLabel) + ": <b>" + esc(r.periodText) + "</b></div>" +
+      // Title + period meta
+      '<h1 style="font-size:18px;margin:0 0 6px">' + esc(r.title) + "</h1>" +
+      '<div style="font-size:13px;color:#334155;margin-bottom:16px;padding:8px 12px;background:#f8fafc;border-radius:8px;border-left:3px solid #10b981">' +
+      esc(r.periodLabel) + ": <b>" + esc(r.periodText) + "</b>" + presentRow +
+      "</div>" +
+      // Table
       '<table style="width:100%;border-collapse:collapse;font-size:13px">' +
       '<thead><tr style="background:#f0fdfa">' +
       '<th style="padding:8px 10px;text-align:left;border-bottom:2px solid #99f6e4">' + esc(r.cols.device) + "</th>" +
@@ -87,11 +101,13 @@
       '<th style="padding:8px 10px;text-align:right;border-bottom:2px solid #99f6e4">' + esc(r.cols.usage) + "</th>" +
       '<th style="padding:8px 10px;text-align:right;border-bottom:2px solid #99f6e4">' + esc(r.cols.kwh) + "</th>" +
       "</tr></thead><tbody>" + rows + "</tbody></table>" +
+      // Total
       '<div style="margin-top:18px;display:flex;justify-content:flex-end">' +
       '<div style="background:#0f766e;color:#fff;padding:12px 18px;border-radius:10px;text-align:right">' +
       '<div style="font-size:12px;opacity:.85">' + esc(r.totalLabel) + "</div>" +
       '<div style="font-size:24px;font-weight:800">' + esc(r.totalKwh) + ' <span style="font-size:13px;font-weight:500">' + esc(r.unit) + "</span></div>" +
       "</div></div>" +
+      // Footer
       '<div style="margin-top:24px;font-size:11px;color:#94a3b8;border-top:1px solid #e5e7eb;padding-top:8px">' + esc(r.footer) + "</div>" +
       "</div>"
     );

@@ -470,8 +470,16 @@ input[type="date"] {
   transition: background 0.15s, color 0.15s;
 }
 .icon-btn:hover {
-  background: var(--surface-2);
+  background: var(--line);
+  color: var(--ink-soft);
+}
+.it-remove:hover {
+  background: #fee2e2;
   color: var(--danger);
+}
+.it-dup:hover {
+  background: var(--primary-50);
+  color: var(--primary);
 }
 
 /* ---------- items ---------- */
@@ -574,6 +582,65 @@ select.text-input {
   cursor: pointer;
   flex: none;
 }
+/* label + required star inline row */
+.label-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 6px;
+}
+.label-row .field-label {
+  margin-bottom: 0;
+}
+/* required field asterisk */
+.req-star {
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* input error state */
+.text-input.input-error {
+  border-color: var(--danger);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.12);
+}
+.occupied-error {
+  display: block;
+  font-size: 12px;
+  color: var(--danger);
+  margin-top: 5px;
+}
+
+/* note per device */
+.btn-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.btn-link:hover {
+  color: var(--primary-600);
+}
+.it-note-row {
+  margin-top: 8px;
+}
+.it-note-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.it-note {
+  font-size: 13px;
+  resize: vertical;
+  min-height: 48px;
+}
+
 /* disabled controls read as non-interactive */
 .text-input:disabled {
   background: var(--surface-2);
@@ -819,8 +886,36 @@ select.text-input {
 .summary-head .sub-title {
   margin: 0;
 }
+.summary-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
 .summary-hint {
   font-size: 12.5px;
+}
+.summary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  margin-bottom: 10px;
+  padding: 7px 11px;
+  background: var(--primary-50);
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--primary-600);
+}
+.summary-meta-item {
+  white-space: nowrap;
+}
+.summary-note-row td {
+  font-size: 12px;
+  color: var(--muted);
+  font-style: italic;
+  padding: 2px 12px 8px !important;
+  border-bottom: 1px solid var(--line) !important;
 }
 .table-scroll {
   overflow-x: auto;
