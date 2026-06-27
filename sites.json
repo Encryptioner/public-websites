@@ -1,5 +1,5 @@
 {
-  "updated": "2026-05-17",
+  "updated": "2026-06-26",
   "sites": [
     {
       "slug": "cgpa-calculator",
@@ -9,6 +9,15 @@
       "icon": "cgpa-calculator/icons/icon-192.png",
       "tags": ["pwa", "education", "offline"],
       "added": "2026-05-17"
+    },
+    {
+      "slug": "electricity-calculator",
+      "name": "Electricity Calculator",
+      "tagline": "Estimate your monthly electricity usage & units, device by device.",
+      "description": "Private, offline-friendly electricity usage calculator. Search, select or add any device and its wattage, set daily hours (with variable usage spans), and see your monthly kWh/units instantly. Save history and export a PDF report. English & বাংলা.",
+      "icon": "electricity-calculator/favicon.svg",
+      "tags": ["utility", "energy", "offline"],
+      "added": "2026-06-26"
     }
   ]
 }

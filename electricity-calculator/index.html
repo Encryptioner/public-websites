@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Electricity Calculator — estimate your monthly units</title>
+    <meta
+      name="description"
+      content="Free, private electricity usage calculator. Estimate your monthly kWh and units device by device. Works offline. English & বাংলা."
+    />
+    <meta name="theme-color" content="#10b981" />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="stylesheet" href="./assets/css/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="topbar">
+      <div class="wrap topbar-inner">
+        <a class="brand" href="./">
+          <span class="brand-mark" aria-hidden="true">⚡</span>
+          <span class="brand-text">
+            <span class="brand-name" data-i18n="appName">Electricity Calculator</span>
+            <span class="brand-tag" data-i18n="tagline"></span>
+          </span>
+        </a>
+        <div class="lang-switch" role="group" aria-label="Language">
+          <button type="button" class="lang-btn" data-lang="en">EN</button>
+          <button type="button" class="lang-btn" data-lang="bn">বাংলা</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap layout" id="main">
+      <!-- ============ INPUT COLUMN ============ -->
+      <section class="col col-input" aria-label="Inputs">
+        <!-- Title -->
+        <div class="panel">
+          <label class="field">
+            <span class="field-label" data-i18n="titleLabel"></span>
+            <input
+              type="text"
+              id="titleInput"
+              class="text-input"
+              data-i18n-ph="titlePlaceholder"
+              maxlength="80"
+            />
+          </label>
+        </div>
+
+        <!-- Billing period -->
+        <div class="panel">
+          <h2 class="panel-title" data-i18n="periodHeading"></h2>
+          <p class="panel-hint" data-i18n="periodHint"></p>
+          <div class="seg" role="tablist" aria-label="Period mode">
+            <button type="button" class="seg-btn is-on" id="modeDaysBtn" data-mode="days" data-i18n="modeDays"></button>
+            <button type="button" class="seg-btn" id="modeRangeBtn" data-mode="range" data-i18n="modeRange"></button>
+          </div>
+
+          <div id="daysWrap" class="period-body">
+            <label class="field">
+              <span class="field-label" data-i18n="daysLabel"></span>
+              <input type="number" id="daysInput" class="text-input" min="1" step="1" value="30" inputmode="numeric" />
+            </label>
+          </div>
+
+          <div id="rangeWrap" class="period-body two-col" hidden>
+            <label class="field">
+              <span class="field-label" data-i18n="startLabel"></span>
+              <input type="date" id="startInput" class="text-input" />
+            </label>
+            <label class="field">
+              <span class="field-label" data-i18n="endLabel"></span>
+              <input type="date" id="endInput" class="text-input" />
+            </label>
+            <div class="days-computed" id="daysComputed"></div>
+          </div>
+
+          <label class="field occupied-field">
+            <span class="field-label" data-i18n="occupiedLabel"></span>
+            <input type="number" id="occupiedInput" class="text-input" min="0" step="1" inputmode="numeric" placeholder="" />
+            <span class="field-hint" data-i18n="occupiedHint"></span>
+            <span class="occupied-error" id="occupiedError" hidden></span>
+          </label>
+        </div>
+
+        <!-- Add device -->
+        <div class="panel">
+          <h2 class="panel-title" data-i18n="addHeading"></h2>
+          <p class="panel-hint" data-i18n="addHint"></p>
+          <div class="add-grid">
+            <label class="field add-device">
+              <span class="field-label" data-i18n="deviceLabel"></span>
+              <div id="deviceCb"></div>
+            </label>
+            <label class="field add-watt">
+              <span class="label-row"><span class="field-label" data-i18n="wattLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
+              <div id="wattCb"></div>
+            </label>
+            <label class="field add-hours">
+              <span class="label-row"><span class="field-label" data-i18n="hoursLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
+              <input type="number" id="hoursInput" class="text-input" min="0" max="24" step="0.5" value="1" inputmode="decimal" />
+            </label>
+            <button type="button" id="addBtn" class="btn btn-primary add-btn" data-i18n="addBtn"></button>
+          </div>
+        </div>
+
+        <!-- Items -->
+        <div class="panel">
+          <div class="panel-head">
+            <div class="panel-head-left">
+              <h2 class="panel-title" data-i18n="itemsHeading"></h2>
+              <span id="deviceCount" class="device-count-badge" hidden></span>
+            </div>
+            <div class="panel-actions">
+              <select id="scenarioSelect" class="btn btn-ghost btn-sm scenario-select"></select>
+              <button type="button" id="clearAllBtn" class="btn btn-ghost btn-sm" data-i18n="clearAll"></button>
+              <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" data-i18n="reset"></button>
+            </div>
+          </div>
+          <div id="itemsList" class="items"></div>
+          <div id="emptyState" class="empty">
+            <div class="empty-icon" aria-hidden="true">🔌</div>
+            <div class="empty-title" data-i18n="emptyTitle"></div>
+            <div class="empty-hint" data-i18n="emptyHint"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ RESULTS COLUMN ============ -->
+      <section class="col col-result" aria-label="Results">
+        <div class="panel result-panel">
+          <h2 class="panel-title" data-i18n="resultsHeading"></h2>
+          <div class="total-card">
+            <div class="total-label" data-i18n="totalLabel"></div>
+            <div class="total-value"><span id="totalKwh">0</span></div>
+            <div class="total-unit" data-i18n="unit"></div>
+          </div>
+
+          <div class="result-actions">
+            <button type="button" id="saveBtn" class="btn btn-secondary" data-i18n="save"></button>
+            <button type="button" id="pdfBtn" class="btn btn-primary" data-i18n="downloadPdf"></button>
+          </div>
+
+          <h3 class="sub-title" data-i18n="perDeviceHeading"></h3>
+          <div id="breakdown" class="breakdown"></div>
+          <p id="noResult" class="muted" data-i18n="noResult"></p>
+
+          <div id="summaryWrap" class="summary" hidden></div>
+
+          <details class="formula" id="formulaSection">
+            <summary data-i18n="formulaHeading"></summary>
+            <div id="formulaBody" class="formula-body"></div>
+          </details>
+        </div>
+
+        <div class="panel history-panel">
+          <div class="panel-head">
+            <h2 class="panel-title" data-i18n="history"></h2>
+          </div>
+          <div id="historyList" class="history"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============ FAQ ============ -->
+    <section class="wrap faq-section" aria-label="FAQ">
+      <h2 class="faq-heading" data-i18n="faqHeading"></h2>
+      <div id="faqList" class="faq"></div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <span>⚡ <span data-i18n="appName"></span></span>
+        <a href="https://encryptioner.github.io/public-websites/" rel="noopener">more tools →</a>
+      </div>
+    </footer>
+
+    <!-- Mobile sticky total -->
+    <div class="mobile-total" id="mobileTotal" role="button" tabindex="0" aria-label="View results">
+      <span class="mt-label" data-i18n="totalLabel"></span>
+      <span class="mt-right"><b id="mobileKwh">0</b> <span data-i18n="unit"></span><span class="mt-arrow">↓</span></span>
+    </div>
+
+    <!-- Custom confirm dialog -->
+    <div id="confirmOverlay" class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmMsg" hidden>
+      <div class="confirm-card">
+        <p id="confirmMsg" class="confirm-msg"></p>
+        <div class="confirm-btns">
+          <button type="button" id="confirmCancelBtn" class="btn btn-ghost"></button>
+          <button type="button" id="confirmOkBtn" class="btn btn-danger"></button>
+        </div>
+      </div>
+    </div>
+    <!-- Toast notification -->
+    <div id="toastEl" class="toast" aria-live="polite"></div>
+
+    <script src="./assets/js/data.js"></script>
+    <script src="./assets/js/i18n.js"></script>
+    <script src="./assets/js/calc.js"></script>
+    <script src="./assets/js/combobox.js"></script>
+    <script src="./assets/js/storage.js"></script>
+    <script src="./assets/js/pdf.js"></script>
+    <script src="./assets/js/app.js"></script>
+  </body>
+</html>
