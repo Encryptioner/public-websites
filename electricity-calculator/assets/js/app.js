@@ -22,6 +22,52 @@
   let deviceCb, wattCb;
   let saveTimer = null;
 
+  // ── custom confirm dialog ──────────────────────────────────────────────────
+  let _confirmResolve = null;
+  function confirmDialog(msg) {
+    return new Promise((resolve) => {
+      _confirmResolve = resolve;
+      const overlay = $("confirmOverlay");
+      $("confirmMsg").textContent = msg;
+      $("confirmOkBtn").textContent = i18n.t("dialogConfirm");
+      $("confirmCancelBtn").textContent = i18n.t("dialogCancel");
+      overlay.hidden = false;
+      $("confirmOkBtn").focus();
+    });
+  }
+  function _bindConfirmDialog() {
+    $("confirmOkBtn").addEventListener("click", () => {
+      $("confirmOverlay").hidden = true;
+      if (_confirmResolve) { _confirmResolve(true); _confirmResolve = null; }
+    });
+    $("confirmCancelBtn").addEventListener("click", () => {
+      $("confirmOverlay").hidden = true;
+      if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+    });
+    $("confirmOverlay").addEventListener("click", (e) => {
+      if (e.target === $("confirmOverlay")) {
+        $("confirmOverlay").hidden = true;
+        if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+      }
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !$("confirmOverlay").hidden) {
+        $("confirmOverlay").hidden = true;
+        if (_confirmResolve) { _confirmResolve(false); _confirmResolve = null; }
+      }
+    });
+  }
+
+  // ── toast ──────────────────────────────────────────────────────────────────
+  let _toastTimer = null;
+  function showToast(msg, durationMs) {
+    const el = $("toastEl");
+    el.textContent = msg;
+    el.classList.add("show");
+    clearTimeout(_toastTimer);
+    _toastTimer = setTimeout(() => el.classList.remove("show"), durationMs || 2000);
+  }
+
   function blankState() {
     return {
       title: "",
@@ -249,7 +295,10 @@
     const list = $("itemsList");
     const empty = $("emptyState");
     const badge = $("deviceCount");
-    if (!state.items.length) {
+    const hasItems = state.items.length > 0;
+    $("clearAllBtn").hidden = !hasItems;
+    $("resetBtn").hidden = !hasItems;
+    if (!hasItems) {
       list.innerHTML = "";
       empty.hidden = false;
       badge.hidden = true;
@@ -463,11 +512,14 @@
   }
 
   function renderFormula(rows, total) {
+    const section = $("formulaSection");
     const body = $("formulaBody");
     if (!rows.length || total <= 0) {
       body.innerHTML = "";
+      section.hidden = true;
       return;
     }
+    section.hidden = false;
     const lines = rows.map((r) => {
       return (
         '<div class="fline"><b>' + esc(displayName(r.name)) + "</b>: " +
@@ -774,24 +826,24 @@
     $("itemsList").addEventListener("click", onItemClick);
 
     // toolbar
-    $("scenarioSelect").addEventListener("change", (e) => {
+    $("scenarioSelect").addEventListener("change", async (e) => {
       const key = e.target.value;
       if (!key) return;
-      if (state.items.length && !confirm(t("confirmReset"))) {
+      if (state.items.length && !await confirmDialog(t("confirmReset"))) {
         e.target.value = "";
         return;
       }
       loadScenario(key);
     });
-    $("clearAllBtn").addEventListener("click", () => {
+    $("clearAllBtn").addEventListener("click", async () => {
       if (!state.items.length) return;
-      if (!confirm(t("confirmClearDevices"))) return;
+      if (!await confirmDialog(t("confirmClearDevices"))) return;
       state.items = [];
       renderItems();
       updateResults();
     });
-    $("resetBtn").addEventListener("click", () => {
-      if (state.items.length && !confirm(t("confirmReset"))) return;
+    $("resetBtn").addEventListener("click", async () => {
+      if (state.items.length && !await confirmDialog(t("confirmReset"))) return;
       state = blankState();
       $("titleInput").value = "";
       render();
@@ -827,16 +879,42 @@
         updateSaveButton();
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else if (e.target.closest(".hist-del")) {
-        if (confirm(t("confirmDelete"))) {
-          store.deleteHistory(id);
-          renderHistory();
-        }
+        confirmDialog(t("confirmDelete")).then((ok) => {
+          if (ok) { store.deleteHistory(id); renderHistory(); }
+        });
       }
     });
+
+    // mobile sticky total → scroll to result column
+    const mt = $("mobileTotal");
+    mt.addEventListener("click", scrollToResults);
+    mt.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") scrollToResults(); });
+
+    _bindConfirmDialog();
+  }
+
+  function scrollToResults() {
+    const target = document.querySelector(".col-result");
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      showToast(t("scrolledToResults"), 1800);
+    }
+  }
+
+  function isoDate(d) {
+    const pad = (n) => String(n).padStart(2, "0");
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate());
   }
 
   function setMode(mode) {
     state.mode = mode;
+    if (mode === "range" && !state.startDate && !state.endDate) {
+      const today = new Date();
+      const prior = new Date(today);
+      prior.setDate(prior.getDate() - 30);
+      state.endDate = isoDate(today);
+      state.startDate = isoDate(prior);
+    }
     syncPeriodInputs();
     renderItems();
     updateResults();

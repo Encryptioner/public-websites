@@ -148,7 +148,7 @@
 
           <div id="summaryWrap" class="summary" hidden></div>
 
-          <details class="formula">
+          <details class="formula" id="formulaSection">
             <summary data-i18n="formulaHeading"></summary>
             <div id="formulaBody" class="formula-body"></div>
           </details>
@@ -177,10 +177,23 @@
     </footer>
 
     <!-- Mobile sticky total -->
-    <div class="mobile-total" id="mobileTotal" aria-hidden="true">
+    <div class="mobile-total" id="mobileTotal" role="button" tabindex="0" aria-label="View results">
       <span class="mt-label" data-i18n="totalLabel"></span>
-      <span><b id="mobileKwh">0</b> <span data-i18n="unit"></span></span>
+      <span class="mt-right"><b id="mobileKwh">0</b> <span data-i18n="unit"></span><span class="mt-arrow">↓</span></span>
     </div>
+
+    <!-- Custom confirm dialog -->
+    <div id="confirmOverlay" class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmMsg" hidden>
+      <div class="confirm-card">
+        <p id="confirmMsg" class="confirm-msg"></p>
+        <div class="confirm-btns">
+          <button type="button" id="confirmCancelBtn" class="btn btn-ghost"></button>
+          <button type="button" id="confirmOkBtn" class="btn btn-danger"></button>
+        </div>
+      </div>
+    </div>
+    <!-- Toast notification -->
+    <div id="toastEl" class="toast" aria-live="polite"></div>
 
     <script src="./assets/js/data.js"></script>
     <script src="./assets/js/i18n.js"></script>

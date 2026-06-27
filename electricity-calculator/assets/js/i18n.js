@@ -90,6 +90,9 @@
       confirmReset: "Clear all devices and start over?",
       confirmClearDevices: "Remove all devices? Billing period and title are kept.",
       confirmDelete: "Delete this saved calculation?",
+      dialogConfirm: "Confirm",
+      dialogCancel: "Cancel",
+      scrolledToResults: "Showing results ↓",
       savedAt: "Saved {when}",
 
       // FAQ / info
@@ -130,9 +133,9 @@
       ],
 
       // Hours unit selector
-      unitHDay: "h/day",
+      unitHDay: "hr/day",
       unitMinDay: "min/day",
-      unitHWeek: "h/week",
+      unitHWeek: "hr/week",
       unitMinWeek: "min/week",
       hoursLabelMinDay: "Minutes per day",
       hoursLabelHWeek: "Hours per week",
@@ -238,6 +241,9 @@
       confirmReset: "সব ডিভাইস মুছে নতুন করে শুরু করবেন?",
       confirmClearDevices: "সব ডিভাইস মুছবেন? বিলিং সময়কাল ও শিরোনাম থাকবে।",
       confirmDelete: "এই সংরক্ষিত হিসাবটি মুছবেন?",
+      dialogConfirm: "নিশ্চিত করুন",
+      dialogCancel: "বাতিল",
+      scrolledToResults: "ফলাফল দেখানো হচ্ছে ↓",
       savedAt: "{when} সংরক্ষিত",
 
       faqHeading: "কীভাবে কাজ করে ও সাধারণ প্রশ্ন",
@@ -277,9 +283,9 @@
       ],
 
       // Hours unit selector
-      unitHDay: "ঘ/দিন",
+      unitHDay: "ঘণ্টা/দিন",
       unitMinDay: "মিনিট/দিন",
-      unitHWeek: "ঘ/সপ্তাহ",
+      unitHWeek: "ঘণ্টা/সপ্তাহ",
       unitMinWeek: "মিনিট/সপ্তাহ",
       hoursLabelMinDay: "দৈনিক ব্যবহার (মিনিট)",
       hoursLabelHWeek: "সাপ্তাহিক ব্যবহার (ঘণ্টা)",

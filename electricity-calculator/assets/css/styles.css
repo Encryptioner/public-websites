@@ -209,6 +209,29 @@ body {
   gap: 8px;
   flex-wrap: wrap;
 }
+/* mobile: stack heading above actions, give actions full width for even wrapping */
+@media (max-width: 520px) {
+  .panel-head {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .panel-head-left {
+    width: 100%;
+  }
+  .panel-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+  .panel-actions .btn,
+  .panel-actions select {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .scenario-select {
+    max-width: none;
+  }
+}
 .panel-head-left {
   display: flex;
   align-items: center;
@@ -303,6 +326,13 @@ input[type="date"] {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+}
+/* date pickers are wide — stack start/end vertically on phones so each
+   gets a full, comfortable line instead of two cramped inputs */
+@media (max-width: 520px) {
+  .period-body.two-col {
+    grid-template-columns: 1fr;
+  }
 }
 .days-computed {
   grid-column: 1 / -1;
@@ -563,12 +593,11 @@ input[type="date"] {
 .item-fields.one {
   grid-template-columns: 130px;
 }
-@media (max-width: 460px) {
+/* phones: stack watt / hours / days each on its own full-width row so the
+   hours input + unit selector always sit comfortably on one line */
+@media (max-width: 520px) {
   .item-fields.three {
-    grid-template-columns: 1fr 1fr;
-  }
-  .item-fields.three .it-watt-field {
-    grid-column: 1 / -1;
+    grid-template-columns: 1fr;
   }
 }
 /* native select styled like our inputs */
@@ -617,10 +646,13 @@ select.text-input {
 .it-hoursunit {
   flex: none;
   width: auto;
-  min-width: 80px;
+  min-width: 92px;
   font-size: 13px;
-  padding: 11px 26px 11px 8px;
+  padding: 11px 28px 11px 10px;
 }
+/* hours input + unit selector stay on one line at every width:
+   below 520px the parent .item-fields.three is already 1-column, giving
+   .hours-wrap the full card width — no need to ever stack vertically. */
 .chk-row {
   display: flex;
   align-items: center;
@@ -1132,10 +1164,17 @@ select.text-input {
   gap: 12px;
   background: var(--primary);
   color: #fff;
-  padding: 12px 18px;
-  border-radius: 14px;
-  box-shadow: var(--shadow-lg);
+  padding: 13px 20px;
+  border-radius: 16px;
+  box-shadow: 0 8px 28px rgba(15, 118, 110, 0.4);
   font-size: 15px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.mobile-total:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 14px rgba(15, 118, 110, 0.35);
 }
 .mobile-total b {
   font-size: 20px;
@@ -1144,10 +1183,97 @@ select.text-input {
   opacity: 0.85;
   font-size: 13px;
 }
+.mt-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.mt-arrow {
+  font-size: 16px;
+  opacity: 0.7;
+  animation: mt-bounce 1.6s ease-in-out infinite;
+}
+@keyframes mt-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
 @media (max-width: 919px) {
   .mobile-total.show {
     display: flex;
   }
+}
+
+/* ---------- toast ---------- */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  z-index: 60;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  padding: 8px 18px;
+  border-radius: 20px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ---------- custom confirm dialog ---------- */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.confirm-card {
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow: 0 24px 64px rgba(15, 23, 42, 0.22);
+  padding: 28px 28px 22px;
+  max-width: 380px;
+  width: 100%;
+  animation: cardUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes cardUp {
+  from { transform: scale(0.9) translateY(10px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.confirm-msg {
+  margin: 0 0 22px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink);
+}
+.confirm-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.btn-danger {
+  background: var(--danger);
+  color: #fff;
+  border: none;
+}
+.btn-danger:hover {
+  background: #b91c1c;
 }
 
 /* ---------- animations ---------- */

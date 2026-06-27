@@ -169,7 +169,6 @@
       occupiedDays: 25,
       items: [
         { name: "Double-door Fridge / Freezer", watts: 200, hours: 24, hoursUnit: "h/day", daysMode: "all" },
-        { name: "Air Conditioner (1.5 ton)", watts: 1500, hours: 8, hoursUnit: "h/day", daysMode: "present" },
         { name: "Ceiling Fan", watts: 75, hours: 12, hoursUnit: "h/day", daysMode: "present" },
         { name: "LED Tube Light", watts: 18, hours: 5, hoursUnit: "h/day", daysMode: "present" },
         { name: "LED TV (43\")", watts: 80, hours: 4, hoursUnit: "h/day", daysMode: "present" },
@@ -198,6 +197,7 @@
         { name: "Mobile Charger", watts: 10, hours: 4, hoursUnit: "h/day", daysMode: "present" },
         { name: "Mobile Charger (2)", watts: 10, hours: 3, hoursUnit: "h/day", daysMode: "present" },
         { name: "Wi-Fi Router", watts: 10, hours: 24, hoursUnit: "h/day", daysMode: "all" },
+        { name: "IPS / Inverter System (standby draw)", watts: 100, hours: 24, hoursUnit: "h/day", daysMode: "all", note: "Standby power for backup" },
       ],
     },
     {
