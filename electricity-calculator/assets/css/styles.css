@@ -219,6 +219,18 @@ body {
   .panel-head-left {
     width: 100%;
   }
+  .period-panel .panel-head {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+  .period-panel .panel-head-left {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+  .period-panel #resetBtn {
+    flex-shrink: 0;
+  }
   .panel-actions {
     width: 100%;
     justify-content: flex-start;

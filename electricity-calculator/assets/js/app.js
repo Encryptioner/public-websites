@@ -563,7 +563,8 @@
   // entered, so totals never look arbitrary:
   //   h/day    → "5 hr/day × 30 days = 150 h"
   //   min/day  → "10 min/day × 25 days = 250 min ≈ 4.2 h"
-  //   h/week   → "3 hr/week × 4.3 weeks = 12.9 h"
+  //   h/week   → "3 hr/week × (20 days ÷ 7) = 2.86 weeks → 12.9 h"
+  //   min/week → "10 min/week × (20 days ÷ 7) = 2.86 weeks → 28.6 min ≈ 0.5 h"
   // Split usage sums its h/day spans: "2 hr/day × 10 days + … = 80 h".
   function unitLabel(unit) {
     if (unit === "min/day") return t("unitMinDay");
@@ -584,11 +585,11 @@
     }
     if (unit === "min/week") {
       const w = calc.round(d / 7, 2);
-      return rate + " " + lbl + " × " + w + " " + t("weekShort") + " = " + calc.round(rate * w, 1) + " " + t("minuteShort") + " ≈ " + totalH + " h";
+      return rate + " " + lbl + " × (" + d + " " + t("days") + " ÷ 7) = " + w + " " + t("weekShort") + " → " + calc.round(rate * w, 1) + " " + t("minuteShort") + " ≈ " + totalH + " h";
     }
     if (unit === "h/week") {
       const w = calc.round(d / 7, 2);
-      return rate + " " + lbl + " × " + w + " " + t("weekShort") + " = " + totalH + " h";
+      return rate + " " + lbl + " × (" + d + " " + t("days") + " ÷ 7) = " + w + " " + t("weekShort") + " → " + totalH + " h";
     }
     return rate + " " + lbl + " × " + d + " " + t("days") + " = " + totalH + " h";
   }

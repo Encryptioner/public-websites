@@ -79,7 +79,7 @@
       // Actions
       loadSample: "Load sample",
       loadScenario: "Load scenario…",
-      clearAll: "Clear devices",
+      clearAll: "Clear all devices",
       reset: "Reset",
       save: "Save",
       downloadPdf: "Download PDF",
@@ -249,7 +249,7 @@
 
       loadSample: "নমুনা দেখুন",
       loadScenario: "পরিস্থিতি লোড করুন…",
-      clearAll: "ডিভাইস মুছুন",
+      clearAll: "সব ডিভাইস মুছুন",
       reset: "রিসেট",
       save: "সংরক্ষণ",
       downloadPdf: "পিডিএফ ডাউনলোড",
