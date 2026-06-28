@@ -67,7 +67,12 @@
           "<tr>" +
           '<td style="padding:8px 10px 6px;border-bottom:' + bb + '">' + esc(row.name) + "</td>" +
           '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right">' + esc(row.watts) + "</td>" +
-          '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right">' + esc(row.usage) + "</td>" +
+          '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right">' +
+            '<div style="font-weight:600">' + esc(row.usage) + "</div>" +
+            (row.usageBreakdown
+              ? '<div style="font-size:10px;color:#94a3b8;font-weight:400;margin-top:2px">' + esc(row.usageBreakdown) + "</div>"
+              : "") +
+          "</td>" +
           '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right;font-weight:600">' + esc(row.kwh) + "</td>" +
           '<td style="padding:8px 10px 6px;border-bottom:' + bb + ';text-align:right;color:#64748b">' + esc(String(row.percent)) + "%</td>" +
           "</tr>" + noteRow

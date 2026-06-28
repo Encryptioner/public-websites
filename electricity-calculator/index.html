@@ -95,7 +95,10 @@
             </label>
             <label class="field add-watt">
               <span class="label-row"><span class="field-label" data-i18n="wattLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
-              <div id="wattCb"></div>
+              <div class="watt-edit">
+                <div id="wattCb"></div>
+                <span class="watt-suffix" data-i18n="wattShort"></span>
+              </div>
             </label>
             <label class="field add-hours">
               <span class="label-row"><span class="field-label" data-i18n="hoursLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
@@ -181,6 +184,8 @@
       <span class="mt-label" data-i18n="totalLabel"></span>
       <span class="mt-right"><b id="mobileKwh">0</b> <span data-i18n="unit"></span><span class="mt-arrow">↓</span></span>
     </div>
+    <!-- Scroll to top -->
+    <button type="button" id="toTopBtn" class="to-top"><span aria-hidden="true">↑</span></button>
 
     <!-- Custom confirm dialog -->
     <div id="confirmOverlay" class="confirm-overlay" role="dialog" aria-modal="true" aria-labelledby="confirmMsg" hidden>

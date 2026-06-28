@@ -20,6 +20,7 @@
 
   let state = blankState();
   let deviceCb, wattCb;
+  let editWattCbs = new Map(); // itemId → ECCombobox, rebuilt each renderItems()
   let saveTimer = null;
 
   // ── custom confirm dialog ──────────────────────────────────────────────────
@@ -150,6 +151,8 @@
     });
     if (deviceCb) deviceCb.input.placeholder = t("devicePlaceholder");
     if (wattCb) wattCb.input.placeholder = t("wattPlaceholder");
+    const toTopBtn = $("toTopBtn");
+    if (toTopBtn) toTopBtn.setAttribute("aria-label", t("toTopLabel"));
   }
   function deviceLabel(d) {
     return i18n.getLang() === "bn" && d.bn ? d.bn : d.name;
@@ -174,7 +177,8 @@
   function wattOptions() {
     return WATT_PRESETS.map((w) => ({
       value: w,
-      label: w + " " + t("wattShort"),
+      label: String(w),
+      sublabel: t("wattShort"),
       search: String(w),
     }));
   }
@@ -188,7 +192,7 @@
       onSelect: (value, label, isNew) => {
         if (!isNew) {
           const d = DEVICES.find((x) => x.name === value);
-          if (d) wattCb.setValue(d.watts, d.watts + " " + t("wattShort"));
+          if (d) wattCb.setValue(d.watts, String(d.watts));
         }
         $("hoursInput").focus();
       },
@@ -205,10 +209,10 @@
       },
       formatAdd: (q) => i18n.fmt(t("addCustomWatt"), { q }),
       onSelect: (value, label, isNew) => {
-        // normalize an added value to a number and show it as "<n> W"
+        // normalize an added value to a number; input shows the bare number
         if (isNew) {
           const n = Number(value);
-          wattCb.setValue(n, n + " " + t("wattShort"));
+          wattCb.setValue(n, String(n));
         }
       },
     });
@@ -300,6 +304,7 @@
     $("resetBtn").hidden = !hasItems;
     if (!hasItems) {
       list.innerHTML = "";
+      destroyEditWattCbs();
       empty.hidden = false;
       badge.hidden = true;
       return;
@@ -308,6 +313,41 @@
     badge.textContent = state.items.length;
     badge.hidden = false;
     list.innerHTML = state.items.map((it, idx) => itemCardHtml(it, idx)).join("");
+    wireEditWattCombos();
+  }
+
+  // Edit-device watt fields are live ECCombobox instances, but item cards are
+  // rebuilt via innerHTML on every structural change. So after each render we
+  // attach a combobox to each .it-watt-host and tear the previous ones down.
+  function destroyEditWattCbs() {
+    editWattCbs.forEach((cb) => cb.destroy());
+    editWattCbs.clear();
+  }
+  function wireEditWattCombos() {
+    destroyEditWattCbs();
+    state.items.forEach((it) => {
+      const host = document.querySelector('.item[data-id="' + it.id + '"] .it-watt-host');
+      if (!host) return;
+      const cb = new ECCombobox(host, {
+        placeholder: t("wattPlaceholder"),
+        allowAdd: true,
+        numericOnly: true,
+        getOptions: wattOptions,
+        validateAdd: (q) => Number.isFinite(Number(q)) && Number(q) > 0,
+        formatAdd: (q) => i18n.fmt(t("addCustomWatt"), { q }),
+        onSelect: (value, label, isNew) => {
+          const n = Number(value);
+          if (Number.isFinite(n) && n >= 0) {
+            it.watts = calc.num(n);
+            if (isNew) cb.setValue(n, String(n));
+            updateResults();
+            scheduleSave();
+          }
+        },
+      });
+      cb.setValue(it.watts, String(it.watts));
+      editWattCbs.set(it.id, cb);
+    });
   }
 
   function itemCardHtml(it, index) {
@@ -340,7 +380,7 @@
 
     const wattField =
       '<label class="field it-watt-field"><span class="field-label">' + esc(t("wattLabel")) + "</span>" +
-      '<div class="watt-edit"><input type="number" class="text-input it-watt" min="0" step="1" value="' + esc(it.watts) + '" inputmode="numeric"><span class="watt-suffix">' + esc(w) + "</span></div></label>";
+      '<div class="watt-edit"><div class="cb it-watt-host"></div><span class="watt-suffix">' + esc(w) + "</span></div></label>";
 
     let bodyHtml;
     if (it.split) {
@@ -415,6 +455,49 @@
   }
 
   // ---------- results ----------
+  // Explains where a device's total hours come from, in the unit the user
+  // entered, so totals never look arbitrary:
+  //   h/day    → "5 hr/day × 30 days = 150 h"
+  //   min/day  → "10 min/day × 25 days = 250 min ≈ 4.2 h"
+  //   h/week   → "3 hr/week × 4.3 weeks = 12.9 h"
+  // Split usage sums its h/day spans: "2 hr/day × 10 days + … = 80 h".
+  function unitLabel(unit) {
+    if (unit === "min/day") return t("unitMinDay");
+    if (unit === "h/week") return t("unitHWeek");
+    if (unit === "min/week") return t("unitMinWeek");
+    return t("unitHDay");
+  }
+  function segPart(s) {
+    return calc.round(calc.num(s.hours), 2) + " " + t("unitHDay") + " × " + calc.num(s.days) + " " + t("days");
+  }
+  function nativeDerivation(src, days, totalH) {
+    const rate = calc.num(src.hours);
+    const d = calc.num(days);
+    const unit = src.hoursUnit || "h/day";
+    const lbl = unitLabel(unit);
+    if (unit === "min/day") {
+      return rate + " " + lbl + " × " + d + " " + t("days") + " = " + calc.round(rate * d, 1) + " " + t("minuteShort") + " ≈ " + totalH + " h";
+    }
+    if (unit === "min/week") {
+      const w = calc.round(d / 7, 2);
+      return rate + " " + lbl + " × " + w + " " + t("weekShort") + " = " + calc.round(rate * w, 1) + " " + t("minuteShort") + " ≈ " + totalH + " h";
+    }
+    if (unit === "h/week") {
+      const w = calc.round(d / 7, 2);
+      return rate + " " + lbl + " × " + w + " " + t("weekShort") + " = " + totalH + " h";
+    }
+    return rate + " " + lbl + " × " + d + " " + t("days") + " = " + totalH + " h";
+  }
+  function hoursDerivation(r, src) {
+    const total = calc.round(r.hours, 1);
+    if (src && !src.split) {
+      const days = r.segments && r.segments[0] ? r.segments[0].days : 0;
+      return nativeDerivation(src, days, total);
+    }
+    const segs = r.segments && r.segments.length ? r.segments : [{ hours: 0, days: 0 }];
+    return segs.map(segPart).join(" + ") + " = " + total + " h";
+  }
+
   function updateResults() {
     const items = effItems();
     const total = calc.totalKwh(items);
@@ -423,6 +506,8 @@
     $("mobileKwh").textContent = totalR;
 
     const rows = calc.breakdown(items);
+    const srcByName = new Map();
+    state.items.forEach((it) => { if (!srcByName.has(it.name)) srcByName.set(it.name, it); });
     const bdEl = $("breakdown");
     const noRes = $("noResult");
     if (!rows.length || total <= 0) {
@@ -435,10 +520,10 @@
           const pct = calc.round(r.percent, 0);
           return (
             '<div class="bd-row">' +
-            '<div class="bd-main"><span class="bd-name">' + esc(displayName(r.name)) + "</span>" +
+            '<div class="bd-main"><span class="bd-name">' + esc(displayName(r.name)) + ' <small class="bd-watts">(' + r.watts + " " + esc(t("wattShort")) + ')</small></span>' +
             '<span class="bd-kwh">' + calc.round(r.kwh, 2) + " " + esc(t("unit").split(" ")[0]) + "</span></div>" +
             '<div class="bd-bar"><span style="width:' + Math.max(2, pct) + '%"></span></div>' +
-            '<div class="bd-meta">' + r.watts + " " + esc(t("wattShort")) + " · " + calc.round(r.hours, 1) + " h · " + pct + "% " + esc(t("ofTotal")) + "</div>" +
+            '<div class="bd-details">' + esc(hoursDerivation(r, srcByName.get(r.name))) + " · " + pct + "% " + esc(t("ofTotal")) + "</div>" +
             "</div>"
           );
         })
@@ -478,8 +563,9 @@
       "<thead><tr><th>" + esc(t("pdfDevice")) + "</th><th>" + esc(t("pdfWatts")) +
       "</th><th>" + esc(t("pdfUsage")) + "</th><th>" + esc(t("pdfKwh")) + "</th><th>" + esc(t("pdfPercent")) + "</th></tr></thead>";
     // Build noteMap once to avoid repeated linear search and handle duplicate names.
+    // Only add notes with content - empty notes won't appear in the fresh map.
     const noteMap = {};
-    state.items.forEach((it) => { if (it.note && !noteMap[it.name]) noteMap[it.name] = it.note; });
+    state.items.forEach((it) => { if (it.note) noteMap[it.name] = it.note; });
     const body = rows
       .map((r) => {
         const note = noteMap[r.name];
@@ -520,11 +606,17 @@
       return;
     }
     section.hidden = false;
-    const lines = rows.map((r) => {
-      return (
+    const srcByName = new Map();
+    state.items.forEach((it) => { if (!srcByName.has(it.name)) srcByName.set(it.name, it); });
+    const lines = [];
+    rows.forEach((r) => {
+      lines.push(
         '<div class="fline"><b>' + esc(displayName(r.name)) + "</b>: " +
-        r.watts + " W × " + calc.round(r.hours, 1) + " h ÷ 1000 = <b>" +
-        calc.round(r.kwh, 2) + " kWh</b></div>"
+        esc(hoursDerivation(r, srcByName.get(r.name))) + "</div>"
+      );
+      lines.push(
+        '<div class="fline fsub">' + r.watts + " W × " + calc.round(r.hours, 1) +
+        " h ÷ 1000 = <b>" + calc.round(r.kwh, 2) + " kWh</b></div>"
       );
     });
     lines.push(
@@ -704,12 +796,15 @@
     // Use breakdown() so percent is available; already sorted by consumption desc.
     const bdRows = calc.breakdown(items);
     const noteMap = {};
-    items.forEach((it) => { if (it.note && !noteMap[it.name]) noteMap[it.name] = it.note; });
+    const srcByName = new Map();
+    items.forEach((it) => { if (it.note) noteMap[it.name] = it.note; });
+    state.items.forEach((it) => { if (!srcByName.has(it.name)) srcByName.set(it.name, it); });
     const pdfRows = bdRows.map((r) => ({
       name: displayName(r.name),
       note: noteMap[r.name] || "",
       watts: r.watts + " " + t("wattShort"),
       usage: calc.round(r.hours, 1) + " h",
+      usageBreakdown: hoursDerivation(r, srcByName.get(r.name)),
       kwh: calc.round(r.kwh, 2),
       percent: calc.round(r.percent, 0),
     }));
@@ -891,6 +986,7 @@
     mt.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") scrollToResults(); });
 
     _bindConfirmDialog();
+    bindToTop();
   }
 
   function scrollToResults() {
@@ -899,6 +995,33 @@
       target.scrollIntoView({ behavior: "smooth", block: "start" });
       showToast(t("scrolledToResults"), 1800);
     }
+  }
+
+  // Floating "back to top" button — appears once the user has scrolled down
+  // past the entry area, smooth-scrolls to the top on click. Uses a scroll
+  // distance check (not IntersectionObserver) because the header is sticky
+  // and therefore always "in view".
+  function bindToTop() {
+    const btn = $("toTopBtn");
+    if (!btn) return;
+    const THRESHOLD = 360;
+    let ticking = false;
+    const update = () => {
+      btn.classList.toggle("show", window.scrollY > THRESHOLD);
+      ticking = false;
+    };
+    const onScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(update);
+        ticking = true;
+      }
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll, { passive: true });
+    update();
+    btn.addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   }
 
   function isoDate(d) {
@@ -925,16 +1048,14 @@
     if (!card) return;
     const it = findItem(card.dataset.id);
     if (!it) return;
-    if (e.target.classList.contains("it-watt")) {
-      it.watts = calc.num(e.target.value);
-    } else if (e.target.classList.contains("it-hours")) {
+    if (e.target.classList.contains("it-hours")) {
       it.hours = calc.num(e.target.value);
     } else if (e.target.classList.contains("it-days")) {
       it.days = calc.num(e.target.value);
     } else if (e.target.classList.contains("it-note")) {
       it.note = e.target.value;
       scheduleSave();
-      return; // no need to recalculate
+      updateResults(); // notes must update summary table
     } else if (e.target.classList.contains("seg-hours") || e.target.classList.contains("seg-days")) {
       const segRow = e.target.closest(".seg-row");
       const seg = it.segments[Number(segRow.dataset.sid)];
@@ -1001,11 +1122,13 @@
     } else if (e.target.closest(".it-note-add")) {
       it.noteOpen = true;
       renderItems();
+      updateResults();
     } else if (e.target.closest(".it-note-hide")) {
       it.noteOpen = false;
       it.note = "";
       scheduleSave();
       renderItems();
+      updateResults();
     } else if (e.target.closest(".seg-add")) {
       it.segments.push({ hours: 0, days: 0 });
       renderItems();

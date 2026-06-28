@@ -86,6 +86,10 @@
         this._render();
         this._openPanel();
       });
+      this.input.addEventListener("blur", () => {
+        this._closePanel();
+        this._autoMatch();
+      });
       this.input.addEventListener("keydown", (e) => this._onKey(e));
       this.caret.addEventListener("mousedown", (e) => {
         e.preventDefault();
@@ -275,6 +279,43 @@
       this.selectedLabel = this.input.value;
       this._closePanel();
       if (this.opts.onSelect) this.opts.onSelect(r.value, this.input.value, isNew);
+    }
+
+    _autoMatch() {
+      const q = this._query();
+      if (!q) return; // empty input, nothing to match
+
+      // Don't auto-match if we already have a selected value (user clicked in panel)
+      if (this.value != null && this.selectedLabel && q === this.selectedLabel) {
+        return;
+      }
+
+      const all = this.opts.getOptions() || [];
+      // Find if typed value exactly matches any option label (case-insensitive)
+      const matchIndex = all.findIndex((o) => o.label.toLowerCase() === q.toLowerCase());
+
+      if (matchIndex !== -1) {
+        // Found a match - select it automatically
+        const matched = all[matchIndex];
+        this.value = matched.value;
+        this.input.value = matched.label;
+        this.selectedLabel = matched.label;
+        // Don't show panel on auto-match, just update the value
+        if (this.opts.onSelect) {
+          this.opts.onSelect(matched.value, matched.label, false);
+        }
+      } else if (this.opts.allowAdd && (!this.opts.validateAdd || this.opts.validateAdd(q))) {
+        // No match found - if allowAdd is enabled, treat as custom value
+        const n = this.opts.numericOnly ? Number(q) : q;
+        const isValid = this.opts.numericOnly ? Number.isFinite(n) && n > 0 : true;
+        if (isValid) {
+          this.value = n;
+          this.selectedLabel = q;
+          if (this.opts.onSelect) {
+            this.opts.onSelect(n, q, true);
+          }
+        }
+      }
     }
 
     // ---- public API ----
