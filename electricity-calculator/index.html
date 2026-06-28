@@ -50,7 +50,12 @@
 
         <!-- Billing period -->
         <div class="panel">
-          <h2 class="panel-title" data-i18n="periodHeading"></h2>
+          <div class="panel-head">
+            <div class="panel-head-left">
+              <h2 class="panel-title" data-i18n="periodHeading"></h2>
+            </div>
+            <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" hidden data-i18n="reset" data-i18n-title="tipReset"></button>
+          </div>
           <p class="panel-hint" data-i18n="periodHint"></p>
           <div class="seg" role="tablist" aria-label="Period mode">
             <button type="button" class="seg-btn is-on" id="modeDaysBtn" data-mode="days" data-i18n="modeDays"></button>
@@ -74,6 +79,7 @@
               <input type="date" id="endInput" class="text-input" />
             </label>
             <div class="days-computed" id="daysComputed"></div>
+            <span class="occupied-error" id="dateRangeError" hidden></span>
           </div>
 
           <label class="field occupied-field">
@@ -86,24 +92,86 @@
 
         <!-- Add device -->
         <div class="panel">
-          <h2 class="panel-title" data-i18n="addHeading"></h2>
+          <div class="panel-head">
+            <div class="panel-head-left">
+              <h2 class="panel-title" data-i18n="addHeading"></h2>
+            </div>
+            <select id="scenarioSelect" class="btn btn-ghost btn-sm scenario-select"></select>
+          </div>
           <p class="panel-hint" data-i18n="addHint"></p>
-          <div class="add-grid">
+          <div class="add-form">
             <label class="field add-device">
               <span class="field-label" data-i18n="deviceLabel"></span>
               <div id="deviceCb"></div>
             </label>
-            <label class="field add-watt">
-              <span class="label-row"><span class="field-label" data-i18n="wattLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
-              <div class="watt-edit">
-                <div id="wattCb"></div>
-                <span class="watt-suffix" data-i18n="wattShort"></span>
+            <div id="addNormalFields">
+              <div class="item-fields three">
+                <label class="field add-watt">
+                  <span class="label-row"><span class="field-label" data-i18n="wattLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
+                  <div class="watt-edit">
+                    <div id="wattCb"></div>
+                  </div>
+                </label>
+                <label class="field add-hours">
+                  <span class="label-row"><span class="field-label" id="addHoursLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
+                  <div class="hours-wrap">
+                    <input type="number" id="hoursInput" class="text-input" min="0" max="24" step="0.5" value="1" inputmode="decimal" />
+                    <select id="addHoursUnit" class="text-input it-hoursunit">
+                      <option value="h/day" data-i18n="unitHDay"></option>
+                      <option value="min/day" data-i18n="unitMinDay"></option>
+                      <option value="h/week" data-i18n="unitHWeek"></option>
+                      <option value="min/week" data-i18n="unitMinWeek"></option>
+                    </select>
+                  </div>
+                </label>
+                <label class="field add-daysmode">
+                  <span class="field-label" data-i18n="daysUsedLabel"></span>
+                  <select id="addDaysMode" class="text-input">
+                    <option value="all" data-i18n="srcAll"></option>
+                    <option value="present" data-i18n="srcPresent"></option>
+                    <option value="custom" data-i18n="srcCustom"></option>
+                  </select>
+                </label>
               </div>
+            <label class="field add-customdays" hidden>
+              <span class="field-label" data-i18n="segDays"></span>
+              <input type="number" id="addCustomDays" class="text-input" min="1" step="1" value="1" inputmode="numeric" />
+              <span class="occupied-error" id="addCustomDaysError" hidden></span>
             </label>
-            <label class="field add-hours">
-              <span class="label-row"><span class="field-label" data-i18n="hoursLabel"></span><span class="req-star" aria-hidden="true"> *</span></span>
-              <input type="number" id="hoursInput" class="text-input" min="0" max="24" step="0.5" value="1" inputmode="decimal" />
-            </label>
+            </div>
+            <div id="addSplitFields" hidden>
+              <div class="item-fields one">
+                <label class="field add-watt-split">
+                  <span class="field-label" data-i18n="wattLabel"></span>
+                  <div class="watt-edit">
+                    <div id="wattCbSplit"></div>
+                    <span class="watt-suffix" data-i18n="wattShort"></span>
+                  </div>
+                </label>
+              </div>
+              <div class="segments" id="addSegments">
+                <div class="seg-row" data-sid="0">
+                  <label class="seg-field"><span data-i18n="segHours"></span>
+                  <input type="number" class="text-input seg-hours" min="0" max="24" step="0.5" value="1" inputmode="decimal"></label>
+                  <label class="seg-field"><span data-i18n="segDays"></span>
+                  <input type="number" class="text-input seg-days" min="0" step="1" value="1" inputmode="numeric"></label>
+                  <button type="button" class="icon-btn seg-remove" disabled title="" aria-label="">✕</button>
+                </div>
+              </div>
+              <button type="button" class="btn btn-ghost btn-sm seg-add" id="addSegBtn" data-i18n="addSegment" data-i18n-title="tipAddSegment"></button>
+              <div class="seg-note" id="addSegNote"></div>
+              <span class="occupied-error" id="addSegDaysError" hidden></span>
+            </div>
+            <div class="chk-row split-toggle">
+              <input type="checkbox" id="addSplitToggle" data-i18n-title="tipSplit"> <span data-i18n="segmentsToggle"></span>
+            </div>
+            <div class="it-note-row" id="addNoteRow">
+              <button type="button" class="it-note-add btn-link" id="addNoteBtn" data-i18n="addNote" data-i18n-title="tipAddNote"></button>
+              <div class="it-note-wrap" id="addNoteWrap" hidden>
+                <textarea class="it-note text-input" id="addNoteInput" rows="2" placeholder="" data-i18n-ph="notePlaceholder"></textarea>
+                <button type="button" class="it-note-hide btn-link" id="addNoteHide" data-i18n="hideNote" data-i18n-title="tipHideNote"></button>
+              </div>
+            </div>
             <button type="button" id="addBtn" class="btn btn-primary add-btn" data-i18n="addBtn"></button>
           </div>
         </div>
@@ -116,12 +184,11 @@
               <span id="deviceCount" class="device-count-badge" hidden></span>
             </div>
             <div class="panel-actions">
-              <select id="scenarioSelect" class="btn btn-ghost btn-sm scenario-select"></select>
-              <button type="button" id="clearAllBtn" class="btn btn-ghost btn-sm" data-i18n="clearAll"></button>
-              <button type="button" id="resetBtn" class="btn btn-ghost btn-sm" data-i18n="reset"></button>
+              <button type="button" id="clearAllBtn" class="btn btn-ghost btn-sm" data-i18n="clearAll" data-i18n-title="tipClearAll"></button>
             </div>
           </div>
           <div id="itemsList" class="items"></div>
+          <button type="button" id="addItemBtn" class="btn btn-ghost add-item-btn" hidden data-i18n="addBtn" data-i18n-title="tipAddItem"></button>
           <div id="emptyState" class="empty">
             <div class="empty-icon" aria-hidden="true">🔌</div>
             <div class="empty-title" data-i18n="emptyTitle"></div>

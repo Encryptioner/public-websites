@@ -175,7 +175,7 @@
         { name: "LED Bulb", watts: 15, hours: 6, hoursUnit: "h/day", daysMode: "present" },
         { name: "LED TV (43\")", watts: 80, hours: 4, hoursUnit: "h/day", daysMode: "present" },
         { name: "Rice Cooker", watts: 700, hours: 30, hoursUnit: "min/day", daysMode: "present" },
-        { name: "Electric Kettle", watts: 1500, hours: 10, hoursUnit: "min/day", daysMode: "present", note: "~2 min/use × 5 uses/day" },
+        { name: "Electric Kettle", watts: 1500, hours: 10, hoursUnit: "min/week", daysMode: "present", note: "~2 min/use × 5 uses/week" },
         { name: "Mobile Charger", watts: 10, hours: 3, hoursUnit: "h/day", daysMode: "present" },
         { name: "Wi-Fi Router", watts: 10, hours: 24, hoursUnit: "h/day", daysMode: "present" },
       ],

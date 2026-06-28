@@ -19,7 +19,7 @@
   const $ = (id) => document.getElementById(id);
 
   let state = blankState();
-  let deviceCb, wattCb;
+  let deviceCb, wattCb, wattCbSplit;
   let editWattCbs = new Map(); // itemId → ECCombobox, rebuilt each renderItems()
   let saveTimer = null;
 
@@ -86,15 +86,17 @@
   // daysMode: 'all' = whole billing period (constant, e.g. fridge),
   //           'present' = the global "days present" value (flexible),
   //           'custom' = this device's own days field.
-  function makeItem(name, watts, hours) {
+  function makeItem(name, watts, hours, hoursUnit, daysMode, customDays) {
+    const unit = hoursUnit || "h/day";
+    const mode = daysMode || "all";
     return {
       id: nextId++,
       name: name,
       watts: calc.num(watts),
       hours: calc.num(hours),
-      hoursUnit: "h/day",
-      days: effectivePeriodDays(),
-      daysMode: "all",
+      hoursUnit: unit,
+      days: mode === "custom" ? calc.num(customDays) : effectivePeriodDays(),
+      daysMode: mode,
       split: false,
       segments: [],
       note: "",
@@ -146,13 +148,27 @@
     document.querySelectorAll("[data-i18n-ph]").forEach((el) => {
       el.placeholder = t(el.dataset.i18nPh);
     });
+    document.querySelectorAll("[data-i18n-title]").forEach((el) => {
+      el.title = t(el.dataset.i18nTitle);
+    });
     document.querySelectorAll(".lang-btn").forEach((b) => {
       b.classList.toggle("is-on", b.dataset.lang === i18n.getLang());
     });
     if (deviceCb) deviceCb.input.placeholder = t("devicePlaceholder");
     if (wattCb) wattCb.input.placeholder = t("wattPlaceholder");
+    if (wattCbSplit) wattCbSplit.input.placeholder = t("wattPlaceholder");
     const toTopBtn = $("toTopBtn");
     if (toTopBtn) toTopBtn.setAttribute("aria-label", t("toTopLabel"));
+    // add-form: dynamic hours label + days mode options with counts
+    if ($("addHoursLabel")) {
+      const unit = $("addHoursUnit") ? $("addHoursUnit").value : "h/day";
+      const labelKey = unit === "min/day" ? "hoursLabelMinDay"
+        : unit === "h/week" ? "hoursLabelHWeek"
+        : unit === "min/week" ? "hoursLabelMinWeek"
+        : "hoursLabel";
+      $("addHoursLabel").textContent = t(labelKey);
+    }
+    syncAddFormDaysMode();
   }
   function deviceLabel(d) {
     return i18n.getLang() === "bn" && d.bn ? d.bn : d.name;
@@ -184,6 +200,25 @@
   }
 
   function buildComboboxes() {
+    const wattOpts = {
+      placeholder: t("wattPlaceholder"),
+      allowAdd: true,
+      numericOnly: true,
+      getOptions: wattOptions,
+      validateAdd: (q) => {
+        const n = Number(q);
+        return Number.isFinite(n) && n > 0;
+      },
+      formatAdd: (q) => i18n.fmt(t("addCustomWatt"), { q }),
+      onSelect: (value, label, isNew) => {
+        if (isNew) {
+          const n = Number(value);
+          wattCb.setValue(n, String(n));
+          wattCbSplit.setValue(n, String(n));
+        }
+      },
+    };
+
     deviceCb = new ECCombobox($("deviceCb"), {
       placeholder: t("devicePlaceholder"),
       allowAdd: true,
@@ -192,30 +227,34 @@
       onSelect: (value, label, isNew) => {
         if (!isNew) {
           const d = DEVICES.find((x) => x.name === value);
-          if (d) wattCb.setValue(d.watts, String(d.watts));
+          if (d) {
+            wattCb.setValue(d.watts, String(d.watts));
+            wattCbSplit.setValue(d.watts, String(d.watts));
+          }
         }
         $("hoursInput").focus();
       },
     });
 
-    wattCb = new ECCombobox($("wattCb"), {
-      placeholder: t("wattPlaceholder"),
-      allowAdd: true,
-      numericOnly: true, // only digits typeable; the unit "W" only shows in labels
-      getOptions: wattOptions,
-      validateAdd: (q) => {
-        const n = Number(q);
-        return Number.isFinite(n) && n > 0;
-      },
-      formatAdd: (q) => i18n.fmt(t("addCustomWatt"), { q }),
+    wattCb = new ECCombobox($("wattCb"), Object.assign({}, wattOpts, {
       onSelect: (value, label, isNew) => {
-        // normalize an added value to a number; input shows the bare number
         if (isNew) {
           const n = Number(value);
           wattCb.setValue(n, String(n));
+          wattCbSplit.setValue(n, String(n));
         }
       },
-    });
+    }));
+
+    wattCbSplit = new ECCombobox($("wattCbSplit"), Object.assign({}, wattOpts, {
+      onSelect: (value, label, isNew) => {
+        if (isNew) {
+          const n = Number(value);
+          wattCb.setValue(n, String(n));
+          wattCbSplit.setValue(n, String(n));
+        }
+      },
+    }));
   }
 
   // ---------- period ----------
@@ -228,11 +267,73 @@
     const o = calc.num(state.occupiedDays);
     return o > 0 ? o : effectivePeriodDays();
   }
+
+  // ── validation helpers (warnings only — never block) ──────────────────────
+  function validateOccupied() {
+    const raw = $("occupiedInput").value;
+    const val = raw === "" ? "" : calc.num(raw);
+    const max = effectivePeriodDays();
+    const errEl = $("occupiedError");
+    if (val !== "" && val > max) {
+      errEl.textContent = i18n.fmt(t("occupiedExceedsError"), { n: max });
+      errEl.hidden = false;
+      $("occupiedInput").classList.add("input-error");
+    } else {
+      errEl.hidden = true;
+      $("occupiedInput").classList.remove("input-error");
+    }
+  }
+  function validateDateRange() {
+    const errEl = $("dateRangeError");
+    if (!errEl) return;
+    if (state.mode === "range" && state.startDate && state.endDate && state.startDate >= state.endDate) {
+      errEl.textContent = t("dateRangeError");
+      errEl.hidden = false;
+    } else {
+      errEl.hidden = true;
+    }
+  }
   // Resolve a non-split device's days from its daysMode.
   function itemDays(it) {
     if (it.daysMode === "all") return effectivePeriodDays();
     if (it.daysMode === "present") return effectiveOccupiedDays();
     return calc.num(it.days);
+  }
+
+  // Update the add-form days mode select options with current counts.
+  function syncAddFormDaysMode() {
+    const sel = $("addDaysMode");
+    if (!sel) return;
+    const cur = sel.value;
+    sel.options[0].textContent = t("srcAll") + " (" + effectivePeriodDays() + ")";
+    sel.options[1].textContent = t("srcPresent") + " (" + effectiveOccupiedDays() + ")";
+    sel.options[2].textContent = t("srcCustom");
+    sel.value = cur;
+    // sync max on custom days input
+    const cd = $("addCustomDays");
+    if (cd) cd.max = effectivePeriodDays();
+  }
+
+  // Update the add-form segment summary note.
+  function syncAddSegNote() {
+    const rows = $("addSegments").querySelectorAll(".seg-row");
+    let totDays = 0, totHours = 0;
+    rows.forEach((row) => {
+      const h = calc.num(row.querySelector(".seg-hours").value);
+      const d = calc.num(row.querySelector(".seg-days").value);
+      totDays += d;
+      totHours += h * d;
+    });
+    $("addSegNote").textContent = i18n.fmt(t("segSumNote"), { d: totDays, h: calc.round(totHours, 1) });
+    // validate total segment days against billing period
+    const max = effectivePeriodDays();
+    const errEl = $("addSegDaysError");
+    if (totDays > max) {
+      errEl.textContent = i18n.fmt(t("segmentDaysExceedsError"), { d: totDays, n: max });
+      errEl.hidden = false;
+    } else {
+      errEl.hidden = true;
+    }
   }
 
   // Build a calc-ready item (fills .segments from the model).
@@ -302,6 +403,7 @@
     const hasItems = state.items.length > 0;
     $("clearAllBtn").hidden = !hasItems;
     $("resetBtn").hidden = !hasItems;
+    $("addItemBtn").hidden = !hasItems;
     if (!hasItems) {
       list.innerHTML = "";
       destroyEditWattCbs();
@@ -364,7 +466,7 @@
             '<input type="number" class="text-input seg-hours" min="0" max="24" step="0.5" value="' + esc(s.hours) + '" inputmode="decimal"></label>' +
             '<label class="seg-field"><span>' + esc(t("segDays")) + "</span>" +
             '<input type="number" class="text-input seg-days" min="0" step="1" value="' + esc(s.days) + '" inputmode="numeric"></label>' +
-            '<button type="button" class="icon-btn seg-remove" ' + (onlyOne ? "disabled " : "") + 'title="' + esc(t("removeSegment")) + '" aria-label="' + esc(t("removeSegment")) + '">✕</button>' +
+            '<button type="button" class="icon-btn seg-remove" ' + (onlyOne ? "disabled " : "") + 'title="' + esc(t("tipRemoveSegment")) + '" aria-label="' + esc(t("removeSegment")) + '">✕</button>' +
             "</div>"
         )
         .join("");
@@ -373,14 +475,15 @@
       segHtml =
         '<div class="segments">' +
         rows +
-        '<button type="button" class="btn btn-ghost btn-sm seg-add">' + esc(t("addSegment")) + "</button>" +
+        '<button type="button" class="btn btn-ghost btn-sm seg-add" title="' + esc(t("tipAddSegment")) + '">' + esc(t("addSegment")) + "</button>" +
         '<div class="seg-note">' + esc(i18n.fmt(t("segSumNote"), { d: totDays, h: calc.round(totHours, 1) })) + "</div>" +
+        '<span class="occupied-error seg-days-error" hidden></span>' +
         "</div>";
     }
 
     const wattField =
       '<label class="field it-watt-field"><span class="field-label">' + esc(t("wattLabel")) + "</span>" +
-      '<div class="watt-edit"><div class="cb it-watt-host"></div><span class="watt-suffix">' + esc(w) + "</span></div></label>";
+      '<div class="watt-edit"><div class="cb it-watt-host"></div></div></label>';
 
     let bodyHtml;
     if (it.split) {
@@ -423,16 +526,17 @@
         "</div>" +
         (custom
           ? '<label class="field it-customdays"><span class="field-label">' + esc(t("srcCustom")) + " — " + esc(t("segDays")) +
-            '</span><input type="number" class="text-input it-days" min="0" step="1" value="' + esc(it.days) + '" inputmode="numeric"></label>'
+            '</span><input type="number" class="text-input it-days" min="0" step="1" value="' + esc(it.days) + '" inputmode="numeric"></label>' +
+            '<span class="occupied-error it-days-error" hidden></span>'
           : '<div class="days-resolved">' + esc(t("daysUsedLabel")) + ": <b>" + shownDays + " " + esc(t("days")) + "</b></div>");
     }
 
     const noteHtml = it.noteOpen
       ? '<div class="it-note-wrap">' +
         '<textarea class="it-note text-input" rows="2" placeholder="' + esc(t("notePlaceholder")) + '">' + esc(it.note) + "</textarea>" +
-        '<button type="button" class="it-note-hide btn-link">' + esc(t("hideNote")) + "</button>" +
+        '<button type="button" class="it-note-hide btn-link" title="' + esc(t("tipHideNote")) + '">' + esc(t("hideNote")) + "</button>" +
         "</div>"
-      : '<button type="button" class="it-note-add btn-link">' + esc(t("addNote")) + "</button>";
+      : '<button type="button" class="it-note-add btn-link" title="' + esc(t("tipAddNote")) + '">' + esc(t("addNote")) + "</button>";
 
     return (
       '<article class="item" data-id="' + it.id + '">' +
@@ -440,11 +544,11 @@
       '<span class="item-num">' + esc(String(index + 1) + ".") + "</span>" +
       '<div class="item-name" title="' + esc(displayName(it.name)) + '">' + esc(displayName(it.name)) + "</div>" +
       '<div class="item-tools">' +
-      '<button type="button" class="icon-btn it-dup" title="' + esc(t("duplicate")) + '" aria-label="' + esc(t("duplicate")) + '">⧉</button>' +
-      '<button type="button" class="icon-btn it-remove" title="' + esc(t("remove")) + '" aria-label="' + esc(t("remove")) + '">🗑</button>' +
+      '<button type="button" class="icon-btn it-dup" title="' + esc(t("tipDuplicate")) + '" aria-label="' + esc(t("duplicate")) + '">⧉</button>' +
+      '<button type="button" class="icon-btn it-remove" title="' + esc(t("tipRemove")) + '" aria-label="' + esc(t("remove")) + '">🗑</button>' +
       "</div></div>" +
       bodyHtml +
-      '<label class="chk-row split-toggle"><input type="checkbox" class="it-split"' + (it.split ? " checked" : "") + "> <span>" + esc(t("segmentsToggle")) + "</span></label>" +
+      '<div class="chk-row split-toggle"><input type="checkbox" class="it-split"' + (it.split ? " checked" : "") + ' title="' + esc(t("tipSplit")) + '"> <span>' + esc(t("segmentsToggle")) + "</span></div>" +
       '<div class="it-note-row">' + noteHtml + "</div>" +
       "</article>"
     );
@@ -645,7 +749,7 @@
           '<span class="hist-when">' + esc(i18n.fmt(t("savedAt"), { when })) + "</span></div>" +
           '<div class="hist-tools">' +
           '<button type="button" class="btn btn-ghost btn-sm hist-load">' + esc(t("load")) + "</button>" +
-          '<button type="button" class="icon-btn hist-del" title="' + esc(t("delete")) + '" aria-label="' + esc(t("delete")) + '">🗑</button>' +
+          '<button type="button" class="icon-btn hist-del" title="' + esc(t("tipDeleteHistory")) + '" aria-label="' + esc(t("delete")) + '">🗑</button>' +
           "</div></div>"
         );
       })
@@ -744,7 +848,21 @@
   function loadScenario(key) {
     const scenario = SCENARIOS.find((s) => s.key === key);
     if (!scenario) return;
+    // Preserve the user's current settings so scenario devices
+    // inherit the user's "all days" / "present days" counts, not the scenario's.
+    const prevTitle = state.title;
+    const prevMode = state.mode;
+    const prevPeriodDays = state.periodDays;
+    const prevStartDate = state.startDate;
+    const prevEndDate = state.endDate;
+    const prevOccupiedDays = state.occupiedDays;
     state = adoptState(scenario);
+    state.title = prevTitle;
+    state.mode = prevMode;
+    state.periodDays = prevPeriodDays;
+    state.startDate = prevStartDate;
+    state.endDate = prevEndDate;
+    state.occupiedDays = prevOccupiedDays;
     render();
   }
 
@@ -756,17 +874,60 @@
   // ---------- add device ----------
   function addDevice() {
     const name = (deviceCb.getValue() || deviceCb.getText()).toString().trim();
-    let watts = wattCb.getValue();
-    if (watts == null) watts = Number(wattCb.getText());
-    const hours = Number($("hoursInput").value);
+    const isSplit = $("addSplitToggle").checked;
+    const activeWattCb = isSplit ? wattCbSplit : wattCb;
+    let watts = activeWattCb.getValue();
+    if (watts == null) watts = Number(activeWattCb.getText());
+    const note = $("addNoteInput") ? $("addNoteInput").value.trim() : "";
 
     if (!name) return flashInvalid($("deviceCb"));
-    if (!Number.isFinite(watts) || watts <= 0) return flashInvalid($("wattCb"));
+    if (!Number.isFinite(watts) || watts <= 0) return flashInvalid(isSplit ? $("wattCbSplit") : $("wattCb"));
 
-    state.items.push(makeItem(name, watts, Number.isFinite(hours) ? hours : 0));
+    if (isSplit) {
+      // Build segments from the add-form segment rows
+      const rows = $("addSegments").querySelectorAll(".seg-row");
+      const segments = [];
+      rows.forEach((row) => {
+        const h = calc.num(row.querySelector(".seg-hours").value);
+        const d = calc.num(row.querySelector(".seg-days").value);
+        segments.push({ hours: h, days: d });
+      });
+      if (!segments.length) segments.push({ hours: 0, days: 0 });
+      state.items.push({
+        id: nextId++,
+        name: name,
+        watts: calc.num(watts),
+        hours: 0,
+        hoursUnit: "h/day",
+        days: 0,
+        daysMode: "all",
+        split: true,
+        segments: segments,
+        note: note,
+        noteOpen: !!note,
+      });
+    } else {
+      const hours = Number($("hoursInput").value);
+      const hoursUnit = $("addHoursUnit").value;
+      const daysMode = $("addDaysMode").value;
+      const customDays = $("addCustomDays").value;
+      state.items.push(makeItem(name, watts, Number.isFinite(hours) ? hours : 0, hoursUnit, daysMode, daysMode === "custom" ? customDays : null));
+      // Attach note to the last item if provided
+      if (note) {
+        const last = state.items[state.items.length - 1];
+        last.note = note;
+        last.noteOpen = true;
+      }
+    }
+
+    // Reset add form
     deviceCb.clear();
     wattCb.clear();
+    wattCbSplit.clear();
     $("hoursInput").value = "1";
+    $("addNoteInput").value = "";
+    $("addNoteWrap").hidden = true;
+    $("addNoteBtn").hidden = false;
     deviceCb.focus();
     renderItems();
     updateResults();
@@ -875,18 +1036,26 @@
     $("modeRangeBtn").addEventListener("click", () => setMode("range"));
     $("daysInput").addEventListener("input", () => {
       state.periodDays = calc.num($("daysInput").value);
+      validateOccupied();
+      syncAddFormDaysMode();
       renderItems();
       updateResults();
     });
     $("startInput").addEventListener("input", () => {
       state.startDate = $("startInput").value;
       syncPeriodInputs();
+      validateOccupied();
+      validateDateRange();
+      syncAddFormDaysMode();
       renderItems();
       updateResults();
     });
     $("endInput").addEventListener("input", () => {
       state.endDate = $("endInput").value;
       syncPeriodInputs();
+      validateOccupied();
+      validateDateRange();
+      syncAddFormDaysMode();
       renderItems();
       updateResults();
     });
@@ -894,17 +1063,9 @@
     $("occupiedInput").addEventListener("input", () => {
       const raw = $("occupiedInput").value;
       const val = raw === "" ? "" : calc.num(raw);
-      const max = effectivePeriodDays();
-      const errEl = $("occupiedError");
-      if (val !== "" && val > max) {
-        errEl.textContent = i18n.fmt(t("occupiedExceedsError"), { n: max });
-        errEl.hidden = false;
-        $("occupiedInput").classList.add("input-error");
-        return; // don't apply invalid value
-      }
-      errEl.hidden = true;
-      $("occupiedInput").classList.remove("input-error");
       state.occupiedDays = val;
+      validateOccupied();
+      syncAddFormDaysMode();
       renderItems();
       updateResults();
     });
@@ -913,6 +1074,102 @@
     $("addBtn").addEventListener("click", addDevice);
     $("hoursInput").addEventListener("keydown", (e) => {
       if (e.key === "Enter") addDevice();
+    });
+
+    // scroll to add form from the bottom "Add device" button
+    $("addItemBtn").addEventListener("click", () => {
+      document.querySelector(".add-form").scrollIntoView({ behavior: "smooth", block: "start" });
+      deviceCb.focus();
+    });
+
+    // add-form: hours unit → update max/step + label
+    $("addHoursUnit").addEventListener("change", () => {
+      const unit = $("addHoursUnit").value;
+      const attrs = hoursUnitAttrs(unit);
+      $("hoursInput").max = attrs.max;
+      $("hoursInput").step = attrs.step;
+      const labelKey = unit === "min/day" ? "hoursLabelMinDay"
+        : unit === "h/week" ? "hoursLabelHWeek"
+        : unit === "min/week" ? "hoursLabelMinWeek"
+        : "hoursLabel";
+      $("addHoursLabel").textContent = t(labelKey);
+    });
+
+    // add-form: days mode → show/hide custom days
+    $("addDaysMode").addEventListener("change", () => {
+      $("addCustomDays").parentElement.hidden = $("addDaysMode").value !== "custom";
+    });
+
+    // add-form: custom days → validate against billing period
+    $("addCustomDays").addEventListener("input", () => {
+      const val = calc.num($("addCustomDays").value);
+      const max = effectivePeriodDays();
+      const errEl = $("addCustomDaysError");
+      if (val > max) {
+        errEl.textContent = i18n.fmt(t("customDaysExceedsError"), { n: max });
+        errEl.hidden = false;
+        $("addCustomDays").classList.add("input-error");
+      } else {
+        errEl.hidden = true;
+        $("addCustomDays").classList.remove("input-error");
+      }
+    });
+
+    // add-form: split toggle → show/hide normal vs split fields
+    $("addSplitToggle").addEventListener("change", () => {
+      const split = $("addSplitToggle").checked;
+      $("addNormalFields").hidden = split;
+      $("addSplitFields").hidden = !split;
+      // Sync watt value between the two comboboxes
+      if (split) {
+        const w = wattCb.getValue();
+        if (w != null) wattCbSplit.setValue(w, String(w));
+      } else {
+        const w = wattCbSplit.getValue();
+        if (w != null) wattCb.setValue(w, String(w));
+      }
+    });
+
+    // add-form: segment add
+    $("addSegBtn").addEventListener("click", () => {
+      const container = $("addSegments");
+      const idx = container.querySelectorAll(".seg-row").length;
+      const row = document.createElement("div");
+      row.className = "seg-row";
+      row.dataset.sid = idx;
+      row.innerHTML =
+        '<label class="seg-field"><span>' + esc(t("segHours")) + "</span>" +
+        '<input type="number" class="text-input seg-hours" min="0" max="24" step="0.5" value="1" inputmode="decimal"></label>' +
+        '<label class="seg-field"><span>' + esc(t("segDays")) + "</span>" +
+        '<input type="number" class="text-input seg-days" min="0" step="1" value="1" inputmode="numeric"></label>' +
+        '<button type="button" class="icon-btn seg-remove" title="' + esc(t("tipRemoveSegment")) + '" aria-label="' + esc(t("removeSegment")) + '">✕</button>';
+      container.appendChild(row);
+      syncAddSegNote();
+    });
+
+    // add-form: segment remove + input (delegation)
+    $("addSegments").addEventListener("click", (e) => {
+      if (e.target.closest(".seg-remove")) {
+        const row = e.target.closest(".seg-row");
+        const container = $("addSegments");
+        if (container.querySelectorAll(".seg-row").length > 1) {
+          row.remove();
+          syncAddSegNote();
+        }
+      }
+    });
+    $("addSegments").addEventListener("input", () => syncAddSegNote());
+
+    // add-form: note show/hide
+    $("addNoteBtn").addEventListener("click", () => {
+      $("addNoteBtn").hidden = true;
+      $("addNoteWrap").hidden = false;
+      $("addNoteInput").focus();
+    });
+    $("addNoteHide").addEventListener("click", () => {
+      $("addNoteWrap").hidden = true;
+      $("addNoteBtn").hidden = false;
+      $("addNoteInput").value = "";
     });
 
     // items (event delegation)
@@ -924,7 +1181,7 @@
     $("scenarioSelect").addEventListener("change", async (e) => {
       const key = e.target.value;
       if (!key) return;
-      if (state.items.length && !await confirmDialog(t("confirmReset"))) {
+      if (state.items.length && !await confirmDialog(t("confirmLoadScenario"))) {
         e.target.value = "";
         return;
       }
@@ -1039,6 +1296,7 @@
       state.startDate = isoDate(prior);
     }
     syncPeriodInputs();
+    syncAddFormDaysMode();
     renderItems();
     updateResults();
   }
@@ -1051,7 +1309,20 @@
     if (e.target.classList.contains("it-hours")) {
       it.hours = calc.num(e.target.value);
     } else if (e.target.classList.contains("it-days")) {
-      it.days = calc.num(e.target.value);
+      const val = calc.num(e.target.value);
+      const max = effectivePeriodDays();
+      const errEl = card.querySelector(".it-days-error");
+      if (val > max) {
+        if (errEl) {
+          errEl.textContent = i18n.fmt(t("customDaysExceedsError"), { n: max });
+          errEl.hidden = false;
+        }
+        e.target.classList.add("input-error");
+      } else {
+        if (errEl) errEl.hidden = true;
+        e.target.classList.remove("input-error");
+      }
+      it.days = val;
     } else if (e.target.classList.contains("it-note")) {
       it.note = e.target.value;
       scheduleSave();
@@ -1068,6 +1339,17 @@
           const totDays = it.segments.reduce((a, s) => a + calc.num(s.days), 0);
           const totHours = it.segments.reduce((a, s) => a + calc.num(s.hours) * calc.num(s.days), 0);
           note.textContent = i18n.fmt(t("segSumNote"), { d: totDays, h: calc.round(totHours, 1) });
+          // validate total segment days
+          const max = effectivePeriodDays();
+          const errEl = card.querySelector(".seg-days-error");
+          if (totDays > max) {
+            if (errEl) {
+              errEl.textContent = i18n.fmt(t("segmentDaysExceedsError"), { d: totDays, n: max });
+              errEl.hidden = false;
+            }
+          } else {
+            if (errEl) errEl.hidden = true;
+          }
         }
       }
     }
