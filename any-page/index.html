@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Any Page — paste any public HTML URL and view it as a live page or presentation. No sign-up, nothing stored."
+    />
+    <meta name="theme-color" content="#0b0d12" />
+    <meta property="og:title" content="Any Page · Public Websites" />
+    <meta
+      property="og:description"
+      content="Paste any public HTML URL and view it as a live page or presentation."
+    />
+    <meta name="robots" content="noindex" />
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../style.css" />
+    <title>Any Page · Public Websites</title>
+    <style>
+      /* Base resets, tokens, and the .panel/.row/.actions/.hint/.field-note component
+         all come from ../style.css — shared with the homepage bonus panel so the two
+         stay visually identical. Only this page's own viewer chrome lives here. */
+
+      /* --- Viewer (URL loaded) --- */
+      #viewerWrap { position: relative; flex: 1; display: flex; }
+      #frame { flex: 1; width: 100%; border: 0; background: var(--bg); }
+
+      .loading {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        background: var(--bg);
+        color: var(--text-dim);
+        font-size: 0.9rem;
+        transition: opacity 220ms ease;
+      }
+      .spinner {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 3px solid var(--border);
+        border-top-color: var(--accent);
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+
+      /* --- Floating corner controls --- */
+      .corner {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .icon-btn {
+        position: relative;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(17, 20, 27, 0.72);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: var(--text);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+        cursor: pointer;
+        transition: transform 160ms ease, border-color 160ms ease, opacity 160ms ease,
+          background 160ms ease;
+      }
+      .icon-btn svg { width: 18px; height: 18px; }
+      .icon-btn:hover { border-color: var(--accent); transform: translateY(-1px); background: rgba(22, 26, 35, 0.9); }
+      .icon-btn.extra { opacity: 0; pointer-events: none; transform: translateX(10px) scale(0.9); }
+      .corner.open .icon-btn.extra { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
+
+      .icon-btn::after {
+        content: attr(data-tip);
+        position: absolute;
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(4px);
+        background: rgba(11, 13, 18, 0.95);
+        color: var(--text);
+        padding: 5px 9px;
+        border-radius: 6px;
+        border: 1px solid var(--border);
+        font-size: 0.74rem;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 140ms ease, transform 140ms ease;
+      }
+      .icon-btn:hover::after,
+      .icon-btn:focus-visible::after {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+
+      /* --- Landing form (no URL) — .panel/.row/.actions/.hint/.field-note/.back
+         all come from ../style.css; this just centers the panel in the viewport. --- */
+      .landing { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
+      .landing .panel { width: 100%; }
+    </style>
+  </head>
+  <body>
+    <script>
+      "use strict";
+
+      const ICONS = {
+        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
+        close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
+        home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+        external: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
+        plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
+        alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
+        copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
+        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
+      };
+
+      const DISABLED_REASON = "Enter a valid http(s) URL to enable View and Copy link.";
+
+      const TIP = "Tip: GitHub raw, jsDelivr and CORS-friendly URLs load directly; others go via a public proxy.";
+
+      const params = new URLSearchParams(location.search);
+      const target = params.get("url");
+
+      function isHttpUrl(s) {
+        try {
+          const u = new URL(s);
+          return u.protocol === "http:" || u.protocol === "https:";
+        } catch {
+          return false;
+        }
+      }
+
+      // ponytail: single public proxy fallback. Swap/add proxies here if it rate-limits or dies.
+      function proxied(u) {
+        return "https://corsproxy.io/?url=" + encodeURIComponent(u);
+      }
+
+      // Race a direct fetch (private, no third party) against the CORS proxy at the same time
+      // instead of waiting for the direct attempt to fail first — first one to succeed wins,
+      // the other is aborted. ponytail: always fires the proxy request too, trading a bit of
+      // proxy quota for lower latency on blocked sites.
+      function fetchHtml(u) {
+        return new Promise((resolve, reject) => {
+          let settled = false;
+          let failures = 0;
+          const directCtrl = new AbortController();
+          const proxyCtrl = new AbortController();
+
+          const succeed = (text, otherCtrl) => {
+            if (settled) return;
+            settled = true;
+            otherCtrl.abort();
+            resolve(text);
+          };
+          const fail = (err) => {
+            failures++;
+            if (failures === 2 && !settled) {
+              settled = true;
+              reject(err);
+            }
+          };
+
+          fetch(u, { redirect: "follow", signal: directCtrl.signal })
+            .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
+            .then((t) => succeed(t, proxyCtrl))
+            .catch(fail);
+
+          fetch(proxied(u), { signal: proxyCtrl.signal })
+            .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
+            .then((t) => succeed(t, directCtrl))
+            .catch(fail);
+        });
+      }
+
+      // Inject a <base> so the page's relative CSS/JS/images resolve against the source.
+      function withBase(html, u) {
+        if (/<base\b/i.test(html)) return html; // respect an existing base
+        const baseHref = new URL(".", u).href;
+        const tag = '<base href="' + baseHref + '">';
+        if (/<head[^>]*>/i.test(html)) return html.replace(/<head([^>]*)>/i, "<head$1>" + tag);
+        return tag + html;
+      }
+
+      function renderLanding(prefill, errorMsg) {
+        document.body.innerHTML = `
+          <div class="landing">
+            <div class="panel">
+              <h1>Any Page</h1>
+              <p class="lede">Paste any public HTML URL and view it as a live page or presentation. Nothing is stored — it renders in your browser.</p>
+              <form class="row" id="f">
+                <div class="field">
+                  <input id="u" type="url" inputmode="url" autocomplete="off"
+                    placeholder="https://example.com/slides/index.html" />
+                  <div class="field-actions">
+                    <button type="button" class="field-btn" id="copyInputBtn" aria-label="Copy" data-tip="Copy">${ICONS.copy}</button>
+                    <button type="button" class="field-btn" id="clearBtn" aria-label="Clear" data-tip="Clear">${ICONS.close}</button>
+                  </div>
+                </div>
+                <p class="field-note" id="fieldNote" hidden>${ICONS.alert} <span>${DISABLED_REASON}</span></p>
+                <div class="actions">
+                  <button type="submit" class="btn-primary" id="viewBtn" disabled>View</button>
+                  <button type="button" class="btn-secondary" id="copyBtn" disabled>Copy link</button>
+                </div>
+              </form>
+              <p class="hint${errorMsg ? " err" : ""}" id="hint">${errorMsg || TIP}</p>
+              <a class="back" href="../">← Back to Public Websites</a>
+            </div>
+          </div>`;
+        const input = document.getElementById("u");
+        const viewBtn = document.getElementById("viewBtn");
+        const copyBtn = document.getElementById("copyBtn");
+        const fieldNote = document.getElementById("fieldNote");
+        const copyInputBtn = document.getElementById("copyInputBtn");
+        const clearBtn = document.getElementById("clearBtn");
+        if (prefill) input.value = prefill;
+
+        let touched = false;
+        const sync = () => {
+          const v = input.value.trim();
+          const valid = isHttpUrl(v);
+          viewBtn.disabled = !valid;
+          copyBtn.disabled = !valid;
+          fieldNote.hidden = !(touched && !valid);
+          copyInputBtn.classList.toggle("show", v.length > 0);
+          clearBtn.classList.toggle("show", v.length > 0);
+        };
+        input.addEventListener("focus", () => {
+          touched = true;
+          sync();
+        });
+        input.addEventListener("input", sync);
+        sync();
+
+        clearBtn.addEventListener("click", () => {
+          input.value = "";
+          input.focus();
+          sync();
+        });
+
+        copyInputBtn.addEventListener("click", async () => {
+          const v = input.value.trim();
+          if (!v) return;
+          await navigator.clipboard.writeText(v);
+          copyInputBtn.innerHTML = ICONS.check;
+          copyInputBtn.setAttribute("data-tip", "Copied!");
+          setTimeout(() => {
+            copyInputBtn.innerHTML = ICONS.copy;
+            copyInputBtn.setAttribute("data-tip", "Copy");
+          }, 1200);
+        });
+
+        document.getElementById("f").addEventListener("submit", (e) => {
+          e.preventDefault();
+          const v = input.value.trim();
+          if (!isHttpUrl(v)) {
+            document.getElementById("hint").textContent = "Enter a valid http(s) URL.";
+            document.getElementById("hint").classList.add("err");
+            return;
+          }
+          location.search = "?url=" + encodeURIComponent(v);
+        });
+
+        copyBtn.addEventListener("click", async () => {
+          const v = input.value.trim();
+          if (!isHttpUrl(v)) return;
+          const link = new URL("?url=" + encodeURIComponent(v), location.href).href;
+          await navigator.clipboard.writeText(link);
+          const original = copyBtn.textContent;
+          copyBtn.textContent = "Copied!";
+          copyBtn.disabled = true;
+          setTimeout(() => {
+            copyBtn.textContent = original;
+            sync();
+          }, 1500);
+        });
+      }
+
+      async function renderViewer(u) {
+        document.body.innerHTML = `
+          <div id="viewerWrap">
+            <iframe id="frame" title="Rendered page"></iframe>
+            <div class="loading" id="loading">
+              <div class="spinner"></div>
+              <p>Loading page…</p>
+            </div>
+          </div>
+          <div class="corner" id="corner">
+            <a class="icon-btn extra" id="cornerOpen" target="_blank" rel="noopener" data-tip="Open source" aria-label="Open source">${ICONS.external}</a>
+            <a class="icon-btn extra" id="cornerNew" href="./" data-tip="New" aria-label="New">${ICONS.plus}</a>
+            <a class="icon-btn extra" id="cornerHome" href="../" data-tip="Public Websites" aria-label="Back to Public Websites">${ICONS.home}</a>
+            <button class="icon-btn" id="cornerToggle" type="button" data-tip="Info" aria-label="Show info">${ICONS.info}</button>
+          </div>`;
+
+        // Set via property, not string interpolation — u comes from the ?url= query
+        // param, and splicing it into the HTML template above would let a crafted
+        // link break out of the attribute and inject markup.
+        document.getElementById("cornerOpen").href = u;
+
+        const corner = document.getElementById("corner");
+        const toggle = document.getElementById("cornerToggle");
+        toggle.addEventListener("click", () => {
+          const open = corner.classList.toggle("open");
+          toggle.innerHTML = open ? ICONS.close : ICONS.info;
+          toggle.setAttribute("aria-label", open ? "Hide info" : "Show info");
+          toggle.setAttribute("data-tip", open ? "Hide info" : "Info");
+        });
+
+        try {
+          const html = await fetchHtml(u);
+          const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+          if (m && m[1].trim()) document.title = m[1].trim() + " · Any Page";
+          const frame = document.getElementById("frame");
+          const loading = document.getElementById("loading");
+          frame.addEventListener("load", () => {
+            loading.style.opacity = "0";
+            setTimeout(() => loading.remove(), 220);
+          });
+          // No allow-same-origin → rendered page runs in a null origin and cannot touch this site's storage/cookies.
+          // ponytail: safe default. Some pages needing same-origin APIs (localStorage) will degrade — that's the tradeoff for isolation.
+          frame.setAttribute(
+            "sandbox",
+            "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-presentation"
+          );
+          frame.srcdoc = withBase(html, u);
+        } catch (err) {
+          renderLanding(u, "Couldn't load that URL: " + err.message + ". It may block cross-origin access or be offline.");
+        }
+      }
+
+      if (target && isHttpUrl(target)) {
+        renderViewer(target);
+      } else {
+        renderLanding(target && !isHttpUrl(target) ? target : "", target ? "That wasn't a valid http(s) URL." : "");
+      }
+    </script>
+  </body>
+</html>

@@ -35,7 +35,10 @@ The source repo's `scripts/release.sh` does the heavy lifting (build + rsync int
 |---|---|
 | `/public-websites/` | `index.html` (home, lists all sites from sites.json) |
 | `/public-websites/<slug>/` | `<slug>/index.html` (the sub-site) |
+| `/public-websites/any-page/?url=<encoded-url>` | `any-page/index.html` (Any Page: fetches any public HTML URL and renders it in a sandboxed iframe) |
 | `/public-websites/<unknown>` | `404.html` |
+
+**`any-page/` is first-party, hand-authored** (like `index.html` / `404.html`) — NOT a generated sub-site dist and NOT a `sites.json` entry. Edit it directly here. The homepage links to it via its own "Bonus" panel (`.bonus` section in `index.html`) — not a `sites.json`-driven card. `any-page/index.html` links the root `../style.css` (shared `.panel`/`.row`/`.actions`/`.hint`/`.field-note` component) so its landing panel and the homepage bonus panel can't visually drift apart; only its viewer-only chrome (corner controls, loading spinner) lives in its own `<style>`.
 
 ## File paths in home page
 

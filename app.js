@@ -101,3 +101,81 @@ function escapeAttr(str) {
 search.addEventListener("input", (e) => filter(e.target.value));
 
 loadSites();
+
+// Bonus · Any Page — same view/copy-link behavior as the any-page landing panel.
+const bonusForm = document.getElementById("bonus-form");
+if (bonusForm) {
+  const urlInput = document.getElementById("bonus-url");
+  const viewBtn = document.getElementById("bonus-view");
+  const copyBtn = document.getElementById("bonus-copy");
+  const fieldNote = document.getElementById("bonus-note");
+  const copyInputBtn = document.getElementById("bonus-copy-input");
+  const clearBtn = document.getElementById("bonus-clear");
+  const copyInputIcon = copyInputBtn.innerHTML;
+  const checkIcon =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+  const isHttpUrl = (s) => {
+    try {
+      const u = new URL(s);
+      return u.protocol === "http:" || u.protocol === "https:";
+    } catch {
+      return false;
+    }
+  };
+
+  let touched = false;
+  const syncButtons = () => {
+    const v = urlInput.value.trim();
+    const valid = isHttpUrl(v);
+    viewBtn.disabled = !valid;
+    copyBtn.disabled = !valid;
+    fieldNote.hidden = !(touched && !valid);
+    copyInputBtn.classList.toggle("show", v.length > 0);
+    clearBtn.classList.toggle("show", v.length > 0);
+  };
+  urlInput.addEventListener("focus", () => {
+    touched = true;
+    syncButtons();
+  });
+  urlInput.addEventListener("input", syncButtons);
+  syncButtons();
+
+  clearBtn.addEventListener("click", () => {
+    urlInput.value = "";
+    urlInput.focus();
+    syncButtons();
+  });
+
+  copyInputBtn.addEventListener("click", async () => {
+    const v = urlInput.value.trim();
+    if (!v) return;
+    await navigator.clipboard.writeText(v);
+    copyInputBtn.innerHTML = checkIcon;
+    copyInputBtn.setAttribute("data-tip", "Copied!");
+    setTimeout(() => {
+      copyInputBtn.innerHTML = copyInputIcon;
+      copyInputBtn.setAttribute("data-tip", "Copy");
+    }, 1200);
+  });
+
+  bonusForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const v = urlInput.value.trim();
+    if (isHttpUrl(v)) location.href = "./any-page/?url=" + encodeURIComponent(v);
+  });
+
+  copyBtn.addEventListener("click", async () => {
+    const v = urlInput.value.trim();
+    if (!isHttpUrl(v)) return;
+    const link = new URL("./any-page/?url=" + encodeURIComponent(v), location.href).href;
+    await navigator.clipboard.writeText(link);
+    const original = copyBtn.textContent;
+    copyBtn.textContent = "Copied!";
+    copyBtn.disabled = true;
+    setTimeout(() => {
+      copyBtn.textContent = original;
+      syncButtons();
+    }, 1500);
+  });
+}
