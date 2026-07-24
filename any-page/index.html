@@ -15,12 +15,13 @@
     />
     <meta name="robots" content="noindex" />
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="../panel.css" />
     <title>Any Page · Public Websites</title>
     <style>
       /* Base resets, tokens, and the .panel/.row/.actions/.hint/.field-note component
-         all come from ../style.css — shared with the homepage bonus panel so the two
-         stay visually identical. Only this page's own viewer chrome lives here. */
+         all come from ../panel.css — shared with the homepage bonus panel (whose
+         style.css also imports panel.css) so the two stay visually identical.
+         Only this page's own viewer chrome lives here. */
 
       /* --- Viewer (URL loaded) --- */
       #viewerWrap { position: relative; flex: 1; display: flex; }
@@ -106,14 +107,16 @@
       }
 
       /* --- Landing form (no URL) — .panel/.row/.actions/.hint/.field-note/.back
-         all come from ../style.css; this just centers the panel in the viewport. --- */
+         all come from ../panel.css; this just centers the panel in the viewport. --- */
       .landing { flex: 1; display: flex; align-items: center; justify-content: center; padding: 24px; }
       .landing .panel { width: 100%; }
     </style>
   </head>
   <body>
-    <script>
+    <script type="module">
       "use strict";
+
+      import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "../url-field.js";
 
       const ICONS = {
         info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
@@ -123,24 +126,10 @@
         plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
         alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
         copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-        check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>',
       };
-
-      const DISABLED_REASON = "Enter a valid http(s) URL to enable View and Copy link.";
-
-      const TIP = "Tip: GitHub raw, jsDelivr and CORS-friendly URLs load directly; others go via a public proxy.";
 
       const params = new URLSearchParams(location.search);
       const target = params.get("url");
-
-      function isHttpUrl(s) {
-        try {
-          const u = new URL(s);
-          return u.protocol === "http:" || u.protocol === "https:";
-        } catch {
-          return false;
-        }
-      }
 
       // ponytail: single public proxy fallback. Swap/add proxies here if it rate-limits or dies.
       function proxied(u) {
@@ -219,46 +208,16 @@
             </div>
           </div>`;
         const input = document.getElementById("u");
-        const viewBtn = document.getElementById("viewBtn");
-        const copyBtn = document.getElementById("copyBtn");
-        const fieldNote = document.getElementById("fieldNote");
-        const copyInputBtn = document.getElementById("copyInputBtn");
-        const clearBtn = document.getElementById("clearBtn");
         if (prefill) input.value = prefill;
 
-        let touched = false;
-        const sync = () => {
-          const v = input.value.trim();
-          const valid = isHttpUrl(v);
-          viewBtn.disabled = !valid;
-          copyBtn.disabled = !valid;
-          fieldNote.hidden = !(touched && !valid);
-          copyInputBtn.classList.toggle("show", v.length > 0);
-          clearBtn.classList.toggle("show", v.length > 0);
-        };
-        input.addEventListener("focus", () => {
-          touched = true;
-          sync();
-        });
-        input.addEventListener("input", sync);
-        sync();
-
-        clearBtn.addEventListener("click", () => {
-          input.value = "";
-          input.focus();
-          sync();
-        });
-
-        copyInputBtn.addEventListener("click", async () => {
-          const v = input.value.trim();
-          if (!v) return;
-          await navigator.clipboard.writeText(v);
-          copyInputBtn.innerHTML = ICONS.check;
-          copyInputBtn.setAttribute("data-tip", "Copied!");
-          setTimeout(() => {
-            copyInputBtn.innerHTML = ICONS.copy;
-            copyInputBtn.setAttribute("data-tip", "Copy");
-          }, 1200);
+        wireUrlField({
+          input,
+          viewBtn: document.getElementById("viewBtn"),
+          copyBtn: document.getElementById("copyBtn"),
+          fieldNote: document.getElementById("fieldNote"),
+          copyInputBtn: document.getElementById("copyInputBtn"),
+          clearBtn: document.getElementById("clearBtn"),
+          buildLink: (v) => new URL("?url=" + encodeURIComponent(v), location.href).href,
         });
 
         document.getElementById("f").addEventListener("submit", (e) => {
@@ -270,20 +229,6 @@
             return;
           }
           location.search = "?url=" + encodeURIComponent(v);
-        });
-
-        copyBtn.addEventListener("click", async () => {
-          const v = input.value.trim();
-          if (!isHttpUrl(v)) return;
-          const link = new URL("?url=" + encodeURIComponent(v), location.href).href;
-          await navigator.clipboard.writeText(link);
-          const original = copyBtn.textContent;
-          copyBtn.textContent = "Copied!";
-          copyBtn.disabled = true;
-          setTimeout(() => {
-            copyBtn.textContent = original;
-            sync();
-          }, 1500);
         });
       }
 

@@ -59,14 +59,14 @@
             </div>
             <p class="field-note" id="bonus-note" hidden>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-              <span>Enter a valid http(s) URL to enable View and Copy link.</span>
+              <span id="bonus-note-text">Enter a valid http(s) URL to enable View and Copy link.</span>
             </p>
             <div class="actions">
               <button type="submit" class="btn-primary" id="bonus-view" disabled>View</button>
               <button type="button" class="btn-secondary" id="bonus-copy" disabled>Copy link</button>
             </div>
           </form>
-          <p class="hint">Tip: GitHub raw, jsDelivr and CORS-friendly URLs load directly; others go via a public proxy.</p>
+          <p class="hint" id="bonus-hint">Tip: GitHub raw, jsDelivr and CORS-friendly URLs load directly; others go via a public proxy.</p>
         </div>
       </section>
     </main>

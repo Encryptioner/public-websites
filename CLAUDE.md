@@ -11,7 +11,7 @@ Live: https://encryptioner.github.io/public-websites/
 
 ## What's here (and what's NOT)
 
-- **Here:** a static home page (`index.html` + `style.css` + `app.js`), a `sites.json` manifest, a `404.html`, and **committed `dist/` directories of each sub-site** at `./<slug>/`.
+- **Here:** a static home page (`index.html` + `style.css` + `app.js`), a shared `panel.css` (tokens + `.panel` component, imported by `style.css` and linked directly by `any-page/`) and `url-field.js` (URL-field JS behavior, imported by both), a `sites.json` manifest, a `404.html`, and **committed `dist/` directories of each sub-site** at `./<slug>/`.
 - **NOT here:** any sub-site source code, any build pipeline for sub-sites, any framework or node_modules. There is **no `package.json`**. There is **no build step**.
 
 ## Hard rules
@@ -38,7 +38,11 @@ The source repo's `scripts/release.sh` does the heavy lifting (build + rsync int
 | `/public-websites/any-page/?url=<encoded-url>` | `any-page/index.html` (Any Page: fetches any public HTML URL and renders it in a sandboxed iframe) |
 | `/public-websites/<unknown>` | `404.html` |
 
-**`any-page/` is first-party, hand-authored** (like `index.html` / `404.html`) — NOT a generated sub-site dist and NOT a `sites.json` entry. Edit it directly here. The homepage links to it via its own "Bonus" panel (`.bonus` section in `index.html`) — not a `sites.json`-driven card. `any-page/index.html` links the root `../style.css` (shared `.panel`/`.row`/`.actions`/`.hint`/`.field-note` component) so its landing panel and the homepage bonus panel can't visually drift apart; only its viewer-only chrome (corner controls, loading spinner) lives in its own `<style>`.
+**`any-page/` is first-party, hand-authored** (like `index.html` / `404.html`) — NOT a generated sub-site dist and NOT a `sites.json` entry. Edit it directly here. The homepage links to it via its own "Bonus" panel (`.bonus` section in `index.html`) — not a `sites.json`-driven card.
+
+Two things are shared between the homepage bonus panel and `any-page/index.html` so they can't visually or behaviorally drift apart — change them in one place, both pages pick it up:
+- **`panel.css`** — tokens (`:root`), base resets, and the `.panel`/`.row`/`.actions`/`.hint`/`.field-note` component. `style.css` does `@import url("./panel.css")` for the homepage; `any-page/index.html` links `../panel.css` directly (skipping the grid/card/footer CSS it doesn't need). Only `any-page`'s own viewer-only chrome (corner controls, loading spinner) lives in its own `<style>`.
+- **`url-field.js`** — `isHttpUrl()`, the `wireUrlField()` behavior (validation, clear/copy-in-field buttons, disabled-reason note, copy-link), and the shared `DISABLED_REASON`/`TIP` copy text. Both `app.js` and `any-page/index.html`'s inline `<script type="module">` import it (native ES modules, no bundler).
 
 ## File paths in home page
 
