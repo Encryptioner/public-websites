@@ -1,0 +1,86 @@
+/* Sandboxed-iframe viewer chrome for any-page/index.html, split out of its inline
+   <style> for readability. Depends on the :root tokens from ../panel.css (--bg, --text,
+   --text-dim, --border, --accent, --shadow), which index.html already links. */
+
+/* --- Viewer (URL loaded) --- */
+#viewerWrap { position: relative; flex: 1; display: flex; }
+#frame { flex: 1; width: 100%; border: 0; background: var(--bg); }
+
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: var(--bg);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  transition: opacity 220ms ease;
+}
+.spinner {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* --- Floating corner controls --- */
+.corner {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.icon-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 20, 27, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, opacity 160ms ease,
+    background 160ms ease;
+}
+.icon-btn svg { width: 18px; height: 18px; }
+.icon-btn:hover { border-color: var(--accent); transform: translateY(-1px); background: rgba(22, 26, 35, 0.9); }
+.icon-btn.extra { opacity: 0; pointer-events: none; transform: translateX(10px) scale(0.9); }
+.corner.open .icon-btn.extra { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
+
+.icon-btn::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: rgba(11, 13, 18, 0.95);
+  color: var(--text);
+  padding: 5px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  font-size: 0.74rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+.icon-btn:hover::after,
+.icon-btn:focus-visible::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}

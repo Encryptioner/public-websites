@@ -36,9 +36,12 @@ The source repo's `scripts/release.sh` does the heavy lifting (build + rsync int
 | `/public-websites/` | `index.html` (home, lists all sites from sites.json) |
 | `/public-websites/<slug>/` | `<slug>/index.html` (the sub-site) |
 | `/public-websites/any-page/?url=<encoded-url>` | `any-page/index.html` (Any Page: fetches any public HTML URL and renders it in a sandboxed iframe) |
+| `/public-websites/any-page/#<host>/<path...>` | `any-page/index.html` — hand-typed shorthand for the `?url=` form (e.g. `any-page/#raw.githubusercontent.com/user/repo/.../index.html`). `https://` is assumed. Uses a **fragment**, not extra path segments, on purpose: a fragment is never sent to the server, so this is a request for the real `index.html` file on any host (GitHub Pages, Netlify, Live Server, `python -m http.server`, ...) — no server-specific 404/rewrite behavior required. |
 | `/public-websites/<unknown>` | `404.html` |
 
 **`any-page/` is first-party, hand-authored** (like `index.html` / `404.html`) — NOT a generated sub-site dist and NOT a `sites.json` entry. Edit it directly here. The homepage links to it via its own "Bonus" panel (`.bonus` section in `index.html`) — not a `sites.json`-driven card.
+
+`any-page/viewer.js` (+ `any-page/viewer.css`) holds the sandboxed-iframe rendering logic (fetch-with-CORS-proxy-race, `<base>` injection, corner controls) split out of `index.html`'s inline `<script>`/`<style>` for readability — `index.html` imports `renderViewer()`/`ICONS` from it. Single consumer today; not a shared-across-pages module like `panel.css`/`url-field.js` below.
 
 Two things are shared between the homepage bonus panel and `any-page/index.html` so they can't visually or behaviorally drift apart — change them in one place, both pages pick it up:
 - **`panel.css`** — tokens (`:root`), base resets, and the `.panel`/`.row`/`.actions`/`.hint`/`.field-note` component. `style.css` does `@import url("./panel.css")` for the homepage; `any-page/index.html` links `../panel.css` directly (skipping the grid/card/footer CSS it doesn't need). Only `any-page`'s own viewer-only chrome (corner controls, loading spinner) lives in its own `<style>`.

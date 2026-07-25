@@ -16,95 +16,12 @@
     <meta name="robots" content="noindex" />
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="../panel.css" />
+    <link rel="stylesheet" href="./viewer.css" />
     <title>Any Page · Public Websites</title>
     <style>
       /* Base resets, tokens, and the .panel/.row/.actions/.hint/.field-note component
-         all come from ../panel.css — shared with the homepage bonus panel (whose
-         style.css also imports panel.css) so the two stay visually identical.
-         Only this page's own viewer chrome lives here. */
-
-      /* --- Viewer (URL loaded) --- */
-      #viewerWrap { position: relative; flex: 1; display: flex; }
-      #frame { flex: 1; width: 100%; border: 0; background: var(--bg); }
-
-      .loading {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 14px;
-        background: var(--bg);
-        color: var(--text-dim);
-        font-size: 0.9rem;
-        transition: opacity 220ms ease;
-      }
-      .spinner {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        border: 3px solid var(--border);
-        border-top-color: var(--accent);
-        animation: spin 0.8s linear infinite;
-      }
-      @keyframes spin { to { transform: rotate(360deg); } }
-
-      /* --- Floating corner controls --- */
-      .corner {
-        position: fixed;
-        right: 16px;
-        bottom: 16px;
-        z-index: 30;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .icon-btn {
-        position: relative;
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(17, 20, 27, 0.72);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        color: var(--text);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        box-shadow: var(--shadow);
-        cursor: pointer;
-        transition: transform 160ms ease, border-color 160ms ease, opacity 160ms ease,
-          background 160ms ease;
-      }
-      .icon-btn svg { width: 18px; height: 18px; }
-      .icon-btn:hover { border-color: var(--accent); transform: translateY(-1px); background: rgba(22, 26, 35, 0.9); }
-      .icon-btn.extra { opacity: 0; pointer-events: none; transform: translateX(10px) scale(0.9); }
-      .corner.open .icon-btn.extra { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); }
-
-      .icon-btn::after {
-        content: attr(data-tip);
-        position: absolute;
-        bottom: calc(100% + 8px);
-        left: 50%;
-        transform: translateX(-50%) translateY(4px);
-        background: rgba(11, 13, 18, 0.95);
-        color: var(--text);
-        padding: 5px 9px;
-        border-radius: 6px;
-        border: 1px solid var(--border);
-        font-size: 0.74rem;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 140ms ease, transform 140ms ease;
-      }
-      .icon-btn:hover::after,
-      .icon-btn:focus-visible::after {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
+         all come from ../panel.css; viewer chrome (#viewerWrap, .corner, .icon-btn, ...)
+         comes from ./viewer.css. Only this page's own landing-form layout lives here. */
 
       /* --- Landing form (no URL) — .panel/.row/.actions/.hint/.field-note/.back
          all come from ../panel.css; this just centers the panel in the viewport. --- */
@@ -117,80 +34,17 @@
       "use strict";
 
       import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "../url-field.js";
-
-      const ICONS = {
-        info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>',
-        close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>',
-        home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
-        external: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>',
-        plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>',
-        alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
-        copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>',
-      };
+      import { ICONS, renderViewer } from "./viewer.js";
 
       const params = new URLSearchParams(location.search);
-      const target = params.get("url");
-
-      // ponytail: single public proxy fallback. Swap/add proxies here if it rate-limits or dies.
-      function proxied(u) {
-        return "https://corsproxy.io/?url=" + encodeURIComponent(u);
-      }
-
-      // Race a direct fetch (private, no third party) against the CORS proxy at the same time
-      // instead of waiting for the direct attempt to fail first — first one to succeed wins,
-      // the other is aborted. ponytail: always fires the proxy request too, trading a bit of
-      // proxy quota for lower latency on blocked sites.
-      //
-      // Resolves { html, finalUrl } — finalUrl is response.url (post-redirect) for the direct
-      // path, since relative asset paths must resolve against where the page actually landed,
-      // not the URL typed in (e.g. raw.github.com 301s to raw.githubusercontent.com/.../file).
-      // The proxy path can't report the target's real final URL (response.url is the proxy's),
-      // so it falls back to u.
-      function fetchHtml(u) {
-        return new Promise((resolve, reject) => {
-          let settled = false;
-          let failures = 0;
-          const directCtrl = new AbortController();
-          const proxyCtrl = new AbortController();
-
-          const succeed = (result, otherCtrl) => {
-            if (settled) return;
-            settled = true;
-            otherCtrl.abort();
-            resolve(result);
-          };
-          const fail = (err) => {
-            failures++;
-            if (failures === 2 && !settled) {
-              settled = true;
-              reject(err);
-            }
-          };
-
-          fetch(u, { redirect: "follow", signal: directCtrl.signal })
-            .then((r) =>
-              r.ok
-                ? r.text().then((t) => ({ html: t, finalUrl: r.url || u }))
-                : Promise.reject(new Error("HTTP " + r.status))
-            )
-            .then((res) => succeed(res, proxyCtrl))
-            .catch(fail);
-
-          fetch(proxied(u), { signal: proxyCtrl.signal })
-            .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
-            .then((t) => succeed({ html: t, finalUrl: u }, directCtrl))
-            .catch(fail);
-        });
-      }
-
-      // Inject a <base> so the page's relative CSS/JS/images resolve against the source.
-      function withBase(html, u) {
-        if (/<base\b/i.test(html)) return html; // respect an existing base
-        const baseHref = new URL(".", u).href;
-        const tag = '<base href="' + baseHref + '">';
-        if (/<head[^>]*>/i.test(html)) return html.replace(/<head([^>]*)>/i, "<head$1>" + tag);
-        return tag + html;
-      }
+      // ?url=<encoded> is the primary form. #<host>/<path...> is a hand-typed shorthand
+      // (e.g. any-page/#raw.githubusercontent.com/user/repo/.../index.html) — a fragment
+      // is never sent to any server, so this is just a request for this real file on
+      // ANY host (GitHub Pages, Netlify, Live Server, python -m http.server, ...),
+      // unlike a passthrough built from extra path segments which only a server willing
+      // to serve custom content for unmatched deep paths (a GH-Pages-only 404 quirk)
+      // could ever resolve.
+      const target = params.get("url") || (location.hash.length > 1 ? "https://" + decodeURIComponent(location.hash.slice(1)) : null);
 
       function renderLanding(prefill, errorMsg) {
         document.body.innerHTML = `
@@ -242,60 +96,10 @@
         });
       }
 
-      async function renderViewer(u) {
-        document.body.innerHTML = `
-          <div id="viewerWrap">
-            <iframe id="frame" title="Rendered page"></iframe>
-            <div class="loading" id="loading">
-              <div class="spinner"></div>
-              <p>Loading page…</p>
-            </div>
-          </div>
-          <div class="corner" id="corner">
-            <a class="icon-btn extra" id="cornerOpen" target="_blank" rel="noopener" data-tip="Open source" aria-label="Open source">${ICONS.external}</a>
-            <a class="icon-btn extra" id="cornerNew" href="./" data-tip="New" aria-label="New">${ICONS.plus}</a>
-            <a class="icon-btn extra" id="cornerHome" href="../" data-tip="Public Websites" aria-label="Back to Public Websites">${ICONS.home}</a>
-            <button class="icon-btn" id="cornerToggle" type="button" data-tip="Info" aria-label="Show info">${ICONS.info}</button>
-          </div>`;
-
-        // Set via property, not string interpolation — u comes from the ?url= query
-        // param, and splicing it into the HTML template above would let a crafted
-        // link break out of the attribute and inject markup.
-        document.getElementById("cornerOpen").href = u;
-
-        const corner = document.getElementById("corner");
-        const toggle = document.getElementById("cornerToggle");
-        toggle.addEventListener("click", () => {
-          const open = corner.classList.toggle("open");
-          toggle.innerHTML = open ? ICONS.close : ICONS.info;
-          toggle.setAttribute("aria-label", open ? "Hide info" : "Show info");
-          toggle.setAttribute("data-tip", open ? "Hide info" : "Info");
-        });
-
-        try {
-          const { html, finalUrl } = await fetchHtml(u);
-          const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-          if (m && m[1].trim()) document.title = m[1].trim() + " · Any Page";
-          const frame = document.getElementById("frame");
-          const loading = document.getElementById("loading");
-          frame.addEventListener("load", () => {
-            loading.style.opacity = "0";
-            setTimeout(() => loading.remove(), 220);
-          });
-          // No allow-same-origin → rendered page runs in a null origin and cannot touch this site's storage/cookies.
-          // ponytail: safe default. Some pages needing same-origin APIs (localStorage) will degrade — that's the tradeoff for isolation.
-          frame.setAttribute(
-            "sandbox",
-            "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-presentation"
-          );
-          frame.srcdoc = withBase(html, finalUrl);
-        } catch (err) {
-          renderLanding(u, "Couldn't load that URL: " + err.message + ". It may block cross-origin access or be offline.");
-        }
-      }
-
       if (target && isHttpUrl(target)) {
-        renderViewer(target);
+        renderViewer(target, (err) =>
+          renderLanding(target, "Couldn't load that URL: " + err.message + ". It may block cross-origin access or be offline.")
+        );
       } else {
         renderLanding(target && !isHttpUrl(target) ? target : "", target ? "That wasn't a valid http(s) URL." : "");
       }
