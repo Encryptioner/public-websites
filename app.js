@@ -128,6 +128,7 @@ if (bonusForm) {
   bonusForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const v = urlInput.value.trim();
-    if (isHttpUrl(v)) location.href = "./any-page/?url=" + encodeURIComponent(v);
+    // Open in a new tab so the homepage stays put, matching any-page's own View button.
+    if (isHttpUrl(v)) window.open(new URL("./any-page/?url=" + encodeURIComponent(v), location.href).href, "_blank", "noopener");
   });
 }

@@ -65,13 +65,22 @@ function fetchHtml(u) {
   });
 }
 
-// Inject a <base> so the page's relative CSS/JS/images resolve against the source.
+// Sandboxed without allow-same-origin → the iframe document's origin is opaque
+// ("null"), so history.pushState/replaceState throw SecurityError for ANY url
+// argument (same-origin check always fails). Many pages do hash-based routing
+// via replaceState (slide decks, client routers) — silence just that failure
+// so their own in-page navigation keeps working instead of throwing uncaught.
+const HISTORY_SHIM =
+  "<script>(function(){var p=History.prototype;[\"pushState\",\"replaceState\"].forEach(function(n){var orig=p[n];p[n]=function(){try{return orig.apply(this,arguments);}catch(e){}};});})();<\/script>";
+
+// Inject a <base> (for relative CSS/JS/image resolution) and the history shim
+// above, both as early as possible so they apply before the page's own scripts run.
 function withBase(html, u) {
-  if (/<base\b/i.test(html)) return html; // respect an existing base
   const baseHref = new URL(".", u).href;
-  const tag = '<base href="' + baseHref + '">';
-  if (/<head[^>]*>/i.test(html)) return html.replace(/<head([^>]*)>/i, "<head$1>" + tag);
-  return tag + html;
+  const baseTag = /<base\b/i.test(html) ? "" : '<base href="' + baseHref + '">'; // respect an existing base
+  const inject = baseTag + HISTORY_SHIM;
+  if (/<head[^>]*>/i.test(html)) return html.replace(/<head([^>]*)>/i, "<head$1>" + inject);
+  return inject + html;
 }
 
 // Renders u in a sandboxed iframe. Calls onError(err) instead of throwing if the fetch fails.

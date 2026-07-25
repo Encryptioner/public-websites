@@ -92,7 +92,9 @@
             document.getElementById("hint").classList.add("err");
             return;
           }
-          location.search = "?url=" + encodeURIComponent(v);
+          // Open in a new tab so the landing form stays put — lets you queue up
+          // several pages instead of losing the form on every View click.
+          window.open(new URL("?url=" + encodeURIComponent(v), location.href).href, "_blank", "noopener");
         });
       }
 

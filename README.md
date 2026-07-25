@@ -17,7 +17,15 @@ Every entry on the home page is its own standalone web app. Some are progressive
 - **[CGPA Calculator · Bangladesh](https://encryptioner.github.io/public-websites/cgpa-calculator/)**  
   Offline CGPA tool for Bangladesh honours students. Browser-only, offline-first PWA to calculate GPA and CGPA for Bangladesh honours-level programmes. Works without internet, installable on mobile and desktop.
 
+- **[Electricity Calculator](https://encryptioner.github.io/public-websites/electricity-calculator/)**  
+  Private, offline-friendly electricity usage calculator. Search, select or add any device and its wattage, set daily hours (with variable usage spans), and see your monthly kWh/units instantly. Save history and export a PDF report. English & বাংলা.
+
 Browse the live site to see what's there today — the list grows over time.
+
+### Bonus: Any Page
+
+- **[Any Page](https://encryptioner.github.io/public-websites/any-page/)**  
+  Paste any public HTML URL and view it as a live page or presentation, right in your browser — nothing stored. Handy for viewing raw GitHub HTML files, decks, or demos without downloading them first.
 
 ## Why a single hub
 
