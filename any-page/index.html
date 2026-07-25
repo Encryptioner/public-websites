@@ -140,6 +140,12 @@
       // instead of waiting for the direct attempt to fail first — first one to succeed wins,
       // the other is aborted. ponytail: always fires the proxy request too, trading a bit of
       // proxy quota for lower latency on blocked sites.
+      //
+      // Resolves { html, finalUrl } — finalUrl is response.url (post-redirect) for the direct
+      // path, since relative asset paths must resolve against where the page actually landed,
+      // not the URL typed in (e.g. raw.github.com 301s to raw.githubusercontent.com/.../file).
+      // The proxy path can't report the target's real final URL (response.url is the proxy's),
+      // so it falls back to u.
       function fetchHtml(u) {
         return new Promise((resolve, reject) => {
           let settled = false;
@@ -147,11 +153,11 @@
           const directCtrl = new AbortController();
           const proxyCtrl = new AbortController();
 
-          const succeed = (text, otherCtrl) => {
+          const succeed = (result, otherCtrl) => {
             if (settled) return;
             settled = true;
             otherCtrl.abort();
-            resolve(text);
+            resolve(result);
           };
           const fail = (err) => {
             failures++;
@@ -162,13 +168,17 @@
           };
 
           fetch(u, { redirect: "follow", signal: directCtrl.signal })
-            .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
-            .then((t) => succeed(t, proxyCtrl))
+            .then((r) =>
+              r.ok
+                ? r.text().then((t) => ({ html: t, finalUrl: r.url || u }))
+                : Promise.reject(new Error("HTTP " + r.status))
+            )
+            .then((res) => succeed(res, proxyCtrl))
             .catch(fail);
 
           fetch(proxied(u), { signal: proxyCtrl.signal })
             .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
-            .then((t) => succeed(t, directCtrl))
+            .then((t) => succeed({ html: t, finalUrl: u }, directCtrl))
             .catch(fail);
         });
       }
@@ -263,7 +273,7 @@
         });
 
         try {
-          const html = await fetchHtml(u);
+          const { html, finalUrl } = await fetchHtml(u);
           const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
           if (m && m[1].trim()) document.title = m[1].trim() + " · Any Page";
           const frame = document.getElementById("frame");
@@ -278,7 +288,7 @@
             "sandbox",
             "allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms allow-modals allow-presentation"
           );
-          frame.srcdoc = withBase(html, u);
+          frame.srcdoc = withBase(html, finalUrl);
         } catch (err) {
           renderLanding(u, "Couldn't load that URL: " + err.message + ". It may block cross-origin access or be offline.");
         }
