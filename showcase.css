@@ -1,28 +1,31 @@
-/* Showcase section — homepage-only. Tokens/base come from panel.css; grid +
-   .card base come from style.css (both linked before this in index.html). */
+/* Showcase + Blog sections — homepage-only. Tokens/base come from panel.css;
+   grid + .card base come from style.css (linked before this in index.html).
+   .sec-head/.sec-sub and the media-card styles are shared by both sections. */
 
-.showcase { margin-top: 56px; }
+.showcase,
+.blog { margin-top: 56px; }
 
 /* Compact grid: more, smaller cards than the sites grid above it. */
-.showcase .grid {
+.showcase .grid,
+.blog .grid {
   grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
   gap: 12px;
 }
 
-.showcase-head { margin-bottom: 16px; }
-.showcase-head h2 {
+.sec-head { margin-bottom: 16px; }
+.sec-head h2 {
   margin: 0 0 6px;
   font-size: clamp(1.4rem, 2.5vw, 1.8rem);
   letter-spacing: -0.02em;
 }
-.showcase-sub {
+.sec-sub {
   margin: 0;
   color: var(--text-dim);
   font-size: 0.95rem;
   line-height: 1.5;
 }
 
-/* Filter chips */
+/* Filter chips (Showcase only) */
 .chips {
   display: flex;
   flex-wrap: wrap;
@@ -126,5 +129,6 @@
 }
 
 @media (max-width: 480px) {
-  .showcase { margin-top: 40px; }
+  .showcase,
+  .blog { margin-top: 40px; }
 }

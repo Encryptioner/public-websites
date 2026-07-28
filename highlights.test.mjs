@@ -18,7 +18,7 @@ const EXCLUDED = new Set([
   "order-genie-shopify", "pixels-craft", "second-line", "daency",
   "daily-stocks", "bikribatta",
 ]);
-const EXPECTED = { highlights: 4, projects: 19, articles: 11 };
+const EXPECTED = { highlights: 4, projects: 19 };
 const isHttp = (s) => typeof s === "string" && /^https?:\/\//.test(s);
 
 let failed = 0;

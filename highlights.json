@@ -1,8 +1,7 @@
 {
   "groups": [
     { "id": "highlights", "label": "Highlights" },
-    { "id": "projects", "label": "Projects" },
-    { "id": "articles", "label": "Articles" }
+    { "id": "projects", "label": "Projects" }
   ],
   "items": [
     {
@@ -234,116 +233,6 @@
       "description": "Real-time chat with WebSocket and background tasks",
       "image": "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=400&h=300&fit=crop&crop=center",
       "link": "https://github.com/Encryptioner/Text-Bomb"
-    },
-    {
-      "id": "claude-code-blog",
-      "title": "Claude Code Blueprint",
-      "group": "articles",
-      "category": "AI & DevTools",
-      "details": "Production Guide",
-      "description": "Complete Claude Code configuration guide for production teams",
-      "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/claude-code-configuration-blueprint-the-complete-guide-for-production-teams-39pd"
-    },
-    {
-      "id": "bd-software-industry-blog",
-      "title": "BD Software Industry",
-      "group": "articles",
-      "category": "Industry",
-      "details": "21 min read",
-      "description": "Inside Bangladesh's software industry — companies, models, and opportunities",
-      "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/inside-bangladeshs-software-industry-companies-models-and-opportunities-3aml"
-    },
-    {
-      "id": "software-business-models-blog",
-      "title": "Software Business Models",
-      "group": "articles",
-      "category": "Business",
-      "details": "20 min read",
-      "description": "The complete guide to software business models",
-      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/the-complete-guide-to-software-business-models-52cd"
-    },
-    {
-      "id": "bd-dev-guide-blog",
-      "title": "BD Developer Guide",
-      "group": "articles",
-      "category": "Career",
-      "details": "10 min read",
-      "description": "Practical guide for developers navigating Bangladesh's software industry",
-      "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/navigating-bangladeshs-software-industry-a-practical-guide-for-developers-in-2026-1g12"
-    },
-    {
-      "id": "npm-package-blog",
-      "title": "Publishing First NPM Package",
-      "group": "articles",
-      "category": "Guide",
-      "details": "Real-world Guide",
-      "description": "A practical guide to publishing NPM packages with updated 2025 practices",
-      "image": "https://images.unsplash.com/photo-1561070791-2526d30994b5?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/publishing-your-first-npm-package-a-real-world-guide-that-actually-helps-4l4"
-    },
-    {
-      "id": "custom-shell-blog",
-      "title": "Build Your Own Shell",
-      "group": "articles",
-      "category": "Tutorial",
-      "details": "7 min read",
-      "description": "Step-by-step guide to building shell in C",
-      "image": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
-    },
-    {
-      "id": "bitbucket-mcp-blog",
-      "title": "Bitbucket MCP Guide",
-      "group": "articles",
-      "category": "DevTools",
-      "details": "26 Reactions",
-      "description": "Integrating Bitbucket MCP with Cursor IDE",
-      "image": "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
-    },
-    {
-      "id": "google-sheets-blog",
-      "title": "Google Sheets Access",
-      "group": "articles",
-      "category": "Automation",
-      "details": "6 min read",
-      "description": "Control sheet access for form submitters only",
-      "image": "https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
-    },
-    {
-      "id": "engineering-newsletters-blog",
-      "title": "Engineering Newsletters",
-      "group": "articles",
-      "category": "Career",
-      "details": "30+ Resources",
-      "description": "Go-to engineering newsletters summarized",
-      "image": "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
-    },
-    {
-      "id": "gmail-newsletters-blog",
-      "title": "Gmail Newsletter List",
-      "group": "articles",
-      "category": "Automation",
-      "details": "4 min read",
-      "description": "List newsletters filling up Gmail with script",
-      "image": "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
-    },
-    {
-      "id": "pnpm-blog",
-      "title": "pnpm Package Manager",
-      "group": "articles",
-      "category": "Node.js",
-      "details": "4 min read",
-      "description": "Why pnpm is better than npm for Node.js",
-      "image": "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
     }
   ]
 }
