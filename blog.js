@@ -3,6 +3,8 @@ import { mediaCardHtml } from "./card.js";
 
 const grid = document.getElementById("blog-grid");
 const empty = document.getElementById("blog-empty");
+const countEl = document.querySelector(".blog .sec-count");
+const detailsEl = document.querySelector(".blog details");
 
 export async function initBlog() {
   if (!grid) return;
@@ -11,6 +13,10 @@ export async function initBlog() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     const items = Array.isArray(data.items) ? data.items : [];
+    if (countEl) {
+      countEl.textContent = String(items.length);
+      countEl.hidden = false;
+    }
     if (!items.length) {
       grid.innerHTML = "";
       empty.hidden = false;
@@ -36,4 +42,9 @@ grid?.addEventListener("click", (e) => {
     position: [...grid.querySelectorAll("a.card--media")].indexOf(card) + 1,
     host: hostOf(card.href),
   });
+});
+
+// Section expand/collapse — native <details> toggle event.
+detailsEl?.addEventListener("toggle", () => {
+  track("section_toggled", { section: "blog", expanded: detailsEl.open });
 });

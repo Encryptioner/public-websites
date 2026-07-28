@@ -4,6 +4,8 @@ import { mediaCardHtml, escapeHtml, escapeAttr } from "./card.js";
 const grid = document.getElementById("showcase-grid");
 const chipsEl = document.getElementById("showcase-chips");
 const empty = document.getElementById("showcase-empty");
+const countEl = document.querySelector(".showcase .sec-count");
+const detailsEl = document.querySelector(".showcase details");
 
 let allItems = [];
 let activeGroup = "all";
@@ -60,6 +62,10 @@ export async function initShowcase() {
     activeGroup = "all";
     chipsEl.innerHTML = chipsHtml();
     applyFilter();
+    if (countEl) {
+      countEl.textContent = String(allItems.length);
+      countEl.hidden = false;
+    }
     track("showcase_loaded", {
       count: allItems.length,
       groups: groupMeta.map((g) => g.id),
@@ -90,4 +96,9 @@ grid?.addEventListener("click", (e) => {
     position: [...grid.querySelectorAll("a.card--media")].indexOf(card) + 1,
     host: hostOf(card.href),
   });
+});
+
+// Section expand/collapse — native <details> toggle event.
+detailsEl?.addEventListener("toggle", () => {
+  track("section_toggled", { section: "showcase", expanded: detailsEl.open });
 });

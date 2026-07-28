@@ -12,18 +12,63 @@
   gap: 12px;
 }
 
-.sec-head { margin-bottom: 16px; }
-.sec-head h2 {
-  margin: 0 0 6px;
+/* Collapsible section header — <summary> is the click target (native toggle,
+   keyboard, ARIA). Default marker hidden; a chevron SVG rotates on open. */
+.sec-head {
+  display: block;
+  margin: 0;
+  padding: 4px 0;
+  cursor: pointer;
+  list-style: none; /* Firefox: drop the default disclosure triangle */
+}
+.sec-head::-webkit-details-marker { display: none; } /* Chrome/Safari */
+.sec-head:hover .chev { color: var(--accent); }
+
+.sec-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-title-row h2 {
+  margin: 0;
   font-size: clamp(1.4rem, 2.5vw, 1.8rem);
   letter-spacing: -0.02em;
 }
+/* Item-count pill — populated by JS after the section's data loads. */
+.sec-count {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.chev {
+  width: 18px;
+  height: 18px;
+  margin-left: auto;
+  color: var(--text-dim);
+  flex: none;
+  transition: transform 160ms ease;
+}
+details[open] > .sec-head .chev { transform: rotate(90deg); }
+
 .sec-sub {
-  margin: 0;
+  margin: 6px 0 0;
   color: var(--text-dim);
   font-size: 0.95rem;
   line-height: 1.5;
 }
+
+/* Body spacing + reveal only matter once expanded. */
+.sec-body { margin-top: 16px; }
+@keyframes sec-reveal {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+/* No height-slide: animating auto height on a card grid is janky. Fade only. */
+details[open] > .sec-body { animation: sec-reveal 160ms ease; }
 
 /* Filter chips (Showcase only) */
 .chips {
@@ -58,7 +103,10 @@
 
 /* Media card variant — banner image + body. Shares .card base from style.css
    (border, radius, shadow, hover lift). Override padding/gap so image is flush. */
-.card--media { padding: 0; gap: 0; overflow: hidden; }
+/* height:100% fills the stretched grid cell so every card in a row matches
+   the tallest — equal card heights. .card-body flex:1 + .card-foot
+   margin-top:auto then pin each card's foot to a common baseline. */
+.card--media { padding: 0; gap: 0; overflow: hidden; height: 100%; }
 .card-media {
   aspect-ratio: 16 / 10;
   width: 100%;
@@ -126,6 +174,8 @@
 @media (prefers-reduced-motion: reduce) {
   .card--media:hover .card-media img { transform: none; }
   .card--media:hover { transform: none; }
+  .chev { transition: none; }
+  details[open] > .sec-body { animation: none; }
 }
 
 @media (max-width: 480px) {

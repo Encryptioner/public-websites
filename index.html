@@ -72,24 +72,40 @@
       </section>
 
       <section class="showcase" aria-labelledby="showcase-title">
-        <div class="sec-head">
-          <h2 id="showcase-title">Showcase</h2>
-          <p class="sec-sub">
-            Open-source projects and career milestones.
-          </p>
-        </div>
-        <div class="chips" id="showcase-chips" role="tablist" aria-label="Filter showcase"></div>
-        <ul id="showcase-grid" class="grid" aria-live="polite"></ul>
-        <p id="showcase-empty" class="empty" hidden>Nothing in this group.</p>
+        <details>
+          <summary class="sec-head">
+            <span class="sec-title-row">
+              <h2 id="showcase-title">Showcase</h2>
+              <span class="sec-count" hidden></span>
+              <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            </span>
+            <p class="sec-sub">
+              Open-source projects and career milestones.
+            </p>
+          </summary>
+          <div class="sec-body">
+            <div class="chips" id="showcase-chips" role="tablist" aria-label="Filter showcase"></div>
+            <ul id="showcase-grid" class="grid" aria-live="polite"></ul>
+            <p id="showcase-empty" class="empty" hidden>Nothing in this group.</p>
+          </div>
+        </details>
       </section>
 
       <section class="blog" aria-labelledby="blog-title">
-        <div class="sec-head">
-          <h2 id="blog-title">Blog & Presentations</h2>
-          <p class="sec-sub">Articles, tutorials, and slide decks I've published.</p>
-        </div>
-        <ul id="blog-grid" class="grid" aria-live="polite"></ul>
-        <p id="blog-empty" class="empty" hidden>No posts yet.</p>
+        <details>
+          <summary class="sec-head">
+            <span class="sec-title-row">
+              <h2 id="blog-title">Blog & Presentations</h2>
+              <span class="sec-count" hidden></span>
+              <svg class="chev" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6" /></svg>
+            </span>
+            <p class="sec-sub">Articles, tutorials, and slide decks I've published.</p>
+          </summary>
+          <div class="sec-body">
+            <ul id="blog-grid" class="grid" aria-live="polite"></ul>
+            <p id="blog-empty" class="empty" hidden>No posts yet.</p>
+          </div>
+        </details>
       </section>
     </main>
 
