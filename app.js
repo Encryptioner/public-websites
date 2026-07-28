@@ -1,6 +1,7 @@
 import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "./url-field.js";
 import { buildViewerLink, linkFormat } from "./viewer-link.js";
 import { track, hostOf } from "./analytics.js";
+import { initShowcase } from "./showcase.js";
 
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
@@ -143,6 +144,9 @@ document.querySelector("footer").addEventListener("click", (e) => {
 });
 
 loadSites();
+
+// Showcase section — renders highlights/projects/articles as filterable cards.
+initShowcase();
 
 // Bonus · Any Page — same view/copy-link behavior as the any-page landing panel,
 // wired via the shared ./url-field.js module.

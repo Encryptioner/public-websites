@@ -10,6 +10,7 @@
     <meta name="theme-color" content="#0b0d12" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./style.css" />
+    <link rel="stylesheet" href="./showcase.css" />
     <title>Public Websites · Ankur Mursalin</title>
   </head>
   <body>
@@ -33,6 +34,18 @@
     <main>
       <ul id="grid" class="grid" aria-live="polite"></ul>
       <p id="empty" class="empty" hidden>No sites match that search.</p>
+
+      <section class="showcase" aria-labelledby="showcase-title">
+        <div class="showcase-head">
+          <h2 id="showcase-title">Showcase</h2>
+          <p class="showcase-sub">
+            Broader work — open-source projects, writing, and career milestones.
+          </p>
+        </div>
+        <div class="chips" id="showcase-chips" role="tablist" aria-label="Filter showcase"></div>
+        <ul id="showcase-grid" class="grid" aria-live="polite"></ul>
+        <p id="showcase-empty" class="empty" hidden>Nothing in this group.</p>
+      </section>
 
       <section class="bonus" aria-labelledby="bonus-title">
         <div class="panel">
