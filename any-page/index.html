@@ -34,17 +34,19 @@
       "use strict";
 
       import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "../url-field.js";
+      import { buildViewerLink, readViewerTarget, linkFormat } from "../viewer-link.js";
+      import { track, hostOf } from "../analytics.js";
       import { ICONS, renderViewer } from "./viewer.js";
 
-      const params = new URLSearchParams(location.search);
-      // ?url=<encoded> is the primary form. #<host>/<path...> is a hand-typed shorthand
-      // (e.g. any-page/#raw.githubusercontent.com/user/repo/.../index.html) — a fragment
-      // is never sent to any server, so this is just a request for this real file on
-      // ANY host (GitHub Pages, Netlify, Live Server, python -m http.server, ...),
-      // unlike a passthrough built from extra path segments which only a server willing
-      // to serve custom content for unmatched deep paths (a GH-Pages-only 404 quirk)
-      // could ever resolve.
-      const target = params.get("url") || (location.hash.length > 1 ? "https://" + decodeURIComponent(location.hash.slice(1)) : null);
+      // Both link forms (#host/path and ?url=<encoded>) are read by the shared
+      // ../viewer-link.js — the one place the format lives.
+      const { target, format } = readViewerTarget();
+
+      // The hash form is now the default link, and a hash-only change (typing a new
+      // target in the address bar, or following an any-page/#… link while already on
+      // any-page) does NOT reload the document — without this the page would keep
+      // showing the previous target. ponytail: reload beats re-plumbing render state.
+      window.addEventListener("hashchange", () => location.reload());
 
       function renderLanding(prefill, errorMsg) {
         document.body.innerHTML = `
@@ -81,7 +83,8 @@
           fieldNote: document.getElementById("fieldNote"),
           copyInputBtn: document.getElementById("copyInputBtn"),
           clearBtn: document.getElementById("clearBtn"),
-          buildLink: (v) => new URL("?url=" + encodeURIComponent(v), location.href).href,
+          viewerBase: "./",
+          context: "any_page",
         });
 
         document.getElementById("f").addEventListener("submit", (e) => {
@@ -90,19 +93,27 @@
           if (!isHttpUrl(v)) {
             document.getElementById("hint").textContent = "Enter a valid http(s) URL.";
             document.getElementById("hint").classList.add("err");
+            track("viewer_open_rejected", { context: "any_page" });
             return;
           }
+          track("viewer_opened", { context: "any_page", host: hostOf(v), link_format: linkFormat(v) });
           // Open in a new tab so the landing form stays put — lets you queue up
           // several pages instead of losing the form on every View click.
-          window.open(new URL("?url=" + encodeURIComponent(v), location.href).href, "_blank", "noopener");
+          window.open(buildViewerLink(v, "./"), "_blank", "noopener");
         });
+
+        document.querySelector(".back").addEventListener("click", () => track("back_to_hub_clicked"));
       }
 
       if (target && isHttpUrl(target)) {
+        // entry_format tells which link form visitors actually arrive on — the
+        // signal for whether the hash default is worth keeping.
+        track("any_page_entered", { mode: "viewer", entry_format: format, host: hostOf(target) });
         renderViewer(target, (err) =>
           renderLanding(target, "Couldn't load that URL: " + err.message + ". It may block cross-origin access or be offline.")
         );
       } else {
+        track("any_page_entered", { mode: "landing", entry_format: format || "none", host: target ? hostOf(target) : "none" });
         renderLanding(target && !isHttpUrl(target) ? target : "", target ? "That wasn't a valid http(s) URL." : "");
       }
     </script>

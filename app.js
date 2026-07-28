@@ -1,10 +1,13 @@
 import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "./url-field.js";
+import { buildViewerLink, linkFormat } from "./viewer-link.js";
+import { track, hostOf } from "./analytics.js";
 
 const grid = document.getElementById("grid");
 const empty = document.getElementById("empty");
 const search = document.getElementById("search");
 
 let allSites = [];
+let shown = [];
 
 async function loadSites() {
   try {
@@ -13,10 +16,12 @@ async function loadSites() {
     const data = await res.json();
     allSites = Array.isArray(data.sites) ? data.sites : [];
     render(allSites);
+    track("sites_loaded", { site_count: allSites.length });
   } catch (err) {
     grid.innerHTML = "";
     empty.hidden = false;
     empty.textContent = `Failed to load sites.json: ${err.message}`;
+    track("sites_load_failed", { error: String(err.message).slice(0, 100) });
   }
 }
 
@@ -43,11 +48,11 @@ function cardHtml(site) {
     ? `<img src="${escapeAttr(site.icon)}" alt="" loading="lazy" />`
     : `<span>${escapeHtml(initials(site.name))}</span>`;
   const sourceLink = site.source
-    ? `<a href="${escapeAttr(site.source)}" rel="noopener" onclick="event.stopPropagation()">source</a>`
+    ? `<a href="${escapeAttr(site.source)}" rel="noopener" data-source-of="${escapeAttr(site.slug)}" onclick="event.stopPropagation()">source</a>`
     : "";
   return `
     <li>
-      <a class="card" href="${escapeAttr(siteUrl(site))}">
+      <a class="card" href="${escapeAttr(siteUrl(site))}" data-slug="${escapeAttr(site.slug)}">
         <div class="card-head">
           <div class="card-icon">${iconNode}</div>
           <h2 class="card-title">${escapeHtml(site.name)}</h2>
@@ -64,6 +69,7 @@ function cardHtml(site) {
 }
 
 function render(sites) {
+  shown = sites;
   if (sites.length === 0) {
     grid.innerHTML = "";
     empty.hidden = false;
@@ -100,7 +106,41 @@ function escapeAttr(str) {
   return escapeHtml(str);
 }
 
-search.addEventListener("input", (e) => filter(e.target.value));
+// ── Analytics ────────────────────────────────────────────────────────────────
+// All wired by delegation on containers that exist from the start, so re-rendering
+// the grid on every search keystroke can't leak listeners.
+
+let searchTimer;
+search.addEventListener("input", (e) => {
+  filter(e.target.value);
+  // Debounced: one event per finished query instead of one per keystroke.
+  // The query text itself is sent — it's what visitors are looking for here,
+  // and the field only ever holds site/tag names.
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const q = e.target.value.trim();
+    if (q) track("site_searched", { search_term: q.slice(0, 60), result_count: shown.length });
+  }, 700);
+});
+
+grid.addEventListener("click", (e) => {
+  const source = e.target.closest("a[data-source-of]");
+  if (source) return track("source_link_clicked", { slug: source.dataset.sourceOf });
+  const card = e.target.closest("a.card[data-slug]");
+  if (card) {
+    track("site_card_clicked", {
+      slug: card.dataset.slug,
+      position: [...grid.querySelectorAll("a.card")].indexOf(card) + 1,
+      // Whether it was reached from a filtered list tells search-vs-browse apart.
+      from_search: search.value.trim().length > 0,
+    });
+  }
+});
+
+document.querySelector("footer").addEventListener("click", (e) => {
+  const a = e.target.closest("a[href^='http']");
+  if (a) track("outbound_link_clicked", { host: hostOf(a.href), label: a.textContent.trim().slice(0, 40) });
+});
 
 loadSites();
 
@@ -122,13 +162,16 @@ if (bonusForm) {
     fieldNote: document.getElementById("bonus-note"),
     copyInputBtn: document.getElementById("bonus-copy-input"),
     clearBtn: document.getElementById("bonus-clear"),
-    buildLink: (v) => new URL("./any-page/?url=" + encodeURIComponent(v), location.href).href,
+    viewerBase: "./any-page/",
+    context: "home",
   });
 
   bonusForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const v = urlInput.value.trim();
+    if (!isHttpUrl(v)) return track("viewer_open_rejected", { context: "home" });
+    track("viewer_opened", { context: "home", host: hostOf(v), link_format: linkFormat(v) });
     // Open in a new tab so the homepage stays put, matching any-page's own View button.
-    if (isHttpUrl(v)) window.open(new URL("./any-page/?url=" + encodeURIComponent(v), location.href).href, "_blank", "noopener");
+    window.open(buildViewerLink(v, "./any-page/"), "_blank", "noopener");
   });
 }

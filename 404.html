@@ -15,5 +15,13 @@
       </p>
       <p><a href="/public-websites/">← Back to all sites</a></p>
     </header>
+    <!-- Absolute path: GitHub Pages serves this file from any depth, so a relative
+         import would resolve against the missing URL's directory. -->
+    <script type="module">
+      import { track } from "/public-websites/analytics.js";
+      // Which dead links people hit — the requested path, not the referrer.
+      track("not_found", { path: location.pathname + location.search });
+      document.querySelector("a").addEventListener("click", () => track("not_found_recovered"));
+    </script>
   </body>
 </html>

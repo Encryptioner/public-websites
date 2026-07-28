@@ -1,3 +1,5 @@
+import { track, hostOf } from "../analytics.js";
+
 // Sandboxed-iframe rendering for any-page/index.html, split out of index.html so the
 // fetch/proxy/sandbox logic isn't buried in a large inline <script>. Corner-button hrefs
 // are absolute (/public-websites/...) rather than relative to avoid any ambiguity about
@@ -23,7 +25,9 @@ function proxied(u) {
 // the other is aborted. ponytail: always fires the proxy request too, trading a bit of
 // proxy quota for lower latency on blocked sites.
 //
-// Resolves { html, finalUrl } — finalUrl is response.url (post-redirect) for the direct
+// Resolves { html, finalUrl, via } — `via` is "direct" or "proxy", i.e. which racer won
+// (reported to analytics so proxy dependence is measurable). finalUrl is response.url
+// (post-redirect) for the direct
 // path, since relative asset paths must resolve against where the page actually landed,
 // not the URL typed in (e.g. raw.github.com 301s to raw.githubusercontent.com/.../file).
 // The proxy path can't report the target's real final URL (response.url is the proxy's),
@@ -52,7 +56,7 @@ function fetchHtml(u) {
     fetch(u, { redirect: "follow", signal: directCtrl.signal })
       .then((r) =>
         r.ok
-          ? r.text().then((t) => ({ html: t, finalUrl: r.url || u }))
+          ? r.text().then((t) => ({ html: t, finalUrl: r.url || u, via: "direct" }))
           : Promise.reject(new Error("HTTP " + r.status))
       )
       .then((res) => succeed(res, proxyCtrl))
@@ -60,7 +64,7 @@ function fetchHtml(u) {
 
     fetch(proxied(u), { signal: proxyCtrl.signal })
       .then((r) => (r.ok ? r.text() : Promise.reject(new Error("HTTP " + r.status))))
-      .then((t) => succeed({ html: t, finalUrl: u }, directCtrl))
+      .then((t) => succeed({ html: t, finalUrl: u, via: "proxy" }, directCtrl))
       .catch(fail);
   });
 }
@@ -112,10 +116,18 @@ export async function renderViewer(u, onError) {
     toggle.innerHTML = open ? ICONS.close : ICONS.info;
     toggle.setAttribute("aria-label", open ? "Hide info" : "Show info");
     toggle.setAttribute("data-tip", open ? "Hide info" : "Info");
+    track("corner_toggled", { open });
+  });
+  corner.addEventListener("click", (e) => {
+    const a = e.target.closest("a.icon-btn");
+    if (!a) return;
+    const action = { cornerOpen: "open_source", cornerNew: "new_page", cornerHome: "hub_home" }[a.id];
+    track("corner_action", { action, host: hostOf(u) });
   });
 
+  const started = performance.now();
   try {
-    const { html, finalUrl } = await fetchHtml(u);
+    const { html, finalUrl, via } = await fetchHtml(u);
     const m = html.match(/<title[^>]*>([^<]*)<\/title>/i);
     if (m && m[1].trim()) document.title = m[1].trim() + " · Any Page";
     const frame = document.getElementById("frame");
@@ -123,6 +135,15 @@ export async function renderViewer(u, onError) {
     frame.addEventListener("load", () => {
       loading.style.opacity = "0";
       setTimeout(() => loading.remove(), 220);
+      track("page_rendered", {
+        host: hostOf(u),
+        via,
+        // Fetch + iframe paint, rounded to 50ms — enough to spot slow proxies.
+        load_ms: Math.round((performance.now() - started) / 50) * 50,
+        // Normalize before comparing — a hand-typed target can differ from the
+        // fetched URL by escaping alone (a literal space vs %20) without any redirect.
+        redirected: finalUrl !== new URL(u).href,
+      });
     });
     // No allow-same-origin → rendered page runs in a null origin and cannot touch this site's storage/cookies.
     // ponytail: safe default. Some pages needing same-origin APIs (localStorage) will degrade — that's the tradeoff for isolation.
@@ -132,6 +153,11 @@ export async function renderViewer(u, onError) {
     );
     frame.srcdoc = withBase(html, finalUrl);
   } catch (err) {
+    track("page_render_failed", {
+      host: hostOf(u),
+      error: String(err.message).slice(0, 100),
+      load_ms: Math.round((performance.now() - started) / 50) * 50,
+    });
     onError(err);
   }
 }
