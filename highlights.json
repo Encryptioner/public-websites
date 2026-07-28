@@ -1,0 +1,349 @@
+{
+  "groups": [
+    { "id": "highlights", "label": "Highlights" },
+    { "id": "projects", "label": "Projects" },
+    { "id": "articles", "label": "Articles" }
+  ],
+  "items": [
+    {
+      "id": "graphical-highlights",
+      "title": "Graphical Highlights",
+      "group": "highlights",
+      "category": "Visual",
+      "details": "Charts & Infographics",
+      "description": "Visual portfolio metrics through charts and infographics",
+      "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/career-highlights/"
+    },
+    {
+      "id": "projectwise-personal-highlights",
+      "title": "Personal Projects",
+      "group": "highlights",
+      "category": "Personal",
+      "details": "Open Source Projects",
+      "description": "Personal development projects and open source contributions",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://icy-provelone-67a.notion.site/Projectwise-Personal-Highlights-2448fa3ec26f80c69769d84798dccf83"
+    },
+    {
+      "id": "yearwise-personal-highlights",
+      "title": "Personal Timeline",
+      "group": "highlights",
+      "category": "Growth",
+      "details": "Learning Journey",
+      "description": "Personal development milestones and skill acquisition timeline",
+      "image": "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=400&h=300&fit=crop&crop=center",
+      "link": "https://icy-provelone-67a.notion.site/Yearwise-Personal-Highlights-2448fa3ec26f80589d52f68183a9d555"
+    },
+    {
+      "id": "testimonials",
+      "title": "Testimonials",
+      "group": "highlights",
+      "category": "Feedback",
+      "details": "Client Reviews",
+      "description": "Client testimonials and professional feedback collection",
+      "image": "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=400&h=300&fit=crop&crop=center",
+      "link": "https://icy-provelone-67a.notion.site/Testimonials-2758fa3ec26f8056ba0df51bda03d0e7"
+    },
+    {
+      "id": "branchdiff",
+      "title": "BranchDiff",
+      "group": "projects",
+      "category": "Developer Tools",
+      "details": "100% Local · No Cloud",
+      "description": "Visual git diff viewer in your browser with AI-supported code review — no data leaves your machine",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/branchdiff-releases/"
+    },
+    {
+      "id": "browser-ide",
+      "title": "Browser IDE",
+      "group": "projects",
+      "category": "Developer Tools",
+      "details": "VS Code in Browser",
+      "description": "Full-featured VS Code alternative running entirely in browser with AI capabilities",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/browser-ide/"
+    },
+    {
+      "id": "cloudnest",
+      "title": "CloudNest",
+      "group": "projects",
+      "category": "Cloud",
+      "details": "Multi-Drive Storage",
+      "description": "Unified dashboard aggregating multiple Google Drive accounts into a single storage pool",
+      "image": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/CloudNest/"
+    },
+    {
+      "id": "coding-challenges",
+      "title": "Coding Challenges",
+      "group": "projects",
+      "category": "Education",
+      "details": "Practice & Learn",
+      "description": "Comprehensive collection of coding challenges designed to build practical programming skills",
+      "image": "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/coding-challenges/"
+    },
+    {
+      "id": "photo-watermark-remover",
+      "title": "Photo Watermark Remover",
+      "group": "projects",
+      "category": "Computer Vision",
+      "details": "100% Client-Side",
+      "description": "Browser PWA removing watermarks using OpenCV.js + WebAssembly — privacy-friendly, offline-capable",
+      "image": "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/coding-challenges/ex-07-photo-watermark-remover/preview.html"
+    },
+    {
+      "id": "local-whisper",
+      "title": "Local Whisper AI",
+      "group": "projects",
+      "category": "AI",
+      "details": "WebAssembly LLM",
+      "description": "Browser-based AI chat running LLM with WebAssembly",
+      "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/private-chat/"
+    },
+    {
+      "id": "html-to-pdf-generator",
+      "title": "HTML to PDF Generator",
+      "group": "projects",
+      "category": "NPM Package",
+      "details": "Multi-page PDF",
+      "description": "Modern library for converting HTML to professional multi-page PDFs with smart pagination",
+      "image": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=300&fit=crop&crop=center",
+      "link": "https://www.npmjs.com/package/@encryptioner/html-to-pdf-generator"
+    },
+    {
+      "id": "markdown-to-slide",
+      "title": "Markdown to Slide",
+      "group": "projects",
+      "category": "Innovation",
+      "details": "PWA Platform",
+      "description": "Modern presentation platform with Markdown to PDF",
+      "image": "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/markdown-to-slide/"
+    },
+    {
+      "id": "ccsh-shell",
+      "title": "CCSH Shell",
+      "group": "projects",
+      "category": "Systems",
+      "details": "C Programming",
+      "description": "Unix-like shell implementation from scratch in C",
+      "image": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=300&fit=crop&crop=center",
+      "link": "https://github.com/Encryptioner/ccsh-shell"
+    },
+    {
+      "id": "linkedinify",
+      "title": "LinkedInify",
+      "group": "projects",
+      "category": "PWA",
+      "details": "Privacy-First",
+      "description": "Convert Markdown to LinkedIn posts with AI features",
+      "image": "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/linkedinify"
+    },
+    {
+      "id": "de-encrypt-hub",
+      "title": "De-Encrypt Hub",
+      "group": "projects",
+      "category": "Security",
+      "details": "Crypto Tools",
+      "description": "Browser-based encryption toolkit with education",
+      "image": "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/de-encrypt-hub/"
+    },
+    {
+      "id": "laravel-learning",
+      "title": "Laravel Learning",
+      "group": "projects",
+      "category": "Education",
+      "details": "PHP Platform",
+      "description": "Comprehensive Laravel app with commit learning",
+      "image": "https://images.unsplash.com/photo-1599507593499-a3f7d7d97667?w=400&h=300&fit=crop&crop=center",
+      "link": "https://github.com/Encryptioner/laravel-example-app"
+    },
+    {
+      "id": "django-learning",
+      "title": "Django Learning",
+      "group": "projects",
+      "category": "Education",
+      "details": "Python Platform",
+      "description": "Modern Django 5.1 with code quality focus",
+      "image": "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=400&h=300&fit=crop&crop=center",
+      "link": "https://github.com/Encryptioner/django-example-app"
+    },
+    {
+      "id": "building-management",
+      "title": "Building Management",
+      "group": "projects",
+      "category": "PWA",
+      "details": "Multi-Language",
+      "description": "Complete building management solution with resident info, bills, import/export & PDF download",
+      "image": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/building-management/"
+    },
+    {
+      "id": "fish-boat-game",
+      "title": "Fish & Boat Game",
+      "group": "projects",
+      "category": "Game",
+      "details": "PWA Game",
+      "description": "Modern Snakes & Ladders with nautical theme",
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/fish-boat-ludu/"
+    },
+    {
+      "id": "vue3-boilerplate",
+      "title": "Vue3 Boilerplate",
+      "group": "projects",
+      "category": "Boilerplate",
+      "details": "Production Ready",
+      "description": "Vue 3 TypeScript boilerplate with modern tooling",
+      "image": "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/frontend-vue3-boilerplate/"
+    },
+    {
+      "id": "nestjs-typescript",
+      "title": "NestJS TypeScript",
+      "group": "projects",
+      "category": "Full-Stack",
+      "details": "Monorepo",
+      "description": "Enterprise-grade TypeScript full-stack boilerplate",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://typescript-boilerplate-0.herokuapp.com/"
+    },
+    {
+      "id": "personal-portfolio",
+      "title": "Personal Portfolio",
+      "group": "projects",
+      "category": "Portfolio",
+      "details": "React Website",
+      "description": "Professional portfolio with responsive design",
+      "image": "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/"
+    },
+    {
+      "id": "text-bomb-chat",
+      "title": "Text Bomb Chat",
+      "group": "projects",
+      "category": "Real-time",
+      "details": "Django Chat",
+      "description": "Real-time chat with WebSocket and background tasks",
+      "image": "https://images.unsplash.com/photo-1577563908411-5077b6dc7624?w=400&h=300&fit=crop&crop=center",
+      "link": "https://github.com/Encryptioner/Text-Bomb"
+    },
+    {
+      "id": "claude-code-blog",
+      "title": "Claude Code Blueprint",
+      "group": "articles",
+      "category": "AI & DevTools",
+      "details": "Production Guide",
+      "description": "Complete Claude Code configuration guide for production teams",
+      "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur/claude-code-configuration-blueprint-the-complete-guide-for-production-teams-39pd"
+    },
+    {
+      "id": "bd-software-industry-blog",
+      "title": "BD Software Industry",
+      "group": "articles",
+      "category": "Industry",
+      "details": "21 min read",
+      "description": "Inside Bangladesh's software industry — companies, models, and opportunities",
+      "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur/inside-bangladeshs-software-industry-companies-models-and-opportunities-3aml"
+    },
+    {
+      "id": "software-business-models-blog",
+      "title": "Software Business Models",
+      "group": "articles",
+      "category": "Business",
+      "details": "20 min read",
+      "description": "The complete guide to software business models",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur/the-complete-guide-to-software-business-models-52cd"
+    },
+    {
+      "id": "bd-dev-guide-blog",
+      "title": "BD Developer Guide",
+      "group": "articles",
+      "category": "Career",
+      "details": "10 min read",
+      "description": "Practical guide for developers navigating Bangladesh's software industry",
+      "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur/navigating-bangladeshs-software-industry-a-practical-guide-for-developers-in-2026-1g12"
+    },
+    {
+      "id": "npm-package-blog",
+      "title": "Publishing First NPM Package",
+      "group": "articles",
+      "category": "Guide",
+      "details": "Real-world Guide",
+      "description": "A practical guide to publishing NPM packages with updated 2025 practices",
+      "image": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur/publishing-your-first-npm-package-a-real-world-guide-that-actually-helps-4l4"
+    },
+    {
+      "id": "custom-shell-blog",
+      "title": "Build Your Own Shell",
+      "group": "articles",
+      "category": "Tutorial",
+      "details": "7 min read",
+      "description": "Step-by-step guide to building shell in C",
+      "image": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur"
+    },
+    {
+      "id": "bitbucket-mcp-blog",
+      "title": "Bitbucket MCP Guide",
+      "group": "articles",
+      "category": "DevTools",
+      "details": "26 Reactions",
+      "description": "Integrating Bitbucket MCP with Cursor IDE",
+      "image": "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur"
+    },
+    {
+      "id": "google-sheets-blog",
+      "title": "Google Sheets Access",
+      "group": "articles",
+      "category": "Automation",
+      "details": "6 min read",
+      "description": "Control sheet access for form submitters only",
+      "image": "https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur"
+    },
+    {
+      "id": "engineering-newsletters-blog",
+      "title": "Engineering Newsletters",
+      "group": "articles",
+      "category": "Career",
+      "details": "30+ Resources",
+      "description": "Go-to engineering newsletters summarized",
+      "image": "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur"
+    },
+    {
+      "id": "gmail-newsletters-blog",
+      "title": "Gmail Newsletter List",
+      "group": "articles",
+      "category": "Automation",
+      "details": "4 min read",
+      "description": "List newsletters filling up Gmail with script",
+      "image": "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur"
+    },
+    {
+      "id": "pnpm-blog",
+      "title": "pnpm Package Manager",
+      "group": "articles",
+      "category": "Node.js",
+      "details": "4 min read",
+      "description": "Why pnpm is better than npm for Node.js",
+      "image": "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=300&fit=crop&crop=center",
+      "link": "https://dev.to/mir_mursalin_ankur"
+    }
+  ]
+}
