@@ -115,6 +115,26 @@
       "link": "https://dev.to/mir_mursalin_ankur/pnpm-a-better-package-manager-for-nodejs-12l7"
     },
     {
+      "id": "p1-automation-workflow",
+      "title": "Automation of Daily Workflow",
+      "group": "presentation",
+      "category": "Workflow",
+      "details": "Slide Deck",
+      "description": "Streamlining development with smart tools",
+      "image": "https://images.unsplash.com/photo-1531403009284-440f080d1e12?w=400&h=300&fit=crop&crop=center",
+      "link": "https://github.com/Encryptioner/blogs/blob/master/presentations/P-1-automation-daily-workflow/index.md"
+    },
+    {
+      "id": "p2-hands-on-coding-tools",
+      "title": "Hands-On Coding: Basic Tools",
+      "group": "presentation",
+      "category": "Tutorial",
+      "details": "Slide Deck",
+      "description": "Understanding fundamentals by building them",
+      "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=300&fit=crop&crop=center",
+      "link": "https://github.com/Encryptioner/blogs/blob/master/presentations/P-2-hands-on-coding-tools/index.md"
+    },
+    {
       "id": "p3-token-economics",
       "title": "Token Economics",
       "group": "presentation",
