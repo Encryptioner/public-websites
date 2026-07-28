@@ -16,13 +16,21 @@
    keyboard, ARIA). Default marker hidden; a chevron SVG rotates on open. */
 .sec-head {
   display: block;
-  margin: 0;
-  padding: 4px 0;
+  margin: 0 -12px;        /* extend the hover band into main's 24px gutter */
+  padding: 8px 12px;      /* band padding; margin cancels it → no content shift */
   cursor: pointer;
   list-style: none; /* Firefox: drop the default disclosure triangle */
+  border-radius: 12px;
+  transition: background 160ms ease;
 }
 .sec-head::-webkit-details-marker { display: none; } /* Chrome/Safari */
-.sec-head:hover .chev { color: var(--accent); }
+/* Hover lights up the whole header — signals it's the expand/collapse target. */
+.sec-head:hover { background: var(--accent-soft); }
+.sec-head:hover .chev,
+.sec-head:hover .sec-title-row h2 { color: var(--accent); }
+.sec-head:hover .sec-sub { color: var(--text); }
+/* Closed + hover: nudge the chev toward "open" (rotate(90deg) wins once open). */
+details:not([open]) > .sec-head:hover .chev { transform: translateX(3px); }
 
 .sec-title-row {
   display: flex;
@@ -33,6 +41,7 @@
   margin: 0;
   font-size: clamp(1.4rem, 2.5vw, 1.8rem);
   letter-spacing: -0.02em;
+  transition: color 160ms ease;
 }
 /* Item-count pill — populated by JS after the section's data loads. */
 .sec-count {
@@ -50,7 +59,7 @@
   margin-left: auto;
   color: var(--text-dim);
   flex: none;
-  transition: transform 160ms ease;
+  transition: transform 160ms ease, color 160ms ease;
 }
 details[open] > .sec-head .chev { transform: rotate(90deg); }
 
@@ -59,6 +68,7 @@ details[open] > .sec-head .chev { transform: rotate(90deg); }
   color: var(--text-dim);
   font-size: 0.95rem;
   line-height: 1.5;
+  transition: color 160ms ease;
 }
 
 /* Body spacing + reveal only matter once expanded. */
@@ -120,6 +130,14 @@ details[open] > .sec-body { animation: sec-reveal 160ms ease; }
   display: block;
   transition: transform 200ms ease;
 }
+/* Broken/missing banner image (remote Unsplash 404, etc.) — degrade to a soft
+   branded wash instead of a torn-image icon. Applies to every media card. */
+.card-media.is-noimg {
+  background:
+    radial-gradient(circle at 28% 32%, var(--accent-soft), transparent 62%),
+    var(--bg-elev);
+}
+.card-media.is-noimg img { display: none; }
 .card--media:hover .card-media img { transform: scale(1.04); }
 
 .card-body {
@@ -140,6 +158,13 @@ details[open] > .sec-body { animation: sec-reveal 160ms ease; }
   margin: 0;
   line-height: 1.25;
   font-weight: 600;
+  /* Exactly 2 lines every time: line-clamp caps overflow, min-height reserves
+     the 2nd line for short titles → uniform card heights across the grid. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.5em; /* 2 × line-height */
 }
 .card-cat {
   flex: 0 0 auto;
@@ -162,12 +187,17 @@ details[open] > .sec-body { animation: sec-reveal 160ms ease; }
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: 2.8em; /* 2 × line-height: reserve 2 lines for uniform height */
 }
 .card--media .card-foot {
   margin-top: auto;
   padding-top: 2px;
   font-size: 0.76rem;
+  line-height: 1.4;
   color: var(--text-dim);
+  /* Reserve 2 lines so a wrapping details label ("Open Source Projects") can't
+     make one card taller than its neighbours — uniform heights. */
+  min-height: 2.8em;
 }
 .card-cta { color: var(--accent); }
 

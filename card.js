@@ -20,7 +20,8 @@ export function mediaCardHtml(it) {
          rel="noopener" data-id="${escapeAttr(it.id)}" data-group="${escapeAttr(it.group || "")}">
         <div class="card-media">
           <img src="${escapeAttr(it.image)}" alt="" loading="lazy" decoding="async"
-               width="400" height="300" />
+               width="400" height="300"
+               onerror="this.parentElement.classList.add('is-noimg')" />
         </div>
         <div class="card-body">
           <div class="card-top">

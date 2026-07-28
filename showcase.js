@@ -1,104 +1,21 @@
-import { track, hostOf } from "./analytics.js";
-import { mediaCardHtml, escapeHtml, escapeAttr } from "./card.js";
+// Showcase section — renders highlights/projects as a chip-filterable card grid.
+// Filter logic + analytics are shared via grid-filter.js; this file is config only.
+import { wireFilterableGrid } from "./grid-filter.js";
 
-const grid = document.getElementById("showcase-grid");
-const chipsEl = document.getElementById("showcase-chips");
-const empty = document.getElementById("showcase-empty");
-const countEl = document.querySelector(".showcase .sec-count");
-const detailsEl = document.querySelector(".showcase details");
-
-let allItems = [];
-let activeGroup = "all";
-let groupMeta = [];
-
-function render(items) {
-  if (items.length === 0) {
-    grid.innerHTML = "";
-    empty.hidden = false;
-    return;
-  }
-  empty.hidden = true;
-  grid.innerHTML = items.map(mediaCardHtml).join("");
+export function initShowcase() {
+  return wireFilterableGrid({
+    grid: document.getElementById("showcase-grid"),
+    chipsEl: document.getElementById("showcase-chips"),
+    empty: document.getElementById("showcase-empty"),
+    countEl: document.querySelector(".showcase .sec-count"),
+    detailsEl: document.querySelector(".showcase details"),
+    jsonPath: "./highlights.json",
+    events: {
+      loaded: "showcase_loaded",
+      filtered: "showcase_filtered",
+      cardClicked: "showcase_card_clicked",
+      toggled: "section_toggled",
+      section: "showcase",
+    },
+  }).init();
 }
-
-function chipsHtml() {
-  const all = [{ id: "all", label: "All" }, ...groupMeta];
-  return all
-    .map((g) => {
-      const n =
-        g.id === "all"
-          ? allItems.length
-          : allItems.filter((i) => i.group === g.id).length;
-      return `<button class="chip" role="tab" aria-selected="${g.id === activeGroup}"
-              data-group="${escapeAttr(g.id)}">${escapeHtml(g.label)}
-              <span class="chip-count">${n}</span></button>`;
-    })
-    .join("");
-}
-
-function syncChips() {
-  for (const c of chipsEl.querySelectorAll(".chip")) {
-    c.setAttribute("aria-selected", String(c.dataset.group === activeGroup));
-  }
-}
-
-function applyFilter() {
-  const items =
-    activeGroup === "all"
-      ? allItems
-      : allItems.filter((i) => i.group === activeGroup);
-  render(items);
-  syncChips();
-}
-
-export async function initShowcase() {
-  if (!grid) return;
-  try {
-    const res = await fetch("./highlights.json", { cache: "no-cache" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    allItems = Array.isArray(data.items) ? data.items : [];
-    groupMeta = Array.isArray(data.groups) ? data.groups : [];
-    activeGroup = "all";
-    chipsEl.innerHTML = chipsHtml();
-    applyFilter();
-    if (countEl) {
-      countEl.textContent = String(allItems.length);
-      countEl.hidden = false;
-    }
-    track("showcase_loaded", {
-      count: allItems.length,
-      groups: groupMeta.map((g) => g.id),
-    });
-  } catch (err) {
-    grid.innerHTML = "";
-    empty.hidden = false;
-    empty.textContent = `Failed to load highlights.json: ${err.message}`;
-  }
-}
-
-// Chip filter — delegation.
-chipsEl?.addEventListener("click", (e) => {
-  const chip = e.target.closest(".chip[data-group]");
-  if (!chip) return;
-  activeGroup = chip.dataset.group;
-  applyFilter();
-  track("showcase_filtered", { group: activeGroup });
-});
-
-// Card clicks — delegation; position is index within currently-rendered grid.
-grid?.addEventListener("click", (e) => {
-  const card = e.target.closest("a.card--media[data-id]");
-  if (!card) return;
-  track("showcase_card_clicked", {
-    id: card.dataset.id,
-    group: card.dataset.group,
-    position: [...grid.querySelectorAll("a.card--media")].indexOf(card) + 1,
-    host: hostOf(card.href),
-  });
-});
-
-// Section expand/collapse — native <details> toggle event.
-detailsEl?.addEventListener("toggle", () => {
-  track("section_toggled", { section: "showcase", expanded: detailsEl.open });
-});
