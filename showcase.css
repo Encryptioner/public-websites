@@ -1,0 +1,119 @@
+/* Showcase section — homepage-only. Tokens/base come from panel.css; grid +
+   .card base come from style.css (both linked before this in index.html). */
+
+.showcase { margin-top: 56px; }
+
+.showcase-head { margin-bottom: 18px; }
+.showcase-head h2 {
+  margin: 0 0 6px;
+  font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+  letter-spacing: -0.02em;
+}
+.showcase-sub {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Filter chips */
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 20px;
+  padding: 0;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg-elev);
+  color: var(--text-dim);
+  font-size: 0.85rem;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms, background 120ms;
+}
+.chip:hover { border-color: var(--accent); color: var(--text); }
+.chip[aria-selected="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #0b0d12;
+  font-weight: 600;
+}
+.chip-count { font-size: 0.72rem; opacity: 0.8; }
+
+/* Media card variant — banner image + body. Shares .card base from style.css
+   (border, radius, shadow, hover lift). Override padding/gap so image is flush. */
+.card--media { padding: 0; gap: 0; overflow: hidden; }
+.card-media {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg-elev);
+}
+.card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 200ms ease;
+}
+.card--media:hover .card-media img { transform: scale(1.04); }
+
+.card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+.card--media .card-title {
+  font-size: 0.98rem;
+  margin: 0;
+  line-height: 1.25;
+  font-weight: 600;
+}
+.card-cat {
+  flex: 0 0 auto;
+  font-size: 0.68rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.card--media .card-tagline {
+  font-size: 0.86rem;
+  margin: 0;
+  line-height: 1.45;
+  color: var(--text-dim);
+  flex: 1;
+}
+.card--media .card-foot {
+  margin-top: auto;
+  padding-top: 4px;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.card-cta { color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  .card--media:hover .card-media img { transform: none; }
+  .card--media:hover { transform: none; }
+}
+
+@media (max-width: 480px) {
+  .showcase { margin-top: 40px; }
+}
