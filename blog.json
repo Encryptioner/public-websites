@@ -8,7 +8,7 @@
       "details": "Production Guide",
       "description": "Complete Claude Code configuration guide for production teams",
       "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/claude-code-configuration-blueprint-the-complete-guide-for-production-teams-39pd"
+      "link": "https://dev.to/mir_mursalin_ankur/claude-code-configuration-blueprint-the-complete-guide-for-production-teams-557p"
     },
     {
       "id": "bd-software-industry-blog",
@@ -18,7 +18,7 @@
       "details": "21 min read",
       "description": "Inside Bangladesh's software industry — companies, models, and opportunities",
       "image": "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/inside-bangladeshs-software-industry-companies-models-and-opportunities-3aml"
+      "link": "https://dev.to/mir_mursalin_ankur/inside-bangladeshs-software-industry-companies-models-and-opportunities-5a2c"
     },
     {
       "id": "software-business-models-blog",
@@ -28,7 +28,7 @@
       "details": "20 min read",
       "description": "The complete guide to software business models",
       "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/the-complete-guide-to-software-business-models-52cd"
+      "link": "https://dev.to/mir_mursalin_ankur/the-complete-guide-to-software-business-models-how-tech-companies-actually-make-money-20dg"
     },
     {
       "id": "bd-dev-guide-blog",
@@ -38,7 +38,7 @@
       "details": "10 min read",
       "description": "Practical guide for developers navigating Bangladesh's software industry",
       "image": "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur/navigating-bangladeshs-software-industry-a-practical-guide-for-developers-in-2026-1g12"
+      "link": "https://dev.to/mir_mursalin_ankur/navigating-bangladeshs-software-industry-a-practical-guide-for-developers-in-2026-22ob"
     },
     {
       "id": "npm-package-blog",
@@ -58,7 +58,7 @@
       "details": "7 min read",
       "description": "Step-by-step guide to building shell in C",
       "image": "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
+      "link": "https://dev.to/mir_mursalin_ankur/i-built-my-own-shell-for-fun-you-can-too-56j3"
     },
     {
       "id": "bitbucket-mcp-blog",
@@ -68,7 +68,7 @@
       "details": "26 Reactions",
       "description": "Integrating Bitbucket MCP with Cursor IDE",
       "image": "https://images.unsplash.com/photo-1556075798-4825dfaaf498?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
+      "link": "https://dev.to/mir_mursalin_ankur/integrating-bitbucket-mcp-with-cursor-a-practical-guide-for-developers-1e5b"
     },
     {
       "id": "google-sheets-blog",
@@ -78,7 +78,7 @@
       "details": "6 min read",
       "description": "Control sheet access for form submitters only",
       "image": "https://images.unsplash.com/photo-1557821552-17105176677c?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
+      "link": "https://dev.to/mir_mursalin_ankur/give-google-sheet-access-only-to-form-submitters-with-apps-script-1anh"
     },
     {
       "id": "engineering-newsletters-blog",
@@ -88,7 +88,7 @@
       "details": "30+ Resources",
       "description": "Go-to engineering newsletters summarized",
       "image": "https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
+      "link": "https://dev.to/mir_mursalin_ankur/my-go-to-engineering-newsletters-30-summarized-19na"
     },
     {
       "id": "gmail-newsletters-blog",
@@ -98,7 +98,7 @@
       "details": "4 min read",
       "description": "List newsletters filling up Gmail with script",
       "image": "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
+      "link": "https://dev.to/mir_mursalin_ankur/apps-script-list-all-the-newsletters-filling-up-your-gmail-selective-unsubscribing-got-easy-2gic"
     },
     {
       "id": "pnpm-blog",
@@ -108,7 +108,7 @@
       "details": "4 min read",
       "description": "Why pnpm is better than npm for Node.js",
       "image": "https://images.unsplash.com/photo-1627398242454-45a1465c2479?w=400&h=300&fit=crop&crop=center",
-      "link": "https://dev.to/mir_mursalin_ankur"
+      "link": "https://dev.to/mir_mursalin_ankur/pnpm-a-better-package-manager-for-nodejs-12l7"
     }
   ]
 }
