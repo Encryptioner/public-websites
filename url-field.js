@@ -6,7 +6,10 @@ import { buildViewerLink, linkFormat } from "./viewer-link.js";
 import { track, hostOf } from "./analytics.js";
 
 export const DISABLED_REASON = "Enter a valid http(s) URL to enable View and Copy link.";
-export const TIP = "Tip: GitHub raw, jsDelivr and CORS-friendly URLs load directly; others go via a public proxy.";
+// No service names beyond GitHub raw (verified CORS-open) — naming more invites
+// staleness; "CORS-friendly" is the actual rule the viewer applies.
+export const TIP =
+  "Tip: any public http(s) URL works. CORS-friendly links like GitHub raw load directly; others go via a public proxy that can see the URL. Need a raw link? See the list below.";
 
 export function isHttpUrl(s) {
   try {
