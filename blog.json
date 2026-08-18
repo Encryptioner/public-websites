@@ -163,6 +163,16 @@
       "description": "Local-first git & file diffs with AI review",
       "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop&crop=center",
       "link": "https://encryptioner.github.io/public-websites/any-page/#raw.githubusercontent.com/Encryptioner/blogs/refs/heads/master/presentations/P-5-branchdiff-features/index.html"
+    },
+    {
+      "id": "p6-domain-driven-design",
+      "title": "Domain-Driven Design",
+      "group": "presentation",
+      "category": "Architecture",
+      "details": "Deck Hub",
+      "description": "Aggregates, events, and context maps in practice",
+      "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/public-websites/any-page/#raw.githubusercontent.com/Encryptioner/blogs/refs/heads/master/presentations/P-6-domain-driven-design/index.html"
     }
   ]
 }
