@@ -34,6 +34,7 @@
       "use strict";
 
       import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "../url-field.js";
+      import { mountRawSources } from "../raw-sources.js";
       import { buildViewerLink, readViewerTarget, linkFormat } from "../viewer-link.js";
       import { track, hostOf } from "../analytics.js";
       import { ICONS, renderViewer } from "./viewer.js";
@@ -70,6 +71,7 @@
                 </div>
               </form>
               <p class="hint${errorMsg ? " err" : ""}" id="hint">${errorMsg || TIP}</p>
+              <div id="rawSources"></div>
               <a class="back" href="../">← Back to Public Websites</a>
             </div>
           </div>`;
@@ -86,6 +88,9 @@
           viewerBase: "./",
           context: "any_page",
         });
+
+        // Collapsed "where to get a raw link" list — same module as the homepage bonus panel.
+        mountRawSources(document.getElementById("rawSources"), "any_page");
 
         document.getElementById("f").addEventListener("submit", (e) => {
           e.preventDefault();

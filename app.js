@@ -1,4 +1,5 @@
 import { isHttpUrl, wireUrlField, DISABLED_REASON, TIP } from "./url-field.js";
+import { mountRawSources } from "./raw-sources.js";
 import { buildViewerLink, linkFormat } from "./viewer-link.js";
 import { track, hostOf } from "./analytics.js";
 import { initShowcase } from "./showcase.js";
@@ -173,6 +174,9 @@ if (bonusForm) {
     viewerBase: "./any-page/",
     context: "home",
   });
+
+  // Collapsed "where to get a raw link" list — same module as the any-page landing.
+  mountRawSources(document.getElementById("raw-sources"), "home");
 
   bonusForm.addEventListener("submit", (e) => {
     e.preventDefault();

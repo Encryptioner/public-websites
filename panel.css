@@ -206,3 +206,38 @@ a:hover {
   margin-top: 20px;
   font-size: 0.85rem;
 }
+
+/* "Where do I get a raw file link?" — collapsed helper mounted by raw-sources.js
+   under the Any Page panel on both the homepage and the any-page landing. The
+   native disclosure triangle is the marker; no custom chevron. */
+.panel .raw-sources {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+.panel .raw-sources summary {
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  transition: color 120ms ease;
+}
+.panel .raw-sources summary:hover,
+.panel .raw-sources[open] summary {
+  color: var(--text);
+}
+.panel .raw-sources ul {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+.panel .raw-sources li {
+  display: grid;
+  gap: 2px;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.panel .raw-sources .meta {
+  color: var(--text-dim);
+}
