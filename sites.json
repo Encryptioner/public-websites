@@ -1,6 +1,15 @@
 {
-  "updated": "2026-06-26",
+  "updated": "2026-08-21",
   "sites": [
+    {
+      "slug": "dpdc-bill-viewer",
+      "name": "DPDC Bill History",
+      "tagline": "Fetch every DPDC electricity bill for your account, in the browser.",
+      "description": "Client-side viewer for DPDC (Dhaka Power Distribution) monthly bills: readings, units, totals, charts, and the original PDFs — one by one, all as ZIP, or data as JSON/CSV. Nothing to install, no account, no data leaves your browser.",
+      "icon": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230e1b29'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%23e8a13d'>৳</text></svg>",
+      "tags": ["utility", "energy", "finance"],
+      "added": "2026-08-21"
+    },
     {
       "slug": "cgpa-calculator",
       "name": "CGPA Calculator · Bangladesh",

@@ -1,0 +1,1 @@
+const o="https://dpdc-bill-relay.ankur2019.deno.net/?url=";function t(){const r=new URLSearchParams(location.search).get("proxy");return r!==null?r:o}const e=3e4,n=800,c=3;export{e as FETCH_TIMEOUT_MS,n as MONTH_DELAY_MS,o as PROXY_URL,c as STOP_AFTER_NO_BILL,t as proxyUrl};

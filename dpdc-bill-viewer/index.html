@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DPDC Bill History — fetch, check, keep</title>
+<meta name="description" content="Fetch your DPDC (Dhaka electricity) monthly bills in the browser: readings, units, totals and every bill PDF. Nothing to install, no account.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230e1b29'/><text x='50' y='68' font-size='52' text-anchor='middle' fill='%23e8a13d'>৳</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Sans+Bengali&display=swap">
+<link rel="stylesheet" href="styles/base.css">
+<link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <span class="wordmark"><a href="https://dpdc.org.bd" target="_blank" rel="noopener">DPDC</a> Bill History <span class="amp">· বিল</span></span>
+    <span class="tag">fetch · check · keep — runs in your browser</span>
+    <nav><a href="#how">How it works</a> · <a href="#fails">When it fails</a> · <a href="#faq">FAQ</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <p class="eyebrow">Your meter, on one page</p>
+  <h1>Every DPDC bill for one customer number — numbers and PDFs.
+  <span class="pill ok meter-type" title="Built and tested for postpaid meters — the monthly-bill kind. Prepaid meters use a different DPDC flow and aren't supported here yet.">Postpaid</span></h1>
+  <p>Enter your DPDC customer number, pick a month range, and this page pulls each
+  month's bill straight from DPDC: meter readings, units, what to pay and by when,
+  plus the original bill PDF for your records. It runs entirely in your browser —
+  there is no account, no server storing anything. <strong>Postpaid meters only</strong>
+  for now — prepaid support is coming. Have a prepaid meter? Check balance and
+  recharge history on
+  <a href="https://dpdc.gov.bd/site/page/15e95442-eb6e-49c4-acfe-a500257359c5/Online-Pre-paid-Meter-Recharge" target="_blank" rel="noopener">DPDC's own prepaid page</a>
+  instead.</p>
+
+  <div class="banner setup" id="setup-banner" hidden>
+    This tool isn't ready yet — please check back later.
+  </div>
+
+  <!-- signature: meter plate. Newest bill once fetched; guidance while idle. -->
+  <div class="plate" aria-label="newest bill summary">
+    <div class="cell"><div class="lab">Meter reading <span class="hlp" title="The running total your meter shows — not the electricity used this month, that's the Units cell.">?</span></div><div class="val" id="plate-reading">—</div><div class="sub" id="plate-reading-sub"></div></div>
+    <div class="cell"><div class="lab">Units used this month</div><div class="val" id="plate-units">—</div></div>
+    <div class="cell"><div class="lab">Payable</div><div class="val taka" id="plate-taka">—</div></div>
+    <div class="disc" aria-hidden="true"></div>
+  </div>
+  <p class="hint" id="account-tag" hidden></p>
+
+  <form id="fetch-form" class="fetch">
+    <div class="field">
+      <label for="cno">Customer number <span class="req" aria-hidden="true">*</span></label>
+      <input id="cno" inputmode="numeric" autocomplete="off" placeholder="e.g. 35318446" required>
+    </div>
+    <div class="field">
+      <label for="acct">Name/label <span class="opt">(optional)</span></label>
+      <input id="acct" autocomplete="off" placeholder="e.g. 3A, Home" maxlength="24">
+    </div>
+    <div class="field">
+      <label for="from">From (newer) <span class="req" aria-hidden="true">*</span></label>
+      <input id="from" class="year" type="month" required>
+    </div>
+    <div class="field">
+      <label for="to">To (older) <span class="req" aria-hidden="true">*</span></label>
+      <input id="to" class="month" type="month" required>
+    </div>
+    <button id="go" class="primary" type="submit" disabled>Fetch bills</button>
+  </form>
+  <p class="hint">* required. The number is on your bill as কাস্টমার নং. A
+  name or label is only for telling accounts apart on your own screen and
+  downloads — it's never sent anywhere. Twelve months take about half a
+  minute — the page waits ~1 second between months to stay polite to DPDC's
+  site.</p>
+
+  <p class="hint import-row">
+    Already saved a JSON export from before?
+    <label for="import-json" class="import-link"
+      title="Loads a previously exported dpdc_..._bills.json straight back into the table and charts — nothing is fetched from DPDC. PDF files aren't part of this JSON, so per-bill downloads and the zip won't be available for imported data.">Import it</label>
+    to see its table and charts again without fetching anything.
+    <input type="file" id="import-json" accept="application/json,.json" hidden>
+  </p>
+
+  <p class="progress" id="progress" aria-live="polite"></p>
+  <p class="progress" id="stopped"></p>
+
+  <div class="actions">
+    <button id="act-zip" disabled>Save all PDFs (zip)</button>
+    <button id="act-json" disabled>Export JSON</button>
+    <button id="act-csv" disabled>Export CSV</button>
+    <button id="act-retry" disabled>Retry failed months</button>
+  </div>
+
+  <p class="hint">Readings, units and totals below are extracted automatically
+  from each bill's PDF — parsing can occasionally miss or misread a field
+  (see "partial" rows). Use each row's <strong>verify</strong> link to open
+  the same bill directly on DPDC's own site, or the <strong>PDF</strong> link,
+  and recheck important figures against it.</p>
+
+  <div class="tablewrap">
+    <table class="ledger">
+      <thead><tr>
+        <th>Month</th><th>Meter reading</th><th>Units</th><th>Payable ৳</th><th>After due ৳</th>
+        <th>Bill no</th><th>Due date</th><th>Status</th><th>Bill</th>
+      </tr></thead>
+      <tbody id="ledger-body"></tbody>
+    </table>
+  </div>
+  <p class="hint" id="summary"></p>
+
+  <div id="charts"></div>
+
+  <section class="docs" id="how">
+    <p class="eyebrow">How it works</p>
+    <ol class="steps">
+      <li><span class="n">1</span><br>Type your customer number and pick a date range.
+      Nothing else leaves your browser.</li>
+      <li><span class="n">2</span><br>This page fetches your official bill for each
+      month straight from DPDC — no captcha, no waiting.</li>
+      <li><span class="n">3</span><br>Your browser reads the numbers off each bill —
+      readings, units, totals, dates — and keeps the original file too, ready to
+      download one by one or all together.</li>
+    </ol>
+  </section>
+
+  <section class="docs" id="fails">
+    <p class="eyebrow">When it can fail</p>
+    <p style="color:var(--ink-2);font-size:.9rem">What can go wrong, and what to do
+    about it — each row: what you'll see, and the fix.</p>
+    <dl class="fails">
+      <dt>DPDC's site is down or slow <span class="sym">— months marked “failed”</span></dt>
+      <dd>Wait a bit and press “Retry failed months” — months that already worked
+      won't be fetched again.</dd>
+
+      <dt>Wrong customer number <span class="sym">— every month “invalid”</span></dt>
+      <dd>Double check the কাস্টমার নং on a recent bill and try again.</dd>
+
+      <dt>“No bill” months <span class="sym">— normal, not an error</span></dt>
+      <dd>Months before the account existed (or the newest month, not issued yet)
+      simply have no bill. After 3 empty months in a row the search stops early —
+      that's usually where the account began.</dd>
+
+      <dt>Some numbers missing <span class="sym">— row shows partial data</span></dt>
+      <dd>DPDC occasionally changes their bill format and a value or two can't be
+      read automatically. The original bill still opens fine — you can read the
+      missing figure yourself from it.</dd>
+
+      <dt>Very long ranges <span class="sym">— slow, or the page gets heavy</span></dt>
+      <dd>Fetching many years at once works but takes a while. A few years at a
+      time is more comfortable.</dd>
+    </dl>
+  </section>
+
+  <section class="docs" id="faq">
+    <p class="eyebrow">FAQ</p>
+    <details>
+      <summary>Is my data stored anywhere?</summary>
+      <p>No. Bills live only in this browser tab until you download them. Close the
+      tab and everything is gone.</p>
+    </details>
+    <details>
+      <summary>Does my customer number go anywhere besides DPDC?</summary>
+      <p>No. It's only used to fetch your bill from DPDC's own website — nothing
+      is saved or sent anywhere else.</p>
+    </details>
+    <details>
+      <summary>Why does it wait between months?</summary>
+      <p>Politeness — this fetches no faster than a person clicking through the
+      official site, so it doesn't burden DPDC's servers. ~1 second per month.</p>
+    </details>
+    <details>
+      <summary>How far back does history go?</summary>
+      <p>The same as DPDC's own site — bills exist from when the account started.
+      The walk stops after 3 consecutive empty months, which usually marks the
+      beginning.</p>
+    </details>
+    <details>
+      <summary>Can I pay bills from here?</summary>
+      <p>No — this is read-only history. For payment use DPDC's own site or your bank.</p>
+    </details>
+    <details>
+      <summary>What's the difference between "Meter reading" and "Units used"?</summary>
+      <p>Meter reading is the running total your meter shows, like a car's
+      odometer — it only ever goes up. Units used is how much it moved
+      <em>this month</em> (this reading minus last month's), which is what
+      you're actually billed for.</p>
+    </details>
+    <details>
+      <summary>Can I view my bills again without fetching from DPDC?</summary>
+      <p>Yes — export JSON once, then use "Import it" above the form any time
+      afterward to see the same table and charts instantly, no fetching at
+      all. The original bill PDFs aren't part of that file (they're in the
+      separate zip download), so imported data can't re-download PDFs or
+      build a fresh zip — everything else works the same.</p>
+    </details>
+  </section>
+
+  <footer class="site">
+    <div class="wrap">
+      Client-side tool · bills come from
+      <a href="https://dpdc.org.bd" target="_blank" rel="noopener">dpdc.org.bd</a>
+      · not affiliated with DPDC ·
+      one of a few niche tools at
+      <a href="https://encryptioner.github.io/public-websites/" target="_blank" rel="noopener">public-websites</a>
+      · built by
+      <a href="https://encryptioner.github.io/" target="_blank" rel="noopener">Ankur Mursalin</a>
+    </div>
+  </footer>
+</main>
+
+<script src="vendor/jszip.min.js"></script>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
