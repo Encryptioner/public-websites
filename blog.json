@@ -1,9 +1,255 @@
 {
   "groups": [
-    { "id": "blog", "label": "Blog" },
-    { "id": "presentation", "label": "Presentations" }
+    {
+      "id": "blog",
+      "label": "Blog"
+    },
+    {
+      "id": "presentation",
+      "label": "Presentations"
+    }
   ],
   "items": [
+    {
+      "id": "blog-branchdiff-github-bitbucket-a-local-lens-for-the",
+      "title": "branchdiff + GitHub & Bitbucket",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "11 min read",
+      "description": "Here is a number nobody tracks but everyone feels: the number of tab switches in a single code…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-13/platform-vs-local-split.png",
+      "link": "https://dev.to/mir_mursalin_ankur/branchdiff-github-bitbucket-a-local-lens-for-the-pull-request-workflow-you-already-have-20mm"
+    },
+    {
+      "id": "blog-build-your-own-coderabbit-with-branchdiff-auto-u",
+      "title": "Build Your Own CodeRabbit With branchdiff auto",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "20 min read",
+      "description": "You are three weeks into a CodeRabbit trial. It is fine. It leaves comments on every PR within a…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-20/stack-ancestor-context.png",
+      "link": "https://encryptioner.github.io/blogs/blog/build-your-own-coderabbit-with-branchdiff-auto-unattended-ai-pr-review-on-your-terms"
+    },
+    {
+      "id": "blog-configure-once-review-everywhere-branchdiff-s-co",
+      "title": "Configure Once, Review Everywhere",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "18 min read",
+      "description": "You maintain six repos. Every morning you open a terminal, cd into the first one, and type the…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-21/auto-push-retry.png",
+      "link": "https://encryptioner.github.io/blogs/blog/configure-once-review-everywhere-branchdiff-s-config-system-and-multi-repo-auto"
+    },
+    {
+      "id": "blog-how-branchdiff-grew-up-one-diff-tool-s-journey-f",
+      "title": "How branchdiff Grew Up",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "17 min read",
+      "description": "Here is a sentence that sounds made up but is not: for the first four months I built a tool, and…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-23/commit-history-vs-content.png",
+      "link": "https://encryptioner.github.io/blogs/blog/how-branchdiff-grew-up-one-diff-tool-s-journey-from-a-proof-of-concept-to-a-self-hosted"
+    },
+    {
+      "id": "blog-manage-the-whole-pr-lifecycle-without-leaving-th",
+      "title": "Manage the Whole PR Lifecycle Without Leaving the Terminal",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "14 min read",
+      "description": "Your Claude Code skill just finished a review pass. It read the diff, posted three [must-fix]…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-22/prune-worktrees-flow.png",
+      "link": "https://encryptioner.github.io/blogs/blog/manage-the-whole-pr-lifecycle-without-leaving-the-terminal-branchdiff-s-pr-sync-and"
+    },
+    {
+      "id": "blog-reviewing-teammates-prs-faster-branchdiff-sessio",
+      "title": "Reviewing Teammates' PRs Faster",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "13 min read",
+      "description": "You open the PR. Thirty-eight files changed. You have already reviewed this one twice this week —…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-15/viewed-stale-state.png",
+      "link": "https://encryptioner.github.io/blogs/blog/reviewing-teammates-prs-faster-branchdiff-sessions-ai-passes-and-sync-back"
+    },
+    {
+      "id": "blog-self-review-with-ai-before-you-open-the-pr-a-pra",
+      "title": "Self-Review With AI Before You Open the PR",
+      "group": "blog",
+      "category": "branchdiff",
+      "details": "13 min read",
+      "description": "You know the moment. You push the branch, open the PR, and immediately see it — the undefined…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-14/self-review-before-after.png",
+      "link": "https://dev.to/mir_mursalin_ankur/self-review-with-ai-before-you-open-the-pr-a-practical-workflow-with-branchdiff-2bn"
+    },
+    {
+      "id": "blog-token-economics-better-results-fewer-tokens",
+      "title": "Token Economics: Better Results, Fewer Tokens",
+      "group": "blog",
+      "category": "Claude Code",
+      "details": "36 min read",
+      "description": "I've spent 7+ years shipping production TypeScript and Node systems, and the last couple of those…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-16/bill-reveal.png",
+      "link": "https://encryptioner.github.io/blogs/blog/token-economics-better-results-fewer-tokens"
+    },
+    {
+      "id": "blog-when-your-desktop-needs-you-free-notifications-f",
+      "title": "When Your Desktop Needs You",
+      "group": "blog",
+      "category": "Productivity",
+      "details": "14 min read",
+      "description": "A build's been running for twenty minutes. An agent is waiting on your \"looks good.\" A backup…",
+      "image": "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/when-your-desktop-needs-you-free-notifications-from-mac-ubuntu-to-your-phone-and-why-you"
+    },
+    {
+      "id": "blog-run-your-desk-from-anywhere-free-remote-control-",
+      "title": "Run Your Desk From Anywhere",
+      "group": "blog",
+      "category": "Productivity",
+      "details": "29 min read",
+      "description": "That's the question Part 1 leaves hanging. This post answers it in two parts, then explains why…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-25/internet-path.png",
+      "link": "https://encryptioner.github.io/blogs/blog/run-your-desk-from-anywhere-free-remote-control-voice-dictation-over-the-internet"
+    },
+    {
+      "id": "blog-run-your-desk-from-the-couch-free-remote-control",
+      "title": "Run Your Desk From the Couch",
+      "group": "blog",
+      "category": "Productivity",
+      "details": "59 min read",
+      "description": "A build's running upstairs. You're on the couch, not working, mostly resting — and a thought worth…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-24/control-path-macos.png",
+      "link": "https://encryptioner.github.io/blogs/blog/run-your-desk-from-the-couch-free-remote-control-voice-dictation-from-your-phone"
+    },
+    {
+      "id": "blog-your-desk-in-your-pocket-free-remote-control-for",
+      "title": "Your Desk in Your Pocket",
+      "group": "blog",
+      "category": "Productivity",
+      "details": "48 min read",
+      "description": "A build's running upstairs. You're on the couch, and something needs doing — reply to that…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-26/control-path-macos.png",
+      "link": "https://dev.to/mir_mursalin_ankur/your-desk-in-your-pocket-free-remote-control-for-mac-ubuntu-same-room-or-anywhere-on-earth-l12"
+    },
+    {
+      "id": "blog-domain-driven-design-deep-dive-aggregates-events",
+      "title": "Domain-Driven Design Deep Dive",
+      "group": "blog",
+      "category": "Domain-Driven Design",
+      "details": "20 min read",
+      "description": "The first three patterns give you vocabulary and boundaries. What follows is what makes those…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-18/when-to-use-ddd.jpg",
+      "link": "https://encryptioner.github.io/blogs/blog/domain-driven-design-deep-dive-aggregates-events-and-context-maps-in-practice"
+    },
+    {
+      "id": "blog-domain-driven-design-for-beginners-what-it-is-an",
+      "title": "Domain-Driven Design for Beginners",
+      "group": "blog",
+      "category": "Domain-Driven Design",
+      "details": "16 min read",
+      "description": "Domain-Driven Design (DDD) has a reputation for being academic — a term you hear in architecture…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-17/ddd-cheatsheet.webp",
+      "link": "https://encryptioner.github.io/blogs/blog/domain-driven-design-for-beginners-what-it-is-and-why-it-matters"
+    },
+    {
+      "id": "blog-domain-driven-design-in-production-a-real-build-",
+      "title": "Domain-Driven Design in Production",
+      "group": "blog",
+      "category": "Domain-Driven Design",
+      "details": "16 min read",
+      "description": "This post drops the fiction and stays in first person, because that's actually how it went: I got…",
+      "image": "https://images.unsplash.com/photo-1517180102446-f3ece451e9d8?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/domain-driven-design-in-production-a-real-build-real-drift-and-what-it-means-for-agentic"
+    },
+    {
+      "id": "blog-graphify-code-review-graph-build-a-self-updating",
+      "title": "Graphify + code-review-graph",
+      "group": "blog",
+      "category": "Claude Code",
+      "details": "64 min read",
+      "description": "You start a new AI coding session, ask about the payment flow — and your agent starts re-reading…",
+      "image": "https://encryptioner.github.io/blogs/content/assets/B-12/pipeline-architecture.png",
+      "link": "https://dev.to/mir_mursalin_ankur/graphify-code-review-graph-build-a-self-updating-knowledge-graph-for-claude-code-and-other-ai-j1m"
+    },
+    {
+      "id": "blog-agent-swarm-plans-for-side-projects",
+      "title": "Agent Swarm Plans for Side Projects",
+      "group": "blog",
+      "category": "Claude Code / Project Research",
+      "details": "6 min read",
+      "description": "Why: Complex multi-layer project with ~27 components, ~24 services, E2E tests across 3 browsers +…",
+      "image": "https://images.unsplash.com/photo-1515879218367-8466d910aaa4?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/agent-swarm-plans-for-side-projects"
+    },
+    {
+      "id": "blog-agent-teams-tdd-multi-agent-test-driven-developm",
+      "title": "Agent Teams + TDD: Multi-Agent Test-Driven Development",
+      "group": "blog",
+      "category": "Claude Code / Project Research",
+      "details": "12 min read",
+      "description": "TDD alone gives you: failing test - implementation - refactor. One agent, sequential.",
+      "image": "https://images.unsplash.com/photo-1555949963-aa79dcee981c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/agent-teams-tdd-multi-agent-test-driven-development"
+    },
+    {
+      "id": "blog-agent-teams-for-browser-ide-deep-analysis-and-st",
+      "title": "Agent Teams for browser-ide: Deep Analysis and Steps",
+      "group": "blog",
+      "category": "Claude Code / Project Research",
+      "details": "14 min read",
+      "description": "These hotspot files must be assigned to exactly ONE agent per team session. If a feature requires…",
+      "image": "https://images.unsplash.com/photo-1504639725590-34d0984388bd?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/agent-teams-for-browser-ide-deep-analysis-and-steps"
+    },
+    {
+      "id": "blog-claude-code-agent-swarms-multi-agent-development",
+      "title": "Claude Code Agent Swarms: Multi-Agent Development Guide",
+      "group": "blog",
+      "category": "Claude Code / Global Research",
+      "details": "10 min read",
+      "description": "Claude Code's Agent Teams (launched Feb 6, 2026, research preview) allow a lead agent to…",
+      "image": "https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/claude-code-agent-swarms-multi-agent-development-guide"
+    },
+    {
+      "id": "blog-claude-code-for-existing-projects-onboarding-gui",
+      "title": "Claude Code for Existing Projects: Onboarding Guide",
+      "group": "blog",
+      "category": "Claude Code / Global Research",
+      "details": "7 min read",
+      "description": "You have an existing project with established patterns, conventions, and tribal knowledge. Claude…",
+      "image": "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/claude-code-for-existing-projects-onboarding-guide"
+    },
+    {
+      "id": "blog-claude-code-for-new-projects-with-tdd-complete-f",
+      "title": "Claude Code for New Projects with TDD",
+      "group": "blog",
+      "category": "Claude Code / Global Research",
+      "details": "11 min read",
+      "description": "Claude's default instinct is implementation first, tests later. This produces code that \"looks…",
+      "image": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/claude-code-for-new-projects-with-tdd-complete-framework"
+    },
+    {
+      "id": "blog-claude-code-permissions-management-the-ninja-gui",
+      "title": "Claude Code Permissions Management: The Ninja Guide",
+      "group": "blog",
+      "category": "Claude Code / Global Research",
+      "details": "15 min read",
+      "description": "You've experienced the nightmare: --dangerously-skip-permissions seemed convenient, then Claude…",
+      "image": "https://images.unsplash.com/photo-1551434678-e076c223a692?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/claude-code-permissions-management-the-ninja-guide"
+    },
+    {
+      "id": "blog-claude-code-plugins-tools-and-productivity-featu",
+      "title": "Claude Code Plugins, Tools & Productivity Features",
+      "group": "blog",
+      "category": "Claude Code / Global Research",
+      "details": "17 min read",
+      "description": "CLAUDE.md is automatically loaded into Claude's context at the start of every session. It's the…",
+      "image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/blogs/blog/claude-code-plugins-tools-and-productivity-features-complete-guide"
+    },
     {
       "id": "claude-code-blog",
       "title": "Claude Code Blueprint",
@@ -142,7 +388,7 @@
       "details": "Slide Deck",
       "description": "Better results, fewer tokens",
       "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&crop=center",
-      "link": "https://encryptioner.github.io/public-websites/any-page/#raw.githubusercontent.com/Encryptioner/blogs/refs/heads/master/presentations/P-3-token-economics/index.html"
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-3-token-economics/index.html"
     },
     {
       "id": "p4-many-accounts-one-harness",
@@ -152,7 +398,7 @@
       "details": "Slide Deck",
       "description": "Multi-account, multi-LLM, one shared context",
       "image": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=300&fit=crop&crop=center",
-      "link": "https://encryptioner.github.io/public-websites/any-page/#raw.githubusercontent.com/Encryptioner/blogs/refs/heads/master/presentations/P-4-many-accounts-many-providers/index.html"
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-4-many-accounts-many-providers/index.html"
     },
     {
       "id": "p5-branchdiff-features",
@@ -162,7 +408,7 @@
       "details": "Feature Deck Hub",
       "description": "Local-first git & file diffs with AI review",
       "image": "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?w=400&h=300&fit=crop&crop=center",
-      "link": "https://encryptioner.github.io/public-websites/any-page/#raw.githubusercontent.com/Encryptioner/blogs/refs/heads/master/presentations/P-5-branchdiff-features/index.html"
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-5-branchdiff-features/index.html"
     },
     {
       "id": "p6-domain-driven-design",
@@ -172,7 +418,37 @@
       "details": "Deck Hub",
       "description": "Aggregates, events, and context maps in practice",
       "image": "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400&h=300&fit=crop&crop=center",
-      "link": "https://encryptioner.github.io/public-websites/any-page/#raw.githubusercontent.com/Encryptioner/blogs/refs/heads/master/presentations/P-6-domain-driven-design/index.html"
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-6-domain-driven-design/index.html"
+    },
+    {
+      "id": "pres-branchdiff-journey",
+      "title": "How branchdiff grew up",
+      "group": "presentation",
+      "category": "Productivity",
+      "details": "Slide Deck",
+      "description": "Two branches can hold identical bytes and still produce a phantom diff — because Git's two-dot…",
+      "image": "https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-8-branchdiff-journey/index.html"
+    },
+    {
+      "id": "pres-desk-in-your-pocket",
+      "title": "Your desk, in your pocket",
+      "group": "presentation",
+      "category": "Productivity",
+      "details": "Slide Deck",
+      "description": "Not a workstation replacement — occasional, light touches on real work, from wherever you already…",
+      "image": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-9-desk-in-your-pocket/index.html"
+    },
+    {
+      "id": "pres-local-whisper",
+      "title": "Local Whisper",
+      "group": "presentation",
+      "category": "Point Solution",
+      "details": "Slide Deck",
+      "description": "Open with the one-line promise: a chatbot that runs in the browser and knows your page — no…",
+      "image": "https://images.unsplash.com/photo-1629654297299-c8506221ca97?w=400&h=300&fit=crop&crop=center",
+      "link": "https://encryptioner.github.io/public-websites/any-page/#encryptioner.github.io/blogs/content/presentations/P-7-local-whisper/index.html"
     }
   ]
 }
