@@ -88,6 +88,11 @@
 
   <p class="progress" id="progress" aria-live="polite"></p>
   <p class="progress" id="stopped"></p>
+  <!-- loader mount: right under the button, and present from page load (the
+       calm pond, ghost previewing the form's range) so a fetch starting never
+       shifts the layout below. #charts (below the table) stays reserved for
+       the real charts -->
+  <div id="loader" hidden></div>
 
   <div class="actions">
     <button id="act-zip" disabled>Save all PDFs (zip)</button>
