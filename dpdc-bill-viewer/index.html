@@ -88,10 +88,11 @@
 
   <p class="progress" id="progress" aria-live="polite"></p>
   <p class="progress" id="stopped"></p>
-  <!-- loader mount: right under the button, and present from page load (the
-       calm pond, ghost previewing the form's range) so a fetch starting never
-       shifts the layout below. #charts (below the table) stays reserved for
-       the real charts -->
+  <!-- loader mount: right under the button. Visible only while a fetch runs
+       or before any data exists (app.js renderAll owns that rule) — once
+       rows are on the page the real table + charts are the show, so the
+       scene hides instead of pitching a wait that's over. #charts (below the
+       table) stays reserved for the real charts -->
   <div id="loader" hidden></div>
 
   <div class="actions">
@@ -107,10 +108,19 @@
   the same bill directly on DPDC's own site, or the <strong>PDF</strong> link,
   and recheck important figures against it.</p>
 
+  <section class="ledger-card" id="ledger-card" hidden aria-labelledby="ledger-card-title"></section>
+
+  <div class="prefer-row" id="prefer-row" hidden>
+    <span class="prefer-label">Show:</span>
+    <label><input type="radio" name="prefer" value="ledger" checked> Ledger (official)</label>
+    <label><input type="radio" name="prefer" value="monthly"> Monthly bill (as printed)</label>
+    <span class="hint prefer-hint">The ledger and a monthly bill disagree for some months (marked ✱) — pick which number this page shows and charts.</span>
+  </div>
+
   <div class="tablewrap">
     <table class="ledger">
       <thead><tr>
-        <th>Month</th><th>Meter reading</th><th>Units</th><th>Payable ৳</th><th>After due ৳</th>
+        <th>Month</th><th>Meter reading</th><th title="The day DPDC actually read the meter (বর্তমান তারিখ) — about two weeks before the bill is issued. Blank for ledger-only months.">Read on</th><th>Units</th><th>Payable ৳</th><th>After due ৳</th>
         <th>Bill no</th><th>Due date</th><th>Status</th><th>Bill</th>
       </tr></thead>
       <tbody id="ledger-body"></tbody>
@@ -128,7 +138,8 @@
       <li><span class="n">2</span><br>This page fetches your official bill for each
       month straight from DPDC — no captcha, no waiting.</li>
       <li><span class="n">3</span><br>Your browser reads the numbers off each bill —
-      readings, units, totals, dates — and keeps the original file too, ready to
+      readings, units, totals, dates — cross-checks them against DPDC's official
+      payment history (the ledger), and keeps the original file too, ready to
       download one by one or all together.</li>
     </ol>
   </section>
@@ -197,7 +208,8 @@
     <details>
       <summary>What's the difference between "Meter reading" and "Units used"?</summary>
       <p>Meter reading is the running total your meter shows, like a car's
-      odometer — it only ever goes up. Units used is how much it moved
+      odometer — it only ever goes up (until DPDC replaces the meter, and the
+      new one starts again from near 0). Units used is how much it moved
       <em>this month</em> (this reading minus last month's), which is what
       you're actually billed for — for most homes those two match exactly.
       Higher-load and commercial connections (CT-metered, shown on the bill
@@ -206,6 +218,45 @@
       the meter itself only measures a scaled-down fraction of the real
       current. A domestic account's OMF is 1, so the distinction never shows
       up there.</p>
+    </details>
+    <details>
+      <summary>What does ✱ mean, and what are "ledger preferred" / "e-bill preferred"?</summary>
+      <p>Each month's bill is checked against DPDC's official payment history —
+      the ledger. When the two disagree for a month, that row gets a ✱ — and
+      so does the point on each chart that plots the disagreeing figure (a
+      units mismatch marks the units charts, not the taka one both sides
+      agree on) — and a <strong>Show</strong> switch appears above the table:
+      <strong>Ledger (official)</strong> or <strong>Monthly bill (as
+      printed)</strong>. It controls which side's number the table and all
+      charts display — the captions and downloaded filenames of charts it
+      changes say which ("ledger preferred" or "e-bill preferred") so a saved
+      image never has to be guessed at later. Nothing is silently overwritten: the other
+      side's value comes right back when you flip the switch. The ledger is
+      the official record DPDC's own office goes by, which is why it's the
+      default.</p>
+    </details>
+    <details>
+      <summary>What is the "Meter reading over time" chart showing?</summary>
+      <p>The odometer itself — the running total on the meter's face, month by
+      month, generally rising. Each point is dated by the bill's own reading
+      date (বর্তমান তারিখ — the day the meter was actually read, roughly two
+      weeks before the bill is issued), so an August reading isn't mislabeled
+      as September. A gap in the line means no bill or an unread meter that
+      month, not a drop. A dashed "meter replaced" divider marks where a new
+      meter took over — the line restarts from its low reading instead of
+      plunging. Months with no printed reading date (ledger-only months,
+      exports saved before this chart existed) show just the month.</p>
+    </details>
+    <details>
+      <summary>What is the "Payment-history ledger" card above the table?</summary>
+      <p>Besides each month's bill, DPDC keeps one official payment-history
+      PDF — the ledger — listing every billed month for your account. This
+      page fetches it first and checks every bill against it. The card
+      tells you what it covers, whether every bill matched (green) or how
+      many months disagree (amber, marked ✱ in the table and charts), and
+      lets you save the ledger PDF or open it on DPDC's own site. If DPDC
+      doesn't hand the ledger over, the card turns amber and says the
+      bills are shown as printed, not cross-checked — fetch again later.</p>
     </details>
     <details>
       <summary>Can I view my bills again without fetching from DPDC?</summary>
