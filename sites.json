@@ -27,6 +27,15 @@
       "icon": "electricity-calculator/favicon.svg",
       "tags": ["utility", "energy", "offline"],
       "added": "2026-06-26"
+    },
+    {
+      "slug": "code-formatter",
+      "name": "Code Formatter",
+      "tagline": "Beautify, minify & preview code — JSON, YAML, HTML, CSS, JS, SQL, Markdown, CSV.",
+      "description": "Pick a language, then beautify minified code or minify readable code — or preview Markdown, HTML, SVG and CSV and export to PDF (Bangla and other scripts render correctly). Line numbers, error line/column, indent options, upload, download and copy on every pane. Runs fully in your browser.",
+      "icon": "code-formatter/icon.svg",
+      "tags": ["utility", "developer", "markdown", "json", "pdf"],
+      "added": "2026-11-20"
     }
   ]
 }

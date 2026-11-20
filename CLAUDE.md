@@ -39,6 +39,8 @@ The source repo's `scripts/release.sh` does the heavy lifting (build + rsync int
 | `/public-websites/any-page/?url=<encoded-url>` | `any-page/index.html` — fallback form, still read forever (old links keep working). Produced only when the target isn't `https://` (e.g. `http://localhost:5500/…`), which the fragment form can't round-trip since it drops the scheme. |
 | `/public-websites/<unknown>` | `404.html` |
 
+**`code-formatter/` is a generated sub-site dist** like `dpdc-bill-viewer/` — source lives in `various-projects/code-formatter/` (`site/` readable source, `scripts/release.sh` builds with esbuild and rsyncs here). Never hand-edit `./code-formatter/`. It IS a `sites.json` card (slug `code-formatter`, kept last — the manifest order is the display order). Runtime CDN libs (js-beautify, terser, sql-formatter, js-yaml, marked, DOMPurify, Noto Sans Bengali) are documented in that project's README.
+
 **`any-page/` is first-party, hand-authored** (like `index.html` / `404.html`) — NOT a generated sub-site dist and NOT a `sites.json` entry. Edit it directly here. The homepage links to it via its own "Bonus" panel (`.bonus` section in `index.html`) — not a `sites.json`-driven card.
 
 `any-page/viewer.js` (+ `any-page/viewer.css`) holds the sandboxed-iframe rendering logic (fetch-with-CORS-proxy-race, `<base>` injection, corner controls) split out of `index.html`'s inline `<script>`/`<style>` for readability — `index.html` imports `renderViewer()`/`ICONS` from it. Single consumer today; not a shared-across-pages module like `panel.css`/`url-field.js` below.
