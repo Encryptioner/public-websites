@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Code Formatter — beautify and minify JSON, HTML, CSS, JavaScript and XML/SVG, with validation and copy everywhere. Runs in your browser." />
+    <meta name="theme-color" content="#0b0d12" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles/base.css" />
+    <link rel="stylesheet" href="./styles/editor.css" />
+    <title>Code Formatter · Public Websites</title>
+  </head>
+  <body>
+    <header class="top">
+      <a href="../" class="back-link">← Public Websites</a>
+      <h1>Code Formatter</h1>
+      <p class="lead">Beautify, minify and preview code — right in your browser, nothing is uploaded.</p>
+      <div class="langs" role="radiogroup" aria-label="Language" id="langs"></div>
+      <nav class="jump" aria-label="Sections"><a href="#beautify">Beautify</a><a href="#minify">Minify</a><a href="#preview">Preview</a></nav>
+    </header>
+
+    <main>
+      <section class="conv" id="beautify" data-mode="beautify">
+        <h2>Beautify <span>minified → readable</span></h2>
+        <div class="grid2">
+          <div class="pane" data-role="in" data-wrap data-title="Minified input"></div>
+          <div class="pane" data-role="out" data-title="Readable output"></div>
+        </div>
+        <div class="opts">
+          <label>Indent
+            <select data-opt="indent"><option value="2">2 spaces</option><option value="4">4 spaces</option><option value="tab">Tab</option></select>
+          </label>
+          <label data-only="json yaml"><input type="checkbox" data-opt="sort" /> Sort keys</label>
+        </div>
+      </section>
+
+      <section class="conv" id="minify" data-mode="minify">
+        <h2>Minify <span>readable → minified</span></h2>
+        <div class="grid2">
+          <div class="pane" data-role="in" data-title="Readable input"></div>
+          <div class="pane" data-role="out" data-wrap data-title="Minified output"></div>
+        </div>
+        <div class="opts">
+          <label data-only="json yaml"><input type="checkbox" data-opt="sort" /> Sort keys</label>
+        </div>
+      </section>
+
+      <section class="conv" id="preview" data-mode="preview" hidden>
+        <h2>Preview <span>see it rendered · export</span></h2>
+        <div class="grid2">
+          <div class="pane" data-role="in" data-title="Source"></div>
+          <div class="pane viewpane" data-role="view"></div>
+        </div>
+      </section>
+    </main>
+    <footer>Built by <a href="https://encryptioner.github.io/" rel="noopener">Mir Mursalin Ankur</a> · <a href="../">More apps</a></footer>
+
+    <script type="module" src="./js/editor.js"></script>
+  </body>
+</html>

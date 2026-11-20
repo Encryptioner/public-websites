@@ -1,0 +1,4 @@
+function a(e){try{return{value:JSON.parse(e)}}catch(o){const r=String(o.message);let n=1,c=1,s=/position (\d+)/.exec(r);const i=!s&&/Unexpected token '(.)', (\.\.\.)?"([\s\S]*?)"?(\.\.\.)? is not valid JSON/.exec(r);if(i){const t=e.indexOf(i[3]);t>=0&&(s=[0,t+(i[2]?10:Math.max(i[3].indexOf(i[1]),0))])}const l=/line (\d+) column (\d+)/.exec(r);if(l)n=+l[1],c=+l[2];else if(s){const t=e.slice(0,+s[1]);n=t.split(`
+`).length,c=+s[1]-t.lastIndexOf(`
+`)}else if(/end of JSON|Unexpected end/i.test(r)){const t=e.split(`
+`);n=t.length,c=t[t.length-1].length+1}return{error:r,line:n,col:c}}}function f(e){return Array.isArray(e)?e.map(f):e&&typeof e=="object"?Object.fromEntries(Object.keys(e).sort().map(o=>[o,f(e[o])])):e}function u(e,{indent:o=0,sort:r=!1}={}){if(!e.trim())return{text:""};const n=a(e);return n.error?n:{text:JSON.stringify(r?f(n.value):n.value,null,o)}}const p=e=>new TextEncoder().encode(e).length;export{p as byteSize,u as convert,a as parse,f as sortKeys};
